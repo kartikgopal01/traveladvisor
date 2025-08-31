@@ -196,7 +196,7 @@ export default function Home() {
       <SignedOut>
         <Card className="max-w-md mx-auto">
           <CardHeader className="text-center">
-            <CardTitle>Welcome to BharatTrip</CardTitle>
+            <CardTitle>Welcome to Trip Advisor</CardTitle>
             <CardDescription>Please sign in to start planning your perfect Indian adventure</CardDescription>
           </CardHeader>
           <CardContent className="text-center">

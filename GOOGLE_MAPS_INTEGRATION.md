@@ -1,8 +1,8 @@
-# Google Maps Integration for BharatTrip Planner
+# Google Maps Integration for Trip Advisor Planner
 
 ## 🌍 Overview
 
-The BharatTrip Planner features comprehensive Google Maps integration that provides seamless navigation, location discovery, and route planning for Indian travel itineraries.
+The Trip Advisor Planner features comprehensive Google Maps integration that provides seamless navigation, location discovery, and route planning for Indian travel itineraries.
 
 ## 🚀 Features
 
