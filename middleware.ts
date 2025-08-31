@@ -1,21 +1,22 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export default clerkMiddleware({
-  publicRoutes: [
-    "/",
-    "/sw.js",
-    "/favicon.ico",
-    "/manifest.json",
-  ],
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sw.js",
+  "/favicon.ico",
+  "/manifest.json",
+  "/api/ai/(.*)",
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  if (isPublicRoute(req)) return;
+  await auth.protect();
 });
 
 export const config = {
   matcher: [
-    
     '/((?!.+\\.[\\w]+$|_next).*)',
-    
     '/(api|trpc)(.*)',
-
     '/sw.js',
     '/favicon.ico',
     '/manifest.json',
