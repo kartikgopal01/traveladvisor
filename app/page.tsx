@@ -17,6 +17,21 @@ import { DirectionsPanel } from "@/components/maps/directions-panel";
 import { MapsIntegrationSummary, MapStats } from "@/components/maps/maps-integration-summary";
 import { DistanceCostPanel } from "@/components/maps/distance-cost-panel";
 import { PartnerHotelsPanel } from "@/components/partner-hotels/panel";
+import {
+  RiArrowRightLine,
+  RiFileTextLine,
+  RiFlashlightLine,
+  RiGitBranchLine,
+  RiGlobalLine,
+  RiShieldCheckLine,
+  RiTeamLine,
+  RiMagicLine,
+  RiUserLine,
+} from "@remixicon/react";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
+import { FlipWords } from "@/components/ui/flip-words";
 
 export default function Home() {
   const [loading, setLoading] = useState(false);
@@ -183,34 +198,210 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen px-6 py-10 max-w-6xl mx-auto">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Trip Advisor
-        </h1>
-        <p className="text-lg text-muted-foreground mt-2">
-          Plan perfect trips across India with AI-powered recommendations
-        </p>
-      </div>
-
+    <>
       <SignedOut>
-        <Card className="max-w-md mx-auto">
-          <CardHeader className="text-center">
-            <CardTitle>Welcome to Trip Advisor</CardTitle>
-            <CardDescription>Please sign in to start planning your perfect Indian adventure</CardDescription>
-          </CardHeader>
-          <CardContent className="text-center">
-          <SignInButton mode="modal">
-              <Button size="lg" className="w-full">
-                Sign in to Get Started
-              </Button>
-          </SignInButton>
-          </CardContent>
-        </Card>
+        <div className="bg-gradient-to-br from-background via-background to-muted/20">
+          {/* Hero Section */}
+          <section className="min-h-screen relative overflow-hidden">
+            {/* Hero Icons */}
+            <div className="mt-12 flex gap-8 justify-center">
+              <motion.div
+                initial={{ opacity: 0, y: 150 }}
+                animate={{ opacity: 1, y: 50 }}
+                transition={{
+                  duration: 0.8,
+                  ease: "easeOut",
+                  delay: 0.2,
+                }}
+                className="relative"
+              >
+                <img
+                  src="/logo.svg"
+                  alt="Trip Advisor Logo"
+                  className="w-40 h-40 dark:hidden opacity-80 hover:opacity-100 transition-opacity duration-300"
+                />
+                <img
+                  src="/logowhite.svg"
+                  alt="Trip Advisor Logo"
+                  className="w-40 h-40 hidden dark:block opacity-80 hover:opacity-100 transition-opacity duration-300"
+                />
+              </motion.div>
+            </div>
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+              <div className="text-center">
+                <Badge variant="secondary" className="mb-4">
+                  <RiFlashlightLine className="w-3 h-3 mr-1" />
+                  AI trip planning
+                </Badge>
+
+                <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 text-foreground">
+                  Plan your next
+                  <FlipWords
+                    words={["Adventure", "Journey", "Experience", "Memory"]}
+                  />{" "}
+                  with
+                  <span className="text-foreground block">AI Superpowers</span>
+                </h1>
+                <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+                  Create detailed itineraries with AI, compare destinations by budget, and visualize routes on interactive maps. All in one fast, modern app.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <SignInButton mode="modal">
+                    <Button size="lg" className="flex items-center group bg-foreground text-background hover:bg-foreground/90 border-foreground">
+                      Get Started Free
+                      <RiArrowRightLine className="h-4 w-4" />
+                    </Button>
+                  </SignInButton>
+                  <Button variant="outline" size="lg" asChild className="border-foreground text-foreground hover:bg-foreground hover:text-background">
+                    <Link href="#features">Learn More</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Features Section */}
+          <section
+            id="features"
+            className="py-20 bg-muted/30 min-h-screen flex items-center justify-center w-full"
+          >
+            <div className="container px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+                  Everything you need to plan smarter
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Built for travelers who want clarity, speed, and beautiful plans
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <RiMagicLine className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-foreground">AI Trip Planning</CardTitle>
+                    <CardDescription>
+                      Generate complete itineraries tailored to your style and budget
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <IndianRupee className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-foreground">Budget Planner</CardTitle>
+                    <CardDescription>
+                      Transparent cost breakdowns for stay, food, travel, and activities
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <MapPin className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-foreground">Interactive Maps</CardTitle>
+                    <CardDescription>
+                      See routes, attractions, and hotels plotted for easy navigation
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <Train className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-foreground">Routes & Directions</CardTitle>
+                    <CardDescription>
+                      Compare travel modes with durations, costs, and tips
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <Users className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-foreground">Partner Hotels</CardTitle>
+                    <CardDescription>
+                      Curated stays near key attractions, with pricing and ratings
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <Utensils className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-foreground">Food & Restaurants</CardTitle>
+                    <CardDescription>
+                      Find great places to eat with specialties and price ranges
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <RiFileTextLine className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-foreground">Share & Export</CardTitle>
+                    <CardDescription>
+                      Share plans or export details for offline access
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <Card className="border-0 shadow-lg">
+                  <CardHeader>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <RiFlashlightLine className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-foreground">Lightning Fast</CardTitle>
+                    <CardDescription>
+                      Built with Next.js for speed and smooth interactions
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
+            </div>
+          </section>
+
+          {/* Footer */}
+          <footer className="border-t bg-muted/30 py-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex flex-col items-center gap-2 justify-center">
+                <p className="text-xl font-semibold text-foreground">Trip Advisor</p>
+                <p className="text-muted-foreground mb-1">
+                  Plan, compare, and map your next adventure
+                </p>
+              </div>
+            </div>
+          </footer>
+        </div>
       </SignedOut>
 
       <SignedIn>
-        <Tabs defaultValue="plan" className="w-full">
+        <div className="min-h-screen px-6 py-10 max-w-6xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Trip Advisor
+            </h1>
+            <p className="text-lg text-muted-foreground mt-2">
+              Plan perfect trips across India with AI-powered recommendations
+            </p>
+          </div>
+
+          <Tabs defaultValue="plan" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="plan" className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
@@ -1224,7 +1415,8 @@ export default function Home() {
             )}
           </div>
         )}
+        </div>
       </SignedIn>
-    </div>
+    </>
   );
 }
