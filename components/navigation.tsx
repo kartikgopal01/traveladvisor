@@ -13,6 +13,8 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
+import { RiMapPinFill } from "@remixicon/react";
+import { useGeolocation } from "@/components/maps/use-geolocation";
 import { useAuth } from "@clerk/nextjs";
 
 export default function Navigation() {
@@ -24,6 +26,18 @@ export default function Navigation() {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+  const { status: geoStatus, location, error: geoError, request } = useGeolocation();
+  const [navCity, setNavCity] = useState<string | null>(null);
+  // Export navCity to window so home can read it as a last resort
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // @ts-ignore
+      window.__NAV_CITY__ = navCity;
+      try {
+        window.dispatchEvent(new CustomEvent('nav-city', { detail: navCity }));
+      } catch {}
+    }
+  }, [navCity]);
 
   // Simplified document title handling without Firebase
   useEffect(() => {
@@ -40,6 +54,33 @@ export default function Navigation() {
       setCanEdit(false);
     }
   }, [pathname, userId]);
+
+  // Auto request location on mount
+  useEffect(() => {
+    request();
+  }, []);
+
+  // Reverse geocode when location updates; fallback to client IP geolocation
+  useEffect(() => {
+    async function run() {
+      try {
+        if (location) {
+          const res = await fetch(`/api/geo/reverse?lat=${location.lat}&lng=${location.lng}`);
+          const data = await res.json();
+          if (res.ok) { setNavCity(data.city || data.state || null); return; }
+        }
+        // If no GPS, approximate via client IP
+        if (!location) {
+          const rr = await fetch("https://ipapi.co/json/");
+          if (rr.ok) {
+            const d = await rr.json();
+            setNavCity(d?.city || d?.region || null);
+          }
+        }
+      } catch {}
+    }
+    run();
+  }, [location?.lat, location?.lng]);
 
   const handleEditClick = () => {
     if (!documentTitle || !documentId) return;
@@ -75,8 +116,7 @@ export default function Navigation() {
     setEditTitle("");
   };
 
-  // Don't show navigation on the landing page
-  if (pathname === "/") return null;
+  // Always show navigation so location badge is visible on the landing page
 
   const getBreadcrumbs = () => {
     const segments = pathname.split("/").filter(Boolean);
@@ -112,14 +152,15 @@ export default function Navigation() {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <nav className="flex items-center space-x-1 text-sm text-muted-foreground px-4 py-2 border-b bg-muted/30">
-      <Button variant="ghost" size="sm" asChild>
-        <Link href="/">
-          <RiHomeLine className="h-4 w-4" />
-        </Link>
-      </Button>
+    <nav className="flex items-center justify-between text-sm text-muted-foreground px-4 py-2 border-b bg-muted/30">
+      <div className="flex items-center space-x-1">
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/">
+            <RiHomeLine className="h-4 w-4" />
+          </Link>
+        </Button>
 
-      {breadcrumbs.map((breadcrumb, index) => (
+        {breadcrumbs.map((breadcrumb, index) => (
         <div key={breadcrumb.path} className="flex items-center">
           <RiArrowRightSLine className="h-4 w-4 mr-2" />
           {index === breadcrumbs.length - 1 ? (
@@ -195,7 +236,15 @@ export default function Navigation() {
             </Button>
           )}
         </div>
-      ))}
+        ))}
+      </div>
+
+      <div className="flex items-center gap-2">
+        <RiMapPinFill className="h-4 w-4 text-foreground" />
+        <span className="text-foreground">
+          {navCity || (geoStatus === "granted" ? "Locating..." : "Detecting location...")}
+        </span>
+      </div>
     </nav>
   );
 }

@@ -40,6 +40,7 @@ export async function POST(request: Request) {
   const doc = await db.collection("partner_hotels").add({
     name,
     city,
+    cityLower: typeof city === "string" ? city.trim().toLowerCase() : null,
     state: state || null,
     address: address || null,
     location: { latitude: latitude ?? null, longitude: longitude ?? null },

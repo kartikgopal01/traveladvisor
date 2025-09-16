@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,12 +32,147 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { FlipWords } from "@/components/ui/flip-words";
+import { useGeolocation } from "@/components/maps/use-geolocation";
+import { ChatPlaces } from "@/components/ui";
 
 export default function Home() {
   const [loading, setLoading] = useState(false);
   const [planResult, setPlanResult] = useState<any | null>(null);
   const [suggestResult, setSuggestResult] = useState<any | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Local places near current user
+  const { status: geoStatus, location, error: geoError, request: requestLocation } = useGeolocation();
+  const [fallbackLoc, setFallbackLoc] = useState<{ lat: number; lng: number } | null>(null);
+  const [localCity, setLocalCity] = useState<string | null>(null);
+  const [localPlaces, setLocalPlaces] = useState<Array<{ title: string; description: string; imageUrl?: string | null; mapsUrl?: string }>>([]);
+  const [localLoading, setLocalLoading] = useState(false);
+  const [customCity, setCustomCity] = useState("");
+
+  async function fetchPlacesByCity(cityName: string) {
+    if (!cityName.trim()) return;
+    setLocalLoading(true);
+    try {
+      const res = await fetch(`/api/ai/local-places?city=${encodeURIComponent(cityName.trim())}&count=8`);
+      const data = await res.json();
+      if (res.ok) {
+        setLocalCity(data.city || cityName.trim());
+        setLocalPlaces(Array.isArray(data.places) ? data.places : []);
+      }
+    } finally {
+      setLocalLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    // Auto-request on mount; if blocked/slow, fallback to IP location after 2s
+    requestLocation();
+    const timer = setTimeout(async () => {
+      if (!location) {
+        try {
+          // Try server-side IP first
+          const r = await fetch("/api/geo/ip");
+          if (r.ok) {
+            const d = await r.json();
+            if (typeof d.lat === "number" && typeof d.lng === "number") {
+              setFallbackLoc({ lat: d.lat, lng: d.lng });
+              return;
+            }
+          }
+        } catch {}
+        try {
+          // Fallback: call public IP API directly from the browser (works on localhost)
+          const rr = await fetch("https://ipapi.co/json/");
+          if (rr.ok) {
+            const dd = await rr.json();
+            const la = Number(dd?.latitude);
+            const ln = Number(dd?.longitude);
+            if (!Number.isNaN(la) && !Number.isNaN(ln)) {
+              setFallbackLoc({ lat: la, lng: ln });
+            }
+          }
+        } catch {}
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    let timeout: any;
+    async function fetchLocalPlaces() {
+      let loc = location || fallbackLoc;
+      // If we still don't have coordinates but navbar shows a city, use that
+      if (!loc && typeof window !== 'undefined') {
+        // @ts-ignore
+        const cityFromNav = (window as any).__NAV_CITY__ as string | undefined;
+        if (cityFromNav) {
+          setLocalCity(cityFromNav);
+          setLocalLoading(true);
+          try {
+            const r2 = await fetch(`/api/ai/local-places?city=${encodeURIComponent(cityFromNav)}&count=6`);
+            const d2 = await r2.json();
+            if (r2.ok && Array.isArray(d2.places)) setLocalPlaces(d2.places);
+          } finally {
+            setLocalLoading(false);
+          }
+          return;
+        }
+      }
+      if (!loc) return;
+      setLocalLoading(true);
+      try {
+        const params = new URLSearchParams({ lat: String(loc.lat), lng: String(loc.lng), count: String(6) });
+        const res = await fetch(`/api/ai/local-places?${params.toString()}`);
+        const data = await res.json();
+        if (res.ok) {
+          setLocalCity(data.city || null);
+          setLocalPlaces(Array.isArray(data.places) ? data.places : []);
+          // If empty, try city-based request via reverse geocode
+          if ((!data.places || data.places.length === 0)) {
+            try {
+              const r = await fetch(`/api/geo/reverse?lat=${loc.lat}&lng=${loc.lng}`);
+              const g = await r.json();
+              const cityName = g?.city || g?.state;
+              if (cityName) {
+                const r2 = await fetch(`/api/ai/local-places?city=${encodeURIComponent(cityName)}&count=6`);
+                const d2 = await r2.json();
+                if (r2.ok && Array.isArray(d2.places) && d2.places.length > 0) {
+                  setLocalCity(d2.city || cityName);
+                  setLocalPlaces(d2.places);
+                }
+              }
+            } catch {}
+          }
+        }
+      } finally {
+        setLocalLoading(false);
+      }
+    }
+    // Debounce to avoid spamming API while location permission transitions
+    timeout = setTimeout(fetchLocalPlaces, 300);
+    const onNavCity = (e: any) => {
+      const c = e?.detail;
+      if (c && !location && !fallbackLoc) {
+        setLocalCity(c);
+        // trigger fetch by calling function directly (city mode)
+        (async () => {
+          setLocalLoading(true);
+          try {
+            const r2 = await fetch(`/api/ai/local-places?city=${encodeURIComponent(c)}&count=6`);
+            const d2 = await r2.json();
+            if (r2.ok && Array.isArray(d2.places)) setLocalPlaces(d2.places);
+          } finally {
+            setLocalLoading(false);
+          }
+        })();
+      }
+    };
+    if (typeof window !== 'undefined') window.addEventListener('nav-city', onNavCity as any);
+    return () => {
+      clearTimeout(timeout);
+      if (typeof window !== 'undefined') window.removeEventListener('nav-city', onNavCity as any);
+    };
+  }, [location, fallbackLoc]);
 
   // Form states for plan
   const [places, setPlaces] = useState<string[]>([""]);
@@ -261,6 +396,60 @@ export default function Home() {
             </div>
           </section>
 
+          {/* Local Discover Section */}
+          <section className="py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex flex-col items-center gap-2 text-center">
+                <div className="text-sm text-muted-foreground">
+                  {localCity ? (
+                    <>You are near <span className="font-medium text-foreground">{localCity}</span></>
+                  ) : (
+                    <>Detecting your location…</>
+                  )}
+                </div>
+                {geoError && <span className="text-xs text-red-500">{geoError}</span>}
+              </div>
+
+              {/* Change location */}
+              <div className="mt-3 flex items-center justify-center gap-2">
+                <Input
+                  placeholder="Change city (e.g., Jaipur)"
+                  value={customCity}
+                  onChange={(e) => setCustomCity(e.target.value)}
+                  className="w-56"
+                />
+                <Button size="sm" variant="outline" onClick={() => fetchPlacesByCity(customCity)}>Show places</Button>
+              </div>
+
+              {localPlaces.length > 0 && (
+                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {localPlaces.map((p, idx) => (
+                    <Card key={idx} className="overflow-hidden">
+                      {p.imageUrl && (
+                        <img src={p.imageUrl} alt={p.title} className="w-full h-40 object-cover" />
+                      )}
+                      <CardContent className="pt-4">
+                        <div className="font-semibold">{p.title}</div>
+                        {p.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
+                        )}
+                        {(p as any).mapsUrl && (
+                          <div className="mt-3">
+                            <MapButton url={(p as any).mapsUrl} title={p.title} size="sm" variant="outline" />
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+
+              {localLoading && (
+                <div className="mt-4 text-center text-sm text-muted-foreground">Loading places near you…</div>
+              )}
+            </div>
+          </section>
+
           {/* Features Section */}
           <section
             id="features"
@@ -376,6 +565,14 @@ export default function Home() {
             </div>
           </section>
 
+          {/* Chat Places */}
+          <section className="py-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <h3 className="text-xl font-semibold mb-3">Ask the assistant for places</h3>
+              <ChatPlaces defaultCity={localCity} />
+            </div>
+          </section>
+
           {/* Footer */}
           <footer className="border-t bg-muted/30 py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -400,6 +597,58 @@ export default function Home() {
               Plan perfect trips across India with AI-powered recommendations
             </p>
           </div>
+
+          {/* Local Discover Section (Signed In) */}
+          <section className="py-4">
+            <div className="flex flex-col items-center gap-2 text-center">
+              <div className="text-sm text-muted-foreground">
+                {localCity ? (
+                  <>You are near <span className="font-medium text-foreground">{localCity}</span></>
+                ) : (
+                  <>Detecting your location…</>
+                )}
+              </div>
+              {geoError && <span className="text-xs text-red-500">{geoError}</span>}
+            </div>
+
+            {/* Change location */}
+            <div className="mt-2 flex items-center justify-center gap-2">
+              <Input
+                placeholder="Change city (e.g., Jaipur)"
+                value={customCity}
+                onChange={(e) => setCustomCity(e.target.value)}
+                className="w-56"
+              />
+              <Button size="sm" variant="outline" onClick={() => fetchPlacesByCity(customCity)}>Show places</Button>
+            </div>
+
+            {localPlaces.length > 0 && (
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {localPlaces.map((p, idx) => (
+                  <Card key={idx} className="overflow-hidden">
+                    {p.imageUrl && (
+                      <img src={p.imageUrl} alt={p.title} className="w-full h-40 object-cover" />
+                    )}
+                    <CardContent className="pt-4">
+                      <div className="font-semibold">{p.title}</div>
+                      {p.description && (
+                        <p className="text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
+                      )}
+                      {(p as any).mapsUrl && (
+                        <div className="mt-3">
+                          <MapButton url={(p as any).mapsUrl} title={p.title} size="sm" variant="outline" />
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {localLoading && (
+              <div className="mt-3 text-center text-sm text-muted-foreground">Loading places near you…</div>
+            )}
+          </section>
 
           <Tabs defaultValue="plan" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8">

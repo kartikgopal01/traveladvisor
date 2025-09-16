@@ -11,6 +11,7 @@ import {
 import "./globals.css";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Navigation from "@/components/navigation";
+import { ChatDock } from "@/components/ui";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -66,6 +67,7 @@ export default function RootLayout({
           </header>
           <Navigation />
           {children}
+          <ChatDock />
         </body>
       </html>
     </ClerkProvider>

@@ -29,6 +29,8 @@ export default function AdminHotelsPage() {
   });
 
   async function addHotel() {
+    if (!form.name.trim()) { alert("Name is required"); return; }
+    if (!form.city.trim()) { alert("City is required"); return; }
     const payload = {
       ...form,
       latitude: form.latitude ? Number(form.latitude) : undefined,
@@ -136,9 +138,37 @@ export default function AdminHotelsPage() {
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {hotels.map((h: any) => (
-              <div key={h.id} className="border rounded p-3 text-sm">
+              <div key={h.id} className="border rounded p-3 text-sm space-y-2">
                 <div className="font-medium">{h.name}</div>
-                <div className="text-xs text-muted-foreground">{h.city}{h.state ? `, ${h.state}` : ''}</div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={h._editCity ?? h.city ?? ""}
+                    onChange={(e) => {
+                      const next = (data?.hotels || []).map((x: any) => x.id === h.id ? { ...x, _editCity: e.target.value } : x);
+                      // Optimistic local mutate
+                      mutate("/api/admin/hotels", { hotels: next }, { revalidate: false });
+                    }}
+                  />
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      const newCity = (h._editCity ?? h.city ?? "").trim();
+                      if (!newCity) { alert("City is required"); return; }
+                      const res = await fetch(`/api/admin/hotels/${h.id}`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ city: newCity }),
+                      });
+                      if (res.ok) {
+                        await mutate("/api/admin/hotels");
+                      } else {
+                        const msg = await res.text();
+                        alert("Update failed: " + msg);
+                      }
+                    }}
+                  >Save City</Button>
+                </div>
+                <div className="text-xs text-muted-foreground">{h.state ? h.state : null}</div>
                 {h.pricePerNightINR && <div className="mt-1">₹{h.pricePerNightINR.toLocaleString?.()}</div>}
                 {h.mapsUrl && (
                   <div className="mt-2">
