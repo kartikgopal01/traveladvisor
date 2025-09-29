@@ -31,6 +31,13 @@ FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY----
 
 # Gemini
 GEMINI_API_KEY=...
+# Optional: override model
+# GEMINI_MODEL=gemini-pro
+
+# Groq (optional - will be used if set)
+GROQ_API_KEY=...
+# Optional: override model
+# GROQ_MODEL=llama-3.1-70b-versatile
 ```
 
 3) Run

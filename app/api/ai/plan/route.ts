@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getGenerativeModel } from "@/lib/gemini";
+import { getGroqClient, getGroqModel } from "@/lib/groq";
 import { getAdminDb } from "@/lib/firebaseAdmin";
 import { generateMapsSearchUrl, generateLocationQuery, generateTripRoute } from "@/lib/maps";
 
@@ -211,12 +212,27 @@ Rules:
 - Add navigation tips and local transportation suggestions.`;
 
   try {
-    if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ error: "Missing GEMINI_API_KEY" }, { status: 500 });
+    let text = "";
+    if (process.env.GROQ_API_KEY) {
+      const groq = getGroqClient();
+      const model = getGroqModel();
+      const chat = await groq.chat.completions.create({
+        model,
+        messages: [
+          { role: "system", content: "You are a helpful travel planner that outputs only JSON per the user's schema." },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.7,
+      });
+      text = chat.choices?.[0]?.message?.content || "";
+    } else {
+      if (!process.env.GEMINI_API_KEY) {
+        return NextResponse.json({ error: "Missing GROQ_API_KEY or GEMINI_API_KEY" }, { status: 500 });
+      }
+      const model = getGenerativeModel();
+      const result = await model.generateContent({ contents: [{ role: "user", parts: [{ text: prompt }] }] });
+      text = result.response.text();
     }
-    const model = getGenerativeModel();
-    const result = await model.generateContent({ contents: [{ role: "user", parts: [{ text: prompt }] }] });
-    const text = result.response.text();
 
     const parsed = extractJson(text);
     if (!parsed?.roadmap || !parsed?.accommodations || !parsed?.attractions) {

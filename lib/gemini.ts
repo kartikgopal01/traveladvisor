@@ -12,9 +12,11 @@ export function getGeminiClient() {
   return genAI;
 }
 
-export function getGenerativeModel(modelName = "gemini-1.5-flash") {
+export function getGenerativeModel(modelName?: string) {
   const client = getGeminiClient();
-  return client.getGenerativeModel({ model: modelName });
+  // Default to a widely supported v1beta-compatible text model
+  const resolved = modelName || process.env.GEMINI_MODEL || "gemini-pro";
+  return client.getGenerativeModel({ model: resolved });
 }
 
 
