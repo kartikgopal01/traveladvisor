@@ -1,4 +1,4 @@
-Trip Advisor app built with Next.js, Clerk, Firebase (Firestore + Storage) and Gemini.
+Happy Journey app built with Next.js, Clerk, Firebase (Firestore + Storage) and Gemini.
 
 ## Setup
 

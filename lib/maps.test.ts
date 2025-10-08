@@ -82,6 +82,6 @@ if (typeof window !== 'undefined') {
 
 // Auto-run tests in development
 if (process.env.NODE_ENV === 'development') {
-  console.log('🚀 Trip Advisor Google Maps Integration Ready!');
+  console.log('🚀 Happy Journey Google Maps Integration Ready!');
   console.log('💡 Run testMapsIntegration() in browser console to test functionality');
 }

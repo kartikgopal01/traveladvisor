@@ -351,14 +351,14 @@ export default function Home() {
                 className="relative"
               >
                 <img
-                  src="/logo.svg"
-                  alt="Trip Advisor Logo"
+                  src="/logoDark.png"
+                  alt="Happy Journey Logo"
                   className="w-40 h-40 dark:hidden opacity-80 hover:opacity-100 transition-opacity duration-300"
                 />
                 <img
-                  src="/logowhite.svg"
-                  alt="Trip Advisor Logo"
-                  className="w-40 h-40 hidden dark:block opacity-80 hover:opacity-100 transition-opacity duration-300"
+                  src="/logowhite.png"
+                  alt="Happy Journey Logo"
+                  className="w-full h-60 hidden dark:block opacity-80 hover:opacity-100 transition-opacity duration-300"
                 />
               </motion.div>
             </div>
@@ -577,7 +577,7 @@ export default function Home() {
           <footer className="border-t bg-muted/30 py-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex flex-col items-center gap-2 justify-center">
-                <p className="text-xl font-semibold text-foreground">Trip Advisor</p>
+                <p className="text-xl font-semibold text-foreground">Happy Journey</p>
                 <p className="text-muted-foreground mb-1">
                   Plan, compare, and map your next adventure
                 </p>
@@ -591,7 +591,7 @@ export default function Home() {
         <div className="min-h-screen px-6 py-10 max-w-6xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Trip Advisor
+              Happy Journey
             </h1>
             <p className="text-lg text-muted-foreground mt-2">
               Plan perfect trips across India with AI-powered recommendations

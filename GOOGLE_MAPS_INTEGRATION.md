@@ -1,8 +1,8 @@
-# Google Maps Integration for Trip Advisor Planner
+# Google Maps Integration for Happy Journey Planner
 
 ## 🌍 Overview
 
-The Trip Advisor Planner features comprehensive Google Maps integration that provides seamless navigation, location discovery, and route planning for Indian travel itineraries.
+The Happy Journey Planner features comprehensive Google Maps integration that provides seamless navigation, location discovery, and route planning for Indian travel itineraries.
 
 ## 🚀 Features
 

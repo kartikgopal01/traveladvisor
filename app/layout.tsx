@@ -24,8 +24,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Trip Advisor",
-  description: "Trip Advisor",
+  title: "Happy Journey",
+  description: "Happy Journey",
 };
 
 export default function RootLayout({
@@ -38,10 +38,11 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          suppressHydrationWarning={true}
         >
           <header className="border-b bg-background">
             <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-              <a href="/" className="font-semibold text-foreground">Trip Advisor</a>
+              <a href="/" className="font-semibold text-foreground">Happy Journey</a>
               <nav className="flex items-center gap-4">
                 <a href="/trips" className="text-sm text-foreground">Trips</a>
                 <ThemeToggle />
