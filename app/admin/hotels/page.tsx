@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import useSWR, { mutate } from "swr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,9 +12,10 @@ import { Label } from "@/components/ui/label";
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function AdminHotelsPage() {
-  const { data, isLoading } = useSWR("/api/admin/hotels", fetcher);
-  const hotels = data?.hotels || [];
-
+  const { userId, isLoaded } = useAuth();
+  const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
   const [form, setForm] = useState({
     name: "",
     city: "",
@@ -27,6 +30,53 @@ export default function AdminHotelsPage() {
     website: "",
     contact: "",
   });
+
+  // Check admin status
+  useEffect(() => {
+    async function checkAdminStatus() {
+      if (!isLoaded) return;
+      
+      if (!userId) {
+        router.push("/");
+        return;
+      }
+      
+      try {
+        const response = await fetch("/api/admin/hotels");
+        if (response.ok) {
+          setIsAdmin(true);
+        } else {
+          router.push("/");
+        }
+      } catch {
+        router.push("/");
+      } finally {
+        setIsChecking(false);
+      }
+    }
+    
+    checkAdminStatus();
+  }, [userId, isLoaded, router]);
+
+  const { data, isLoading } = useSWR(isAdmin ? "/api/admin/hotels" : null, fetcher);
+  const hotels = data?.hotels || [];
+
+  // Show loading while checking admin status
+  if (isChecking || !isLoaded) {
+    return (
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg">Checking permissions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not admin, don't render anything (redirect will happen)
+  if (!isAdmin) {
+    return null;
+  }
 
   async function addHotel() {
     if (!form.name.trim()) { alert("Name is required"); return; }
@@ -68,6 +118,11 @@ export default function AdminHotelsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-red-600 mb-2">🔒 Admin Panel</h1>
+        <p className="text-lg text-muted-foreground">Manage Hotels - Admin Only</p>
+      </div>
+      
       <Card>
         <CardHeader>
           <CardTitle>Add Partner Hotel</CardTitle>

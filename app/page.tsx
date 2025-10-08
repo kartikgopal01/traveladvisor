@@ -33,7 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { FlipWords } from "@/components/ui/flip-words";
 import { useGeolocation } from "@/components/maps/use-geolocation";
-import { ChatPlaces } from "@/components/ui";
+import { ChatPlaces, EventsSection } from "@/components/ui";
 
 export default function Home() {
   const [loading, setLoading] = useState(false);
@@ -371,7 +371,7 @@ export default function Home() {
                 </Badge>
 
                 <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 text-foreground">
-                  Plan your next
+                  Plan your next{" "}
                   <FlipWords
                     words={["Adventure", "Journey", "Experience", "Memory"]}
                   />{" "}
@@ -565,6 +565,13 @@ export default function Home() {
             </div>
           </section>
 
+          {/* Events Section */}
+          <section className="py-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <EventsSection city={localCity || undefined} showModeToggle={true} limit={6} />
+            </div>
+          </section>
+
           {/* Chat Places */}
           <section className="py-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -648,6 +655,11 @@ export default function Home() {
             {localLoading && (
               <div className="mt-3 text-center text-sm text-muted-foreground">Loading places near you…</div>
             )}
+          </section>
+
+          {/* Events Section for Signed In Users */}
+          <section className="py-6">
+            <EventsSection city={localCity || undefined} showModeToggle={true} limit={4} />
           </section>
 
           <Tabs defaultValue="plan" className="w-full">

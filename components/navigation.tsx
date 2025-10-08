@@ -16,10 +16,12 @@ import { useEffect, useState } from "react";
 import { RiMapPinFill } from "@remixicon/react";
 import { useGeolocation } from "@/components/maps/use-geolocation";
 import { useAuth } from "@clerk/nextjs";
+import { RiSettingsLine, RiCalendarLine } from "@remixicon/react";
 
 export default function Navigation() {
   const pathname = usePathname();
   const { userId } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
   const [documentTitle, setDocumentTitle] = useState<string | null>(null);
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [canEdit, setCanEdit] = useState(false);
@@ -59,6 +61,26 @@ export default function Navigation() {
   useEffect(() => {
     request();
   }, []);
+
+  // Check if user is admin
+  useEffect(() => {
+    async function checkAdminStatus() {
+      if (!userId) {
+        setIsAdmin(false);
+        return;
+      }
+      
+      try {
+        // Test admin access by trying to fetch admin data
+        const response = await fetch("/api/admin/events");
+        setIsAdmin(response.ok);
+      } catch {
+        setIsAdmin(false);
+      }
+    }
+    
+    checkAdminStatus();
+  }, [userId]);
 
   // Reverse geocode when location updates; fallback to client IP geolocation
   useEffect(() => {
@@ -239,11 +261,30 @@ export default function Navigation() {
         ))}
       </div>
 
-      <div className="flex items-center gap-2">
-        <RiMapPinFill className="h-4 w-4 text-foreground" />
-        <span className="text-foreground">
-          {navCity || (geoStatus === "granted" ? "Locating..." : "Detecting location...")}
-        </span>
+      <div className="flex items-center gap-4">
+        {userId && isAdmin && (
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/admin/events">
+                <RiCalendarLine className="h-4 w-4" />
+                Admin Events
+              </Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/admin/hotels">
+                <RiSettingsLine className="h-4 w-4" />
+                Admin Hotels
+              </Link>
+            </Button>
+          </div>
+        )}
+        
+        <div className="flex items-center gap-2">
+          <RiMapPinFill className="h-4 w-4 text-foreground" />
+          <span className="text-foreground">
+            {navCity || (geoStatus === "granted" ? "Locating..." : "Detecting location...")}
+          </span>
+        </div>
       </div>
     </nav>
   );
