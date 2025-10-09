@@ -78,6 +78,7 @@ export default function Home() {
   const [localPlaces, setLocalPlaces] = useState<Array<{ title: string; description: string; imageUrl: string | null; mapsUrl?: string }>>([]);
   const [localLoading, setLocalLoading] = useState(false);
   const [customCity, setCustomCity] = useState("");
+  const [isAnimationPaused, setIsAnimationPaused] = useState(false);
 
   // Generate colored gradient for places without images
   function getPlaceCardColor(title: string) {
@@ -395,11 +396,14 @@ export default function Home() {
   return (
     <>
       <SignedOut>
-        <div className="bg-gradient-to-br from-background via-background to-muted/20">
+        <div>
           {/* Hero Section */}
-          <section className="min-h-screen relative overflow-hidden">
+          <section className="min-h-screen relative overflow-hidden hero-background">
+            {/* Background Overlay */}
+            <div className="absolute inset-0 bg-black/0"></div>
+            
             {/* Hero Icons */}
-            <div className="mt-12 flex gap-8 justify-center">
+            <div className="mt-12 flex gap-8 justify-center relative z-10">
               <motion.div
                 initial={{ opacity: 0, y: 150 }}
                 animate={{ opacity: 1, y: 50 }}
@@ -414,7 +418,7 @@ export default function Home() {
               </motion.div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 relative z-10">
               <div className="text-center">
                 <Badge variant="secondary" className="mb-4">
                   <RiFlashlightLine className="w-3 h-3 mr-1" />
@@ -425,6 +429,7 @@ export default function Home() {
                   Plan your next{" "}
                   <FlipWords
                     words={["Adventure", "Journey", "Experience", "Memory"]}
+                    className="dynamic-color-text"
                   />{" "}
                   with
                   <span className="text-foreground block">AI Superpowers</span>
@@ -474,14 +479,51 @@ export default function Home() {
 
               {localPlaces.length > 0 && (
                 <div className="mt-6 relative">
-                  <div className="overflow-hidden">
+                  {/* Pause/Play Button */}
+                  <div className="absolute top-2 right-2 z-10">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-8 h-8 p-0 bg-white/80 hover:bg-white"
+                      onClick={() => {
+                        setIsAnimationPaused(!isAnimationPaused);
+                        const container = document.querySelector('.animate-scroll-all-cards') as HTMLElement;
+                        if (container) {
+                          container.style.animationPlayState = isAnimationPaused ? 'running' : 'paused';
+                        }
+                      }}
+                    >
+                      {isAnimationPaused ? (
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </Button>
+                  </div>
+                  <div 
+                    className="overflow-hidden"
+                    onWheel={(e) => {
+                      // Only handle wheel events when animation is paused and mouse is over cards
+                      if (!isAnimationPaused) return;
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const cardContainer = e.currentTarget.querySelector('.animate-scroll-all-cards') as HTMLElement;
+                      if (cardContainer) {
+                        cardContainer.scrollLeft += e.deltaY;
+                      }
+                    }}
+                  >
                     <div 
                       className="animate-scroll-all-cards"
                       onMouseDown={(e) => {
-                        // Stop auto-scroll when user starts dragging
-                        const container = e.currentTarget;
-                        container.style.animationPlayState = 'paused';
+                        // Only allow dragging when animation is paused
+                        if (!isAnimationPaused) return;
                         
+                        const container = e.currentTarget;
                         let isDragging = true;
                         let startX = e.pageX;
                         let scrollLeft = container.scrollLeft;
@@ -498,28 +540,38 @@ export default function Home() {
                           isDragging = false;
                           document.removeEventListener('mousemove', handleMouseMove);
                           document.removeEventListener('mouseup', handleMouseUp);
-                          // Resume auto-scroll after a delay
-                          setTimeout(() => {
-                            container.style.animationPlayState = 'running';
-                          }, 2000);
                         };
                         
                         document.addEventListener('mousemove', handleMouseMove);
                         document.addEventListener('mouseup', handleMouseUp);
                       }}
+                      onWheel={(e) => {
+                        // Only allow wheel scrolling when animation is paused
+                        if (!isAnimationPaused) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const container = e.currentTarget;
+                        container.scrollLeft += e.deltaY;
+                      }}
                       onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.animationPlayState = 'paused';
+                        // Only pause on hover if animation is not manually paused
+                        if (!isAnimationPaused) {
+                          (e.currentTarget as HTMLElement).style.animationPlayState = 'paused';
+                        }
                       }}
                       onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.animationPlayState = 'running';
+                        // Only resume on leave if animation is not manually paused
+                        if (!isAnimationPaused) {
+                          (e.currentTarget as HTMLElement).style.animationPlayState = 'running';
+                        }
                       }}
                     >
-                      <div className="flex gap-4 pb-4">
+                      <div className="flex gap-3 pb-4">
                         {/* First set of all cards */}
                         {localPlaces.map((p, idx) => (
                           <Card 
                             key={idx} 
-                            className="overflow-hidden flex-shrink-0 w-64 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                            className="overflow-hidden flex-shrink-0 w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
                             onClick={(e) => {
                               // Only open maps if not dragging
                               if (!e.defaultPrevented && p.mapsUrl) {
@@ -564,7 +616,7 @@ export default function Home() {
                         {localPlaces.map((p, idx) => (
                           <Card 
                             key={`duplicate-${idx}`} 
-                            className="overflow-hidden flex-shrink-0 w-64 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                            className="overflow-hidden flex-shrink-0 w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
                             onClick={(e) => {
                               // Only open maps if not dragging
                               if (!e.defaultPrevented && p.mapsUrl) {
@@ -741,10 +793,14 @@ export default function Home() {
 
           {/* Footer */}
           <footer className="border-t bg-muted/30 py-12">
+          
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex flex-col items-center gap-2 justify-center">
-                <p className="text-xl font-semibold text-foreground">Happy Journey</p>
-                <p className="text-muted-foreground mb-1">
+              
+              <div className="flex flex-col items-center justify-center">
+                <div className="transform scale-50">
+                  <ThemeLogo />
+                </div>
+                <p className="text-muted-foreground text-sm -mt-2">
                   Plan, compare, and map your next adventure
                 </p>
               </div>

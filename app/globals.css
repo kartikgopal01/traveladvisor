@@ -125,11 +125,75 @@
 }
 
 .animate-scroll-all-cards {
-  animation: scrollCards 45s linear infinite;
+  animation: scrollCards 60s linear infinite;
   display: flex;
-  width: calc(200% + 4rem);
+  width: calc(200% + 8rem);
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.animate-scroll-all-cards::-webkit-scrollbar {
+  display: none; /* WebKit */
 }
 
 .animate-scroll-all-cards:hover {
   animation-play-state: paused;
 }
+
+/* Hero section background */
+.hero-background {
+  position: relative;
+}
+
+.hero-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/HJback.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
+/* Light theme - more transparent background (default) */
+html:not(.dark) .hero-background::before {
+  opacity: 60%;
+}
+
+/* Dark theme - less transparent background */
+html.dark .hero-background::before {
+  opacity: 70%;
+}
+
+
+
+
+
+/* Light theme - default */
+html:not(.dark) .dynamic-color-text {
+  animation: colorShiftLight 8s ease-in-out infinite;
+  font-weight: bold;
+  color: #ff6b6b !important;
+}
+
+html:not(.dark) .dynamic-color-text * {
+  color: inherit !important;
+}
+
+/* Dark theme */
+html.dark .dynamic-color-text {
+  animation: colorShiftDark 8s ease-in-out infinite;
+  font-weight: bold;
+  color: #ff9a9a !important;
+}
+
+html.dark .dynamic-color-text * {
+  color: inherit !important;
+}
+
+/* Rotating color ring animation for badge */
