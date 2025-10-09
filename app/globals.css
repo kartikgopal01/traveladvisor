@@ -80,3 +80,56 @@
     font-family: Arial, Helvetica, sans-serif;
   }
 }
+
+/* Continuous right-to-left scrolling animation */
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 100s linear infinite;
+  display: flex;
+  width: calc(200% + 1rem);
+}
+
+.animate-scroll:hover {
+  animation-play-state: paused;
+}
+
+.scroll-container {
+  overflow: hidden;
+  width: 100%;
+}
+
+.cards-container {
+  width: max-content;
+}
+
+.all-cards-container {
+  width: max-content;
+}
+
+/* Horizontal scrolling animation - all 15 cards visible */
+@keyframes scrollCards {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-all-cards {
+  animation: scrollCards 45s linear infinite;
+  display: flex;
+  width: calc(200% + 4rem);
+}
+
+.animate-scroll-all-cards:hover {
+  animation-play-state: paused;
+}

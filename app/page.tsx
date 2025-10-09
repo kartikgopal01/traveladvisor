@@ -35,6 +35,36 @@ import { FlipWords } from "@/components/ui/flip-words";
 import { useGeolocation } from "@/components/maps/use-geolocation";
 import { ChatPlaces, EventsSection } from "@/components/ui";
 
+// Theme-aware logo component
+function ThemeLogo() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    const checkTheme = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    
+    checkTheme();
+    
+    // Listen for theme changes
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <img
+      src={isDark ? "/logoDark.png" : "/logowhite.png"}
+      alt="Happy Journey Logo"
+      className="w-full h-60 opacity-100 transition-opacity duration-300"
+    />
+  );
+}
+
 export default function Home() {
   const [loading, setLoading] = useState(false);
   const [planResult, setPlanResult] = useState<any | null>(null);
@@ -45,15 +75,31 @@ export default function Home() {
   const { status: geoStatus, location, error: geoError, request: requestLocation } = useGeolocation();
   const [fallbackLoc, setFallbackLoc] = useState<{ lat: number; lng: number } | null>(null);
   const [localCity, setLocalCity] = useState<string | null>(null);
-  const [localPlaces, setLocalPlaces] = useState<Array<{ title: string; description: string; imageUrl?: string | null; mapsUrl?: string }>>([]);
+  const [localPlaces, setLocalPlaces] = useState<Array<{ title: string; description: string; imageUrl: string | null; mapsUrl?: string }>>([]);
   const [localLoading, setLocalLoading] = useState(false);
   const [customCity, setCustomCity] = useState("");
+
+  // Generate colored gradient for places without images
+  function getPlaceCardColor(title: string) {
+    const colors = [
+      'from-blue-500 to-purple-600',
+      'from-green-500 to-teal-600', 
+      'from-orange-500 to-red-600',
+      'from-purple-500 to-pink-600',
+      'from-indigo-500 to-blue-600',
+      'from-emerald-500 to-green-600',
+      'from-rose-500 to-pink-600',
+      'from-cyan-500 to-blue-600'
+    ];
+    const colorIndex = title.length % colors.length;
+    return colors[colorIndex];
+  }
 
   async function fetchPlacesByCity(cityName: string) {
     if (!cityName.trim()) return;
     setLocalLoading(true);
     try {
-      const res = await fetch(`/api/ai/local-places?city=${encodeURIComponent(cityName.trim())}&count=8`);
+      const res = await fetch(`/api/ai/local-places?city=${encodeURIComponent(cityName.trim())}&count=15`);
       const data = await res.json();
       if (res.ok) {
         setLocalCity(data.city || cityName.trim());
@@ -63,6 +109,7 @@ export default function Home() {
       setLocalLoading(false);
     }
   }
+
 
   useEffect(() => {
     // Auto-request on mount; if blocked/slow, fallback to IP location after 2s
@@ -109,9 +156,12 @@ export default function Home() {
           setLocalCity(cityFromNav);
           setLocalLoading(true);
           try {
-            const r2 = await fetch(`/api/ai/local-places?city=${encodeURIComponent(cityFromNav)}&count=6`);
+            const r2 = await fetch(`/api/ai/local-places?city=${encodeURIComponent(cityFromNav)}&count=15`);
             const d2 = await r2.json();
-            if (r2.ok && Array.isArray(d2.places)) setLocalPlaces(d2.places);
+            if (r2.ok && Array.isArray(d2.places)) {
+              setLocalPlaces(d2.places);
+              console.log(`Navbar auto-detected: ${cityFromNav}, ${d2.places.length} places`);
+            }
           } finally {
             setLocalLoading(false);
           }
@@ -121,12 +171,13 @@ export default function Home() {
       if (!loc) return;
       setLocalLoading(true);
       try {
-        const params = new URLSearchParams({ lat: String(loc.lat), lng: String(loc.lng), count: String(6) });
+        const params = new URLSearchParams({ lat: String(loc.lat), lng: String(loc.lng), count: String(15) });
         const res = await fetch(`/api/ai/local-places?${params.toString()}`);
         const data = await res.json();
         if (res.ok) {
           setLocalCity(data.city || null);
           setLocalPlaces(Array.isArray(data.places) ? data.places : []);
+          console.log(`Auto-detected: ${data.city}, ${data.places?.length || 0} places`);
           // If empty, try city-based request via reverse geocode
           if ((!data.places || data.places.length === 0)) {
             try {
@@ -134,11 +185,12 @@ export default function Home() {
               const g = await r.json();
               const cityName = g?.city || g?.state;
               if (cityName) {
-                const r2 = await fetch(`/api/ai/local-places?city=${encodeURIComponent(cityName)}&count=6`);
+                const r2 = await fetch(`/api/ai/local-places?city=${encodeURIComponent(cityName)}&count=15`);
                 const d2 = await r2.json();
                 if (r2.ok && Array.isArray(d2.places) && d2.places.length > 0) {
                   setLocalCity(d2.city || cityName);
                   setLocalPlaces(d2.places);
+                  console.log(`Fallback auto-detected: ${d2.city || cityName}, ${d2.places.length} places`);
                 }
               }
             } catch {}
@@ -148,8 +200,13 @@ export default function Home() {
         setLocalLoading(false);
       }
     }
-    // Debounce to avoid spamming API while location permission transitions
-    timeout = setTimeout(fetchLocalPlaces, 300);
+    // If we have location, fetch immediately; otherwise debounce
+    if (location || fallbackLoc) {
+      fetchLocalPlaces();
+    } else {
+      // Debounce to avoid spamming API while location permission transitions
+      timeout = setTimeout(fetchLocalPlaces, 300);
+    }
     const onNavCity = (e: any) => {
       const c = e?.detail;
       if (c && !location && !fallbackLoc) {
@@ -158,9 +215,12 @@ export default function Home() {
         (async () => {
           setLocalLoading(true);
           try {
-            const r2 = await fetch(`/api/ai/local-places?city=${encodeURIComponent(c)}&count=6`);
+            const r2 = await fetch(`/api/ai/local-places?city=${encodeURIComponent(c)}&count=15`);
             const d2 = await r2.json();
-            if (r2.ok && Array.isArray(d2.places)) setLocalPlaces(d2.places);
+            if (r2.ok && Array.isArray(d2.places)) {
+              setLocalPlaces(d2.places);
+              console.log(`Nav-city event: ${c}, ${d2.places.length} places`);
+            }
           } finally {
             setLocalLoading(false);
           }
@@ -350,16 +410,7 @@ export default function Home() {
                 }}
                 className="relative"
               >
-                <img
-                  src="/logoDark.png"
-                  alt="Happy Journey Logo"
-                  className="w-40 h-40 dark:hidden opacity-80 hover:opacity-100 transition-opacity duration-300"
-                />
-                <img
-                  src="/logowhite.png"
-                  alt="Happy Journey Logo"
-                  className="w-full h-60 hidden dark:block opacity-80 hover:opacity-100 transition-opacity duration-300"
-                />
+                <ThemeLogo />
               </motion.div>
             </div>
 
@@ -410,43 +461,165 @@ export default function Home() {
                 {geoError && <span className="text-xs text-red-500">{geoError}</span>}
               </div>
 
-              {/* Change location */}
-              <div className="mt-3 flex items-center justify-center gap-2">
-                <Input
-                  placeholder="Change city (e.g., Jaipur)"
-                  value={customCity}
-                  onChange={(e) => setCustomCity(e.target.value)}
-                  className="w-56"
-                />
-                <Button size="sm" variant="outline" onClick={() => fetchPlacesByCity(customCity)}>Show places</Button>
-              </div>
+            {/* Change location */}
+            <div className="mt-3 flex items-center justify-center gap-2">
+              <Input
+                placeholder="Change city (e.g., Jaipur)"
+                value={customCity}
+                onChange={(e) => setCustomCity(e.target.value)}
+                className="w-56"
+              />
+              <Button size="sm" variant="outline" onClick={() => fetchPlacesByCity(customCity)}>Show places</Button>
+            </div>
 
               {localPlaces.length > 0 && (
-                <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {localPlaces.map((p, idx) => (
-                    <Card key={idx} className="overflow-hidden">
-                      {p.imageUrl && (
-                        <img src={p.imageUrl} alt={p.title} className="w-full h-40 object-cover" />
-                      )}
-                      <CardContent className="pt-4">
-                        <div className="font-semibold">{p.title}</div>
-                        {p.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
-                        )}
-                        {(p as any).mapsUrl && (
-                          <div className="mt-3">
-                            <MapButton url={(p as any).mapsUrl} title={p.title} size="sm" variant="outline" />
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div className="mt-6 relative">
+                  <div className="overflow-hidden">
+                    <div 
+                      className="animate-scroll-all-cards"
+                      onMouseDown={(e) => {
+                        // Stop auto-scroll when user starts dragging
+                        const container = e.currentTarget;
+                        container.style.animationPlayState = 'paused';
+                        
+                        let isDragging = true;
+                        let startX = e.pageX;
+                        let scrollLeft = container.scrollLeft;
+                        
+                        const handleMouseMove = (e: MouseEvent) => {
+                          if (!isDragging) return;
+                          e.preventDefault();
+                          const x = e.pageX;
+                          const walk = (x - startX) * 2;
+                          container.scrollLeft = scrollLeft - walk;
+                        };
+                        
+                        const handleMouseUp = () => {
+                          isDragging = false;
+                          document.removeEventListener('mousemove', handleMouseMove);
+                          document.removeEventListener('mouseup', handleMouseUp);
+                          // Resume auto-scroll after a delay
+                          setTimeout(() => {
+                            container.style.animationPlayState = 'running';
+                          }, 2000);
+                        };
+                        
+                        document.addEventListener('mousemove', handleMouseMove);
+                        document.addEventListener('mouseup', handleMouseUp);
+                      }}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.animationPlayState = 'paused';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.animationPlayState = 'running';
+                      }}
+                    >
+                      <div className="flex gap-4 pb-4">
+                        {/* First set of all cards */}
+                        {localPlaces.map((p, idx) => (
+                          <Card 
+                            key={idx} 
+                            className="overflow-hidden flex-shrink-0 w-64 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                            onClick={(e) => {
+                              // Only open maps if not dragging
+                              if (!e.defaultPrevented && p.mapsUrl) {
+                                window.open(p.mapsUrl, '_blank');
+                              }
+                            }}
+                          >
+                            {p.imageUrl ? (
+                              <img src={p.imageUrl} alt={p.title} className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300" />
+                            ) : (
+                              <div className={`w-full h-40 bg-gradient-to-br ${getPlaceCardColor(p.title)} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                                <div className="text-white text-center px-4">
+                                  <div className="text-lg font-bold">{p.title}</div>
+                                </div>
+                              </div>
+                            )}
+                            <CardContent className="pt-4">
+                              <div className="font-semibold group-hover:text-primary transition-colors duration-300">{p.title}</div>
+                              {p.description && (
+                                <p className="text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
+                              )}
+                              <div className="mt-3">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="w-full"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (p.mapsUrl) {
+                                      window.open(p.mapsUrl, '_blank');
+                                    }
+                                  }}
+                                >
+                                  View on Maps
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                        
+                        {/* Second set of all cards for seamless loop */}
+                        {localPlaces.map((p, idx) => (
+                          <Card 
+                            key={`duplicate-${idx}`} 
+                            className="overflow-hidden flex-shrink-0 w-64 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                            onClick={(e) => {
+                              // Only open maps if not dragging
+                              if (!e.defaultPrevented && p.mapsUrl) {
+                                window.open(p.mapsUrl, '_blank');
+                              }
+                            }}
+                          >
+                            {p.imageUrl ? (
+                              <img src={p.imageUrl} alt={p.title} className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300" />
+                            ) : (
+                              <div className={`w-full h-40 bg-gradient-to-br ${getPlaceCardColor(p.title)} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                                <div className="text-white text-center px-4">
+                                  <div className="text-lg font-bold">{p.title}</div>
+                                </div>
+                              </div>
+                            )}
+                            <CardContent className="pt-4">
+                              <div className="font-semibold group-hover:text-primary transition-colors duration-300">{p.title}</div>
+                              {p.description && (
+                                <p className="text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
+                              )}
+                              <div className="mt-3">
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="w-full"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (p.mapsUrl) {
+                                      window.open(p.mapsUrl, '_blank');
+                                    }
+                                  }}
+                                >
+                                  View on Maps
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
               {localLoading && (
                 <div className="mt-4 text-center text-sm text-muted-foreground">Loading places near you…</div>
               )}
+            </div>
+          </section>
+
+          {/* Events Section */}
+          <section className="py-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <EventsSection city={localCity || undefined} showModeToggle={true} limit={6} />
             </div>
           </section>
 
@@ -565,20 +738,6 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Events Section */}
-          <section className="py-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <EventsSection city={localCity || undefined} showModeToggle={true} limit={6} />
-            </div>
-          </section>
-
-          {/* Chat Places */}
-          <section className="py-10">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <h3 className="text-xl font-semibold mb-3">Ask the assistant for places</h3>
-              <ChatPlaces defaultCity={localCity} />
-            </div>
-          </section>
 
           {/* Footer */}
           <footer className="border-t bg-muted/30 py-12">
@@ -633,8 +792,14 @@ export default function Home() {
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {localPlaces.map((p, idx) => (
                   <Card key={idx} className="overflow-hidden">
-                    {p.imageUrl && (
+                    {p.imageUrl ? (
                       <img src={p.imageUrl} alt={p.title} className="w-full h-40 object-cover" />
+                    ) : (
+                      <div className={`w-full h-40 bg-gradient-to-br ${getPlaceCardColor(p.title)} flex items-center justify-center`}>
+                        <div className="text-white text-center px-4">
+                          <div className="text-lg font-bold">{p.title}</div>
+                        </div>
+                      </div>
                     )}
                     <CardContent className="pt-4">
                       <div className="font-semibold">{p.title}</div>
