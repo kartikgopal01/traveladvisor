@@ -12,6 +12,7 @@ import "./globals.css";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Navigation from "@/components/navigation";
 import { ChatDock } from "@/components/ui";
+import { ThemeLogo } from "@/components/ui/theme-logo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,8 +42,12 @@ export default function RootLayout({
           suppressHydrationWarning={true}
         >
           <header className="border-b bg-background">
-            <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
-              <a href="/" className="font-semibold text-foreground">Happy Journey</a>
+            <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
+              <a href="/" className="flex items-center" title="Happy Journey - Go to Home">
+                <div className="transform scale-25">
+                  <ThemeLogo />
+                </div>
+              </a>
               <nav className="flex items-center gap-4">
                 <a href="/trips" className="text-sm text-foreground">Trips</a>
                 <ThemeToggle />

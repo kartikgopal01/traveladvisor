@@ -594,19 +594,12 @@ export default function Home() {
                                 <p className="text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
                               )}
                               <div className="mt-3">
-                                <Button 
+                                <MapButton 
+                                  url={p.mapsUrl || ''} 
+                                  title="View on Maps" 
                                   size="sm" 
-                                  variant="outline" 
-                                  className="w-full"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (p.mapsUrl) {
-                                      window.open(p.mapsUrl, '_blank');
-                                    }
-                                  }}
-                                >
-                                  View on Maps
-                                </Button>
+                                  variant="outline"
+                                />
                               </div>
                             </CardContent>
                           </Card>
@@ -639,19 +632,12 @@ export default function Home() {
                                 <p className="text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
                               )}
                               <div className="mt-3">
-                                <Button 
+                                <MapButton 
+                                  url={p.mapsUrl || ''} 
+                                  title="View on Maps" 
                                   size="sm" 
-                                  variant="outline" 
-                                  className="w-full"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (p.mapsUrl) {
-                                      window.open(p.mapsUrl, '_blank');
-                                    }
-                                  }}
-                                >
-                                  View on Maps
-                                </Button>
+                                  variant="outline"
+                                />
                               </div>
                             </CardContent>
                           </Card>
@@ -792,30 +778,32 @@ export default function Home() {
 
 
           {/* Footer */}
-          <footer className="border-t bg-muted/30 py-12">
+        <footer className="transform scale-60">
           
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              
-              <div className="flex flex-col items-center justify-center">
-                <div className="transform scale-50">
-                  <ThemeLogo />
-                </div>
-                <p className="text-muted-foreground text-sm -mt-2">
-                  Plan, compare, and map your next adventure
-                </p>
+          <div className="max-w-7xl mx-auto px-4 py-0 sm:px-6 lg:px-8">
+            
+            <div className="flex flex-col items-center justify-center">
+              <div className="transform scale-90">
+                <ThemeLogo />
               </div>
+              <p className="text-muted-foreground text-sm  -mt-1 md:-mt-2">
+                Plan, compare, and map your next adventure
+              </p>
             </div>
-          </footer>
+          </div>
+         </footer>
         </div>
       </SignedOut>
 
       <SignedIn>
-        <div className="min-h-screen px-6 py-10 max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Happy Journey
-            </h1>
-            <p className="text-lg text-muted-foreground mt-2">
+        <div className="min-h-screen px-6 max-w-6xl mx-auto">
+          <div className="text-center transform scale-80">
+            <div className="flex justify-center items-center w-full h-full mb-0">
+              <div className="transform scale-100">
+                <ThemeLogo />
+              </div>
+            </div>
+            <p className="text-lg text-muted-foreground mt-1">
               Plan perfect trips across India with AI-powered recommendations
             </p>
           </div>
@@ -845,31 +833,167 @@ export default function Home() {
             </div>
 
             {localPlaces.length > 0 && (
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {localPlaces.map((p, idx) => (
-                  <Card key={idx} className="overflow-hidden">
-                    {p.imageUrl ? (
-                      <img src={p.imageUrl} alt={p.title} className="w-full h-40 object-cover" />
-                    ) : (
-                      <div className={`w-full h-40 bg-gradient-to-br ${getPlaceCardColor(p.title)} flex items-center justify-center`}>
-                        <div className="text-white text-center px-4">
-                          <div className="text-lg font-bold">{p.title}</div>
-                        </div>
-                      </div>
-                    )}
-                    <CardContent className="pt-4">
-                      <div className="font-semibold">{p.title}</div>
-                      {p.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
+              <div className="mt-6">
+                <div className="overflow-hidden relative">
+                  {/* Pause/Play button */}
+                  <div className="absolute top-2 right-2 z-10">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="w-8 h-8 p-0 bg-white/80 hover:bg-white"
+                      onClick={() => {
+                        setIsAnimationPaused(!isAnimationPaused);
+                        const container = document.querySelector('.animate-scroll-all-cards') as HTMLElement;
+                        if (container) {
+                          container.style.animationPlayState = isAnimationPaused ? 'running' : 'paused';
+                        }
+                      }}
+                    >
+                      {isAnimationPaused ? (
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
                       )}
-                      {(p as any).mapsUrl && (
-                        <div className="mt-3">
-                          <MapButton url={(p as any).mapsUrl} title={p.title} size="sm" variant="outline" />
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+                    </Button>
+                  </div>
+                  <div 
+                    className="animate-scroll-all-cards"
+                    onMouseDown={(e) => {
+                      // Only allow dragging when animation is paused
+                      if (!isAnimationPaused) return;
+                      // Stop auto-scroll when user starts dragging
+                      const container = e.currentTarget;
+                      container.style.animationPlayState = 'paused';
+                      
+                      let isDragging = true;
+                      let startX = e.pageX;
+                      let scrollLeft = container.scrollLeft;
+                      
+                      const handleMouseMove = (e: MouseEvent) => {
+                        if (!isDragging) return;
+                        e.preventDefault();
+                        const x = e.pageX;
+                        const walk = (x - startX) * 2;
+                        container.scrollLeft = scrollLeft - walk;
+                      };
+                      
+                      const handleMouseUp = () => {
+                        isDragging = false;
+                        document.removeEventListener('mousemove', handleMouseMove);
+                        document.removeEventListener('mouseup', handleMouseUp);
+                        // Resume auto-scroll after a delay
+                        setTimeout(() => {
+                          container.style.animationPlayState = 'running';
+                        }, 2000);
+                      };
+                      
+                      document.addEventListener('mousemove', handleMouseMove);
+                      document.addEventListener('mouseup', handleMouseUp);
+                    }}
+                    onWheel={(e) => {
+                      // Only allow wheel scrolling when animation is paused
+                      if (!isAnimationPaused) return;
+                      e.preventDefault();
+                      e.stopPropagation(); // Prevent page scroll
+                      const container = e.currentTarget;
+                      container.scrollLeft += e.deltaY;
+                    }}
+                    onMouseEnter={(e) => {
+                      // Only pause on hover if animation is not manually paused
+                      if (!isAnimationPaused) {
+                        (e.currentTarget as HTMLElement).style.animationPlayState = 'paused';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      // Only resume on leave if animation is not manually paused
+                      if (!isAnimationPaused) {
+                        (e.currentTarget as HTMLElement).style.animationPlayState = 'running';
+                      }
+                    }}
+                  >
+                    <div className="flex gap-3 pb-4">
+                      {/* First set of all cards */}
+                      {localPlaces.map((p, idx) => (
+                        <Card 
+                          key={idx} 
+                          className="overflow-hidden flex-shrink-0 w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                          onClick={(e) => {
+                            // Only open maps if not dragging
+                            if (!e.defaultPrevented && (p as any).mapsUrl) {
+                              window.open((p as any).mapsUrl, '_blank');
+                            }
+                          }}
+                        >
+                          {p.imageUrl ? (
+                            <img src={p.imageUrl} alt={p.title} className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300" />
+                          ) : (
+                            <div className={`w-full h-40 bg-gradient-to-br ${getPlaceCardColor(p.title)} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                              <div className="text-white text-center px-4">
+                                <div className="text-lg font-bold">{p.title}</div>
+                              </div>
+                            </div>
+                          )}
+                          <CardContent className="pt-4">
+                            <div className="font-semibold group-hover:text-primary transition-colors duration-300">{p.title}</div>
+                            {p.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
+                            )}
+                            <div className="mt-3">
+                              <MapButton 
+                                url={p.mapsUrl || ''} 
+                                title="View on Maps" 
+                                size="sm" 
+                                variant="outline"
+                              />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                      
+                      {/* Second set for seamless loop */}
+                      {localPlaces.map((p, idx) => (
+                        <Card 
+                          key={`duplicate-${idx}`} 
+                          className="overflow-hidden flex-shrink-0 w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                          onClick={(e) => {
+                            // Only open maps if not dragging
+                            if (!e.defaultPrevented && (p as any).mapsUrl) {
+                              window.open((p as any).mapsUrl, '_blank');
+                            }
+                          }}
+                        >
+                          {p.imageUrl ? (
+                            <img src={p.imageUrl} alt={p.title} className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300" />
+                          ) : (
+                            <div className={`w-full h-40 bg-gradient-to-br ${getPlaceCardColor(p.title)} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                              <div className="text-white text-center px-4">
+                                <div className="text-lg font-bold">{p.title}</div>
+                              </div>
+                            </div>
+                          )}
+                          <CardContent className="pt-4">
+                            <div className="font-semibold group-hover:text-primary transition-colors duration-300">{p.title}</div>
+                            {p.description && (
+                              <p className="text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
+                            )}
+                            <div className="mt-3">
+                              <MapButton 
+                                url={p.mapsUrl || ''} 
+                                title="View on Maps" 
+                                size="sm" 
+                                variant="outline"
+                              />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -1898,7 +2022,23 @@ export default function Home() {
           </div>
         )}
         </div>
-      </SignedIn>
+
+        {/* Footer */}
+        <footer className="transform scale-60">
+          
+          <div className="max-w-7xl mx-auto px-4 py-0 sm:px-6 lg:px-8">
+            
+            <div className="flex flex-col items-center justify-center">
+              <div className="transform scale-90">
+                <ThemeLogo />
+              </div>
+              <p className="text-muted-foreground text-sm  -mt-1 md:-mt-2">
+                Plan, compare, and map your next adventure
+              </p>
+            </div>
+          </div>
+         </footer>
+       </SignedIn>
     </>
   );
 }
