@@ -27,6 +27,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Happy Journey",
   description: "Happy Journey",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/logoDark.png", media: "(prefers-color-scheme: dark)" },
+      { url: "/logowhite.png", media: "(prefers-color-scheme: light)" }
+    ],
+    apple: "/logoDark.png",
+    shortcut: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
