@@ -243,17 +243,31 @@ export default function Home() {
   const [travelStyle, setTravelStyle] = useState("balanced");
   const [accommodationType, setAccommodationType] = useState("hotel");
   const [transportationType, setTransportationType] = useState("mix");
+  const [vehicleType, setVehicleType] = useState("");
+  const [vehicleMileage, setVehicleMileage] = useState("");
+  const [fuelType, setFuelType] = useState("");
+  const [fuelCostPerLiter, setFuelCostPerLiter] = useState("");
   const [interests, setInterests] = useState<string[]>([]);
   const [dietaryRestrictions, setDietaryRestrictions] = useState<string[]>([]);
   const [accessibility, setAccessibility] = useState<string[]>([]);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [specialRequests, setSpecialRequests] = useState("");
+  const [expandedSuggestion, setExpandedSuggestion] = useState<number | null>(null);
+
+  // Handle click outside to close popup
+  const handleClickOutside = (e: React.MouseEvent) => {
+    if (expandedSuggestion !== null && !(e.target as HTMLElement).closest('.suggestion-popup')) {
+      setExpandedSuggestion(null);
+    }
+  };
 
   // Form states for suggest
   const [budgetINR, setBudgetINR] = useState(50000);
   const [suggestDays, setSuggestDays] = useState(3);
   const [origin, setOrigin] = useState("");
+  const [preferredLocation, setPreferredLocation] = useState("");
+  const [includeAccommodation, setIncludeAccommodation] = useState(true);
   const [suggestTravelStyle, setSuggestTravelStyle] = useState("balanced");
   const [suggestInterests, setSuggestInterests] = useState<string[]>([]);
   const [preferredSeason, setPreferredSeason] = useState("any");
@@ -289,12 +303,16 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           places: validPlaces,
-          days,
-          travelers,
-          budget,
+          days: days || undefined,
+          travelers: travelers || undefined,
+          budget: budget || undefined,
           travelStyle,
           accommodationType,
           transportationType,
+          vehicleType: transportationType === "own-vehicle" ? vehicleType : undefined,
+          vehicleMileage: transportationType === "own-vehicle" ? vehicleMileage : undefined,
+          fuelType: transportationType === "own-vehicle" ? fuelType : undefined,
+          fuelCostPerLiter: transportationType === "own-vehicle" ? fuelCostPerLiter : undefined,
           interests,
           dietaryRestrictions,
           accessibility,
@@ -327,6 +345,8 @@ export default function Home() {
           budgetINR,
           days: suggestDays,
           origin: origin || undefined,
+          preferredLocation: preferredLocation || undefined,
+          includeAccommodation,
           travelStyle: suggestTravelStyle,
           interests: suggestInterests,
           preferredSeason: preferredSeason || undefined,
@@ -478,7 +498,7 @@ export default function Home() {
             </div>
 
               {localPlaces.length > 0 && (
-                <div className="mt-6 relative">
+                <div className="mt-6 relative overflow-hidden">
                   {/* Pause/Play Button */}
                   <div className="absolute top-2 right-2 z-10">
                     <Button
@@ -505,7 +525,7 @@ export default function Home() {
                     </Button>
                   </div>
                   <div 
-                    className="overflow-hidden"
+                    className="relative overflow-hidden"
                     onWheel={(e) => {
                       // Only handle wheel events when animation is paused and mouse is over cards
                       if (!isAnimationPaused) return;
@@ -571,7 +591,7 @@ export default function Home() {
                         {localPlaces.map((p, idx) => (
                           <Card 
                             key={idx} 
-                            className="overflow-hidden flex-shrink-0 w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                            className="flex-shrink-0 w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
                             onClick={(e) => {
                               // Only open maps if not dragging
                               if (!e.defaultPrevented && p.mapsUrl) {
@@ -609,7 +629,7 @@ export default function Home() {
                         {localPlaces.map((p, idx) => (
                           <Card 
                             key={`duplicate-${idx}`} 
-                            className="overflow-hidden flex-shrink-0 w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                            className="flex-shrink-0 w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
                             onClick={(e) => {
                               // Only open maps if not dragging
                               if (!e.defaultPrevented && p.mapsUrl) {
@@ -833,8 +853,8 @@ export default function Home() {
             </div>
 
             {localPlaces.length > 0 && (
-              <div className="mt-6">
-                <div className="overflow-hidden relative">
+              <div className="mt-6 relative overflow-hidden">
+                <div className="relative overflow-hidden">
                   {/* Pause/Play button */}
                   <div className="absolute top-2 right-2 z-10">
                     <Button
@@ -917,10 +937,10 @@ export default function Home() {
                   >
                     <div className="flex gap-3 pb-4">
                       {/* First set of all cards */}
-                      {localPlaces.map((p, idx) => (
-                        <Card 
-                          key={idx} 
-                          className="overflow-hidden flex-shrink-0 w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                        {localPlaces.map((p, idx) => (
+                          <Card 
+                            key={idx} 
+                            className="flex-shrink-0 w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
                           onClick={(e) => {
                             // Only open maps if not dragging
                             if (!e.defaultPrevented && (p as any).mapsUrl) {
@@ -1068,7 +1088,7 @@ export default function Home() {
                 {/* Basic Details */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="days">Number of Days</Label>
+                    <Label htmlFor="days">Number of Days (Optional)</Label>
                     <Input
                       id="days"
                       type="number"
@@ -1076,10 +1096,11 @@ export default function Home() {
                       max={30}
                       value={days}
                       onChange={(e) => setDays(Number(e.target.value))}
+                      placeholder="Leave empty for auto-calculation"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="travelers">Number of Travelers</Label>
+                    <Label htmlFor="travelers">Number of Travelers (Optional)</Label>
                     <Input
                       id="travelers"
                       type="number"
@@ -1087,16 +1108,18 @@ export default function Home() {
                       max={20}
                       value={travelers}
                       onChange={(e) => setTravelers(Number(e.target.value))}
+                      placeholder="Leave empty for auto-calculation"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="budget">Total Budget (₹)</Label>
+                    <Label htmlFor="budget">Total Budget (₹) (Optional)</Label>
                     <Input
                       id="budget"
                       type="number"
                       min={1000}
                       value={budget}
                       onChange={(e) => setBudget(Number(e.target.value))}
+                      placeholder="Leave empty for auto-calculation"
                     />
                   </div>
                 </div>
@@ -1129,6 +1152,7 @@ export default function Home() {
                         <SelectItem value="boutique">Boutique Hotel</SelectItem>
                         <SelectItem value="resort">Resort</SelectItem>
                         <SelectItem value="homestay">Homestay</SelectItem>
+                        <SelectItem value="na">NA (Not Needed)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1144,10 +1168,69 @@ export default function Home() {
                         <SelectItem value="car">Car Rental</SelectItem>
                         <SelectItem value="flight">Flight</SelectItem>
                         <SelectItem value="mix">Mix</SelectItem>
+                        <SelectItem value="na">NA (Not Needed)</SelectItem>
+                        <SelectItem value="own-vehicle">Own Vehicle</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
+
+                {/* Vehicle Details - Only show when "Own Vehicle" is selected */}
+                {transportationType === "own-vehicle" && (
+                  <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+                    <h3 className="text-lg font-semibold">Vehicle Details</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="vehicleType">Vehicle Type</Label>
+                        <Select value={vehicleType} onValueChange={setVehicleType}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select vehicle type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="bike">Bike/Motorcycle</SelectItem>
+                            <SelectItem value="car">Car</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="vehicleMileage">Mileage (km/liter)</Label>
+                        <Input
+                          id="vehicleMileage"
+                          type="number"
+                          min={1}
+                          max={50}
+                          value={vehicleMileage}
+                          onChange={(e) => setVehicleMileage(e.target.value)}
+                          placeholder="e.g., 15"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="fuelType">Fuel Type</Label>
+                        <Select value={fuelType} onValueChange={setFuelType}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select fuel type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="petrol">Petrol</SelectItem>
+                            <SelectItem value="diesel">Diesel</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="fuelCostPerLiter">Fuel Cost (₹/liter)</Label>
+                        <Input
+                          id="fuelCostPerLiter"
+                          type="number"
+                          min={50}
+                          max={200}
+                          value={fuelCostPerLiter}
+                          onChange={(e) => setFuelCostPerLiter(e.target.value)}
+                          placeholder="e.g., 100"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Interests */}
                 <div className="space-y-3">
@@ -1348,6 +1431,55 @@ export default function Home() {
                       onChange={(e) => setOrigin(e.target.value)}
                     />
                   </div>
+                </div>
+
+                {/* Preferred Location */}
+                <div className="space-y-2">
+                  <Label htmlFor="preferredLocation">Preferred Location/State/District (Optional)</Label>
+                  <Input
+                    id="preferredLocation"
+                    placeholder="e.g., Kerala, Goa, Rajasthan, Shimla, Manali"
+                    value={preferredLocation}
+                    onChange={(e) => setPreferredLocation(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Specify a particular state, district, or city you'd like to visit
+                  </p>
+                </div>
+
+                {/* Accommodation Preference */}
+                <div className="space-y-2">
+                  <Label htmlFor="includeAccommodation">Accommodation Suggestions</Label>
+                  <div className="flex items-center space-x-4">
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="accommodation"
+                        value="yes"
+                        checked={includeAccommodation === true}
+                        onChange={() => setIncludeAccommodation(true)}
+                        className="w-4 h-4 text-blue-600"
+                      />
+                      <span className="text-sm">Yes, include accommodation suggestions</span>
+                    </label>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="radio"
+                        name="accommodation"
+                        value="no"
+                        checked={includeAccommodation === false}
+                        onChange={() => setIncludeAccommodation(false)}
+                        className="w-4 h-4 text-blue-600"
+                      />
+                      <span className="text-sm">No, only destinations</span>
+                    </label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {includeAccommodation 
+                      ? "Accommodation budget will be allocated from your total budget"
+                      : "Only destination suggestions will be provided"
+                    }
+                  </p>
                 </div>
 
                 {/* Interests for suggestions */}
@@ -1717,7 +1849,7 @@ export default function Home() {
                 )}
 
                 {/* Partner Hotels near destinations */}
-                {planResult.destinations && planResult.destinations.length > 0 && (
+                {planResult.destinations && planResult.destinations.length > 0 && accommodationType !== "na" && (
                   <div className="space-y-4">
                     <h4 className="text-lg font-semibold">Partner Hotels Near Your Trip</h4>
                     <PartnerHotelsPanel destinations={planResult.destinations} />
@@ -1844,161 +1976,263 @@ export default function Home() {
                   {suggestResult.suggestions?.length} destinations matching your preferences
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <CardContent onClick={handleClickOutside}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {suggestResult.suggestions?.map((suggestion: any, idx: number) => (
-                    <Card key={idx} className="h-full">
-                      <CardHeader>
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1">
-                            <CardTitle className="text-xl">{suggestion.destination}</CardTitle>
-                            <CardDescription className="flex items-center gap-2">
-                              <MapPin className="w-4 h-4" />
-                              {suggestion.state}, {suggestion.region}
-                            </CardDescription>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-2xl font-bold text-green-600">
-                              ₹{suggestion.estimatedCost?.toLocaleString()}
+                    <div key={idx} className="relative">
+                      <Card className="h-full hover:shadow-md transition-shadow">
+                        <CardHeader className="pb-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1">
+                              <CardTitle className="text-lg">{suggestion.destination}</CardTitle>
+                              <CardDescription className="flex items-center gap-1 text-sm">
+                                <MapPin className="w-3 h-3" />
+                                {suggestion.state}, {suggestion.region}
+                              </CardDescription>
                             </div>
-                            <div className="text-xs text-muted-foreground capitalize">
-                              {suggestion.budgetCategory}
-                            </div>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        {/* Best Time & Highlights */}
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Calendar className="w-4 h-4" />
-                            <span className="font-medium">Best Time:</span>
-                            <span>{suggestion.bestTimeToVisit}</span>
-                          </div>
-                          {suggestion.highlights && suggestion.highlights.length > 0 && (
-                <div>
-                              <div className="font-medium text-sm mb-1">Highlights:</div>
-                              <ul className="text-xs space-y-1">
-                                {suggestion.highlights.slice(0, 3).map((highlight: string, i: number) => (
-                                  <li key={i} className="flex items-start gap-2">
-                                    <span className="text-green-600 mt-1">✓</span>
-                                    <span>{highlight}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                          )}
-                        </div>
-
-                        {/* Budget Breakdown */}
-                        {suggestion.breakdown && (
-                          <div className="space-y-2">
-                            <div className="font-medium text-sm">Budget Breakdown:</div>
-                            <div className="grid grid-cols-2 gap-2 text-xs">
-                              <div className="flex justify-between">
-                                <span>Flights:</span>
-                                <span>₹{suggestion.breakdown.flights?.toLocaleString()}</span>
+                            <div className="text-right">
+                              <div className="text-xl font-bold text-green-600">
+                                ₹{suggestion.estimatedCost?.toLocaleString()}
                               </div>
+                              <div className="text-xs text-muted-foreground capitalize">
+                                {suggestion.budgetCategory}
+                              </div>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          {/* Compact Info */}
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm">
+                              <Calendar className="w-3 h-3" />
+                              <span className="text-muted-foreground">{suggestion.bestTimeToVisit}</span>
+                            </div>
+                            {suggestion.highlights && suggestion.highlights.length > 0 && (
+                              <div className="text-xs text-muted-foreground">
+                                {suggestion.highlights.slice(0, 2).join(" • ")}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Quick Budget Preview */}
+                          {suggestion.breakdown && (
+                            <div className="text-xs space-y-1">
                               <div className="flex justify-between">
                                 <span>Stay:</span>
                                 <span>₹{suggestion.breakdown.accommodation?.toLocaleString()}</span>
                               </div>
                               <div className="flex justify-between">
-                                <span>Food:</span>
-                                <span>₹{suggestion.breakdown.food?.toLocaleString()}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>Transport:</span>
-                                <span>₹{suggestion.breakdown.localTransport?.toLocaleString()}</span>
-                              </div>
-                              <div className="flex justify-between">
                                 <span>Activities:</span>
                                 <span>₹{suggestion.breakdown.attractions?.toLocaleString()}</span>
                               </div>
-                              <div className="flex justify-between">
-                                <span>Misc:</span>
-                                <span>₹{suggestion.breakdown.miscellaneous?.toLocaleString()}</span>
-                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
 
-                        {/* Sample Plan Preview */}
-                        {suggestion.samplePlan && (
-                          <div className="space-y-2">
-                            <div className="font-medium text-sm">Sample Daily Plan:</div>
-                            <div className="space-y-2">
-                              {suggestion.samplePlan.roadmap?.slice(0, 2).map((day: any) => (
-                                <div key={day.day} className="text-xs border rounded p-2 bg-muted/50">
-                                  <div className="font-medium">Day {day.day}:</div>
-                                  <div className="text-muted-foreground">{day.summary}</div>
-                                  <div className="mt-1">
-                                    {day.activities?.slice(0, 2).map((activity: any, i: number) => (
-                                      <div key={i} className="text-xs">
-                                        • {activity.title}
+                          {/* Action Buttons */}
+                          <div className="flex gap-2 pt-2">
+                            {suggestion.samplePlan?.accommodations?.[0]?.mapsUrl && (
+                              <MapButton
+                                url={suggestion.samplePlan.accommodations[0].mapsUrl}
+                                title={`${suggestion.destination} Accommodation`}
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                              />
+                            )}
+                            <Button 
+                              className="flex-1" 
+                              variant="default" 
+                              size="sm"
+                              onClick={() => setExpandedSuggestion(expandedSuggestion === idx ? null : idx)}
+                            >
+                              View Full Details
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Full Details Popup */}
+                      {expandedSuggestion === idx && (
+                        <div className="suggestion-popup absolute top-0 left-0 z-20 bg-white border border-blue-200 rounded-lg shadow-2xl p-4 w-[120%] max-w-5xl max-h-[60vh] overflow-y-auto">
+                          <div className="space-y-3">
+                            {/* Header */}
+                            <div className="flex items-center justify-between border-b pb-3">
+                              <div>
+                                <h3 className="text-2xl font-bold text-blue-600">{suggestion.destination}</h3>
+                                <p className="text-muted-foreground">{suggestion.state}, {suggestion.region}</p>
+                              </div>
+                              <button
+                                onClick={() => setExpandedSuggestion(null)}
+                                className="text-gray-400 hover:text-gray-600 text-2xl"
+                              >
+                                ×
+                              </button>
+                            </div>
+
+                            {/* Full Day Details */}
+                            {suggestion.samplePlan?.roadmap && (
+                              <div className="space-y-2">
+                                <h4 className="text-base font-bold text-blue-700 bg-blue-100 px-3 py-2 rounded-lg border-l-4 border-blue-500">
+                                  📅 Complete Daily Itinerary
+                                </h4>
+                                {suggestion.samplePlan.roadmap.map((day: any, dayIdx: number) => (
+                                  <div key={dayIdx} className="border rounded-lg p-4 bg-gray-50">
+                                    <div className="flex items-center gap-2 mb-3">
+                                      <div className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
+                                        {day.day}
                                       </div>
-                                    ))}
+                                      <h5 className="font-semibold text-lg">Day {day.day}</h5>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground mb-3">{day.summary}</p>
+                                    
+                                    {/* Activities with Location Links */}
+                                    {day.activities && (
+                                      <div className="space-y-2">
+                                        <h6 className="font-medium text-sm">Activities:</h6>
+                                        {day.activities.map((activity: any, actIdx: number) => (
+                                          <div key={actIdx} className="flex items-start gap-3 p-2 bg-white rounded border">
+                                            <div className="flex-1">
+                                              <div className="font-medium text-sm">{activity.title}</div>
+                                              {activity.description && (
+                                                <div className="text-xs text-muted-foreground mt-1">
+                                                  {activity.description}
+                                                </div>
+                                              )}
+                                              {activity.location && (
+                                                <div className="text-xs text-blue-600 mt-1">
+                                                  📍 {activity.location}
+                                                </div>
+                                              )}
+                                            </div>
+                                            {activity.location && (
+                                              <MapButton
+                                                url={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activity.location)}, ${encodeURIComponent(suggestion.destination)}, ${encodeURIComponent(suggestion.state)}, India`}
+                                                title={activity.title}
+                                                size="sm"
+                                                variant="outline"
+                                              />
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+
+                                    {/* Accommodation for the day */}
+                                    {day.accommodation && (
+                                      <div className="mt-3 p-2 bg-green-50 rounded border">
+                                        <div className="flex items-center justify-between">
+                                          <div>
+                                            <div className="font-medium text-sm text-green-800">
+                                              🏨 {day.accommodation.name}
+                                            </div>
+                                            <div className="text-xs text-green-600">
+                                              ₹{day.accommodation.price?.toLocaleString()}/night
+                                            </div>
+                                          </div>
+                                          {day.accommodation.location && (
+                                            <MapButton
+                                              url={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(day.accommodation.location)}, ${encodeURIComponent(suggestion.destination)}, ${encodeURIComponent(suggestion.state)}, India`}
+                                              title={day.accommodation.name}
+                                              size="sm"
+                                              variant="outline"
+                                            />
+                                          )}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Detailed Budget Breakdown */}
+                            {suggestion.breakdown && (
+                              <div className="space-y-2">
+                                <h4 className="text-base font-bold text-green-700 bg-green-100 px-3 py-2 rounded-lg border-l-4 border-green-500">
+                                  💰 Detailed Budget Breakdown
+                                </h4>
+                                <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                                  <div className="p-2 bg-blue-50 rounded-lg border border-blue-200">
+                                    <div className="text-xs font-medium text-blue-800 mb-1">✈️ Flights</div>
+                                    <div className="text-sm font-bold text-blue-900">₹{suggestion.breakdown.flights?.toLocaleString()}</div>
+                                  </div>
+                                  <div className="p-2 bg-green-50 rounded-lg border border-green-200">
+                                    <div className="text-xs font-medium text-green-800 mb-1">🏨 Stay</div>
+                                    <div className="text-sm font-bold text-green-900">₹{suggestion.breakdown.accommodation?.toLocaleString()}</div>
+                                  </div>
+                                  <div className="p-2 bg-orange-50 rounded-lg border border-orange-200">
+                                    <div className="text-xs font-medium text-orange-800 mb-1">🍽️ Food</div>
+                                    <div className="text-sm font-bold text-orange-900">₹{suggestion.breakdown.food?.toLocaleString()}</div>
+                                  </div>
+                                  <div className="p-2 bg-purple-50 rounded-lg border border-purple-200">
+                                    <div className="text-xs font-medium text-purple-800 mb-1">🚗 Transport</div>
+                                    <div className="text-sm font-bold text-purple-900">₹{suggestion.breakdown.localTransport?.toLocaleString()}</div>
+                                  </div>
+                                  <div className="p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+                                    <div className="text-xs font-medium text-yellow-800 mb-1">🎯 Activities</div>
+                                    <div className="text-sm font-bold text-yellow-900">₹{suggestion.breakdown.attractions?.toLocaleString()}</div>
+                                  </div>
+                                  <div className="p-2 bg-gray-50 rounded-lg border border-gray-200">
+                                    <div className="text-xs font-medium text-gray-800 mb-1">📦 Misc</div>
+                                    <div className="text-sm font-bold text-gray-900">₹{suggestion.breakdown.miscellaneous?.toLocaleString()}</div>
                                   </div>
                                 </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Transportation */}
-                        {suggestion.transportation && (
-                          <div className="space-y-2">
-                            <div className="font-medium text-sm">Getting There:</div>
-                            <div className="text-xs border rounded p-2">
-                              <div className="font-medium">{suggestion.transportation.toDestination?.mode}</div>
-                              <div className="text-muted-foreground">
-                                {suggestion.transportation.toDestination?.duration} •
-                                ₹{suggestion.transportation.toDestination?.cost?.toLocaleString()}
                               </div>
-                              <div className="text-blue-600 mt-1">
-                                💡 {suggestion.transportation.toDestination?.tips}
-              </div>
-            </div>
-          </div>
-        )}
+                            )}
 
-                        {/* Local Tips */}
-                        {(suggestion.localTips || suggestion.safetyNotes || suggestion.culturalNotes) && (
-                          <div className="space-y-2">
-                            <div className="font-medium text-sm">Quick Tips:</div>
-                            <div className="space-y-1">
-                              {suggestion.localTips?.slice(0, 1).map((tip: string, i: number) => (
-                                <div key={i} className="text-xs flex items-start gap-2">
-                                  <span className="text-blue-600 mt-1">💡</span>
-                                  <span>{tip}</span>
+                            {/* Transportation Details */}
+                            {suggestion.transportation && (
+                              <div className="space-y-2">
+                                <h4 className="text-base font-bold text-purple-700 bg-purple-100 px-3 py-2 rounded-lg border-l-4 border-purple-500">
+                                  🚗 Transportation Details
+                                </h4>
+                                <div className="p-4 bg-purple-50 rounded-lg">
+                                  <div className="font-medium">{suggestion.transportation.toDestination?.mode}</div>
+                                  <div className="text-sm text-muted-foreground">
+                                    Duration: {suggestion.transportation.toDestination?.duration}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    Cost: ₹{suggestion.transportation.toDestination?.cost?.toLocaleString()}
+                                  </div>
+                                  {suggestion.transportation.toDestination?.tips && (
+                                    <div className="text-sm text-blue-600 mt-2">
+                                      💡 {suggestion.transportation.toDestination.tips}
+                                    </div>
+                                  )}
                                 </div>
-                              ))}
-                              {suggestion.safetyNotes?.slice(0, 1).map((note: string, i: number) => (
-                                <div key={i} className="text-xs flex items-start gap-2">
-                                  <span className="text-orange-600 mt-1">⚠️</span>
-                                  <span>{note}</span>
-                                </div>
-                              ))}
+                              </div>
+                            )}
+
+                            {/* Tips and Notes */}
+                            <div className="space-y-2">
+                              <h4 className="text-base font-bold text-orange-700 bg-orange-100 px-3 py-2 rounded-lg border-l-4 border-orange-500">
+                                💡 Travel Tips & Notes
+                              </h4>
+                              <div className="space-y-2">
+                                {suggestion.localTips?.map((tip: string, i: number) => (
+                                  <div key={i} className="flex items-start gap-2 p-2 bg-blue-50 rounded">
+                                    <span className="text-blue-600 mt-1">💡</span>
+                                    <span className="text-sm">{tip}</span>
+                                  </div>
+                                ))}
+                                {suggestion.safetyNotes?.map((note: string, i: number) => (
+                                  <div key={i} className="flex items-start gap-2 p-2 bg-orange-50 rounded">
+                                    <span className="text-orange-600 mt-1">⚠️</span>
+                                    <span className="text-sm">{note}</span>
+                                  </div>
+                                ))}
+                                {suggestion.culturalNotes?.map((note: string, i: number) => (
+                                  <div key={i} className="flex items-start gap-2 p-2 bg-green-50 rounded">
+                                    <span className="text-green-600 mt-1">🏛️</span>
+                                    <span className="text-sm">{note}</span>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           </div>
-                        )}
-
-                        {/* Map and Details Buttons */}
-                        <div className="flex gap-2">
-                          {suggestion.samplePlan?.accommodations?.[0]?.mapsUrl && (
-                            <MapButton
-                              url={suggestion.samplePlan.accommodations[0].mapsUrl}
-                              title={`${suggestion.destination} Accommodation`}
-                              variant="outline"
-                              size="sm"
-                            />
-                          )}
-                          <Button className="flex-1" variant="outline" size="sm">
-                            View Full Details
-                          </Button>
-                  </div>
-                      </CardContent>
-                    </Card>
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </CardContent>

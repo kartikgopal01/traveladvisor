@@ -55,11 +55,40 @@ export function MapsIntegrationSummary({
 
   const handleViewTripRoute = () => {
     if (destinations.length > 0) {
-      const tripRoute = generateTripRoute(destinations.map(dest => ({
+      // Create proper destination objects for generateTripRoute
+      const destinationObjects = destinations.map(dest => ({
         name: dest,
         city: dest,
-      })));
-      window.open(tripRoute.routeUrl, '_blank', 'noopener,noreferrer');
+        state: "",
+        address: ""
+      }));
+      
+      const tripRoute = generateTripRoute(destinationObjects);
+      
+      if (tripRoute.routeUrl) {
+        window.open(tripRoute.routeUrl, '_blank', 'noopener,noreferrer');
+      } else {
+        // Fallback: create a simple multi-stop route
+        if (destinations.length === 1) {
+          const searchUrl = generateMapsSearchUrl(destinations[0]);
+          window.open(searchUrl, '_blank', 'noopener,noreferrer');
+        } else if (destinations.length > 1) {
+          const encodedDestinations = destinations.map(dest => encodeURIComponent(dest));
+          const origin = encodedDestinations[0];
+          const destination = encodedDestinations[encodedDestinations.length - 1];
+          const waypoints = encodedDestinations.slice(1, -1);
+          
+          let routeUrl;
+          if (waypoints.length > 0) {
+            const waypointsParam = waypoints.join('|');
+            routeUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${waypointsParam}`;
+          } else {
+            routeUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
+          }
+          
+          window.open(routeUrl, '_blank', 'noopener,noreferrer');
+        }
+      }
     }
   };
 
@@ -74,12 +103,12 @@ export function MapsIntegrationSummary({
       <CardContent className="space-y-6">
         {/* Quick Actions */}
         <div className="flex flex-wrap gap-3">
-          <Button onClick={handleExploreIndia} variant="outline" className="flex items-center gap-2">
+          <Button onClick={handleExploreIndia} variant="outline" className="flex items-center gap-2 flex-shrink-0">
             <Globe className="w-4 h-4" />
             Explore India
           </Button>
           {destinations.length > 1 && (
-            <Button onClick={handleViewTripRoute} variant="outline" className="flex items-center gap-2">
+            <Button onClick={handleViewTripRoute} variant="outline" className="flex items-center gap-2 flex-shrink-0">
               <Route className="w-4 h-4" />
               View Trip Route
             </Button>

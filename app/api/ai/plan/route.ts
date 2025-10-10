@@ -54,12 +54,16 @@ export async function POST(request: Request) {
 
   const { 
     places, 
-    days = 3, 
-    travelers = 2, 
-    budget = 50000,
+    days, 
+    travelers, 
+    budget,
     travelStyle = "balanced",
     accommodationType = "hotel",
     transportationType = "mix",
+    vehicleType,
+    vehicleMileage,
+    fuelType,
+    fuelCostPerLiter,
     interests = [],
     dietaryRestrictions = [],
     accessibility = [],
@@ -77,18 +81,130 @@ export async function POST(request: Request) {
   const dietaryList = Array.isArray(dietaryRestrictions) ? dietaryRestrictions.join(", ") : dietaryRestrictions.join(", ");
   const accessibilityList = Array.isArray(accessibility) ? accessibility.join(", ") : accessibility.join(", ");
 
-  const prompt = `You are an expert Indian travel planner. Generate a comprehensive ${days}-day trip plan for ${travelers} travelers visiting ${placesList} in India.
+  // Calculate accurate budget based on all factors
+  let calculatedBudget = budget;
+  let budgetBreakdown = null;
+  let vehicleCostInfo = "";
   
-Budget: ₹${budget.toLocaleString()} INR
+  if (!budget) {
+    // Auto-calculate budget based on all factors
+    const calculatedDays = days || Math.max(3, places.length); // Minimum 3 days or based on destinations
+    const calculatedTravelers = travelers || 2; // Default 2 travelers
+    
+    // Base budget per person per day based on travel style
+    let baseBudgetPerPersonPerDay = 0;
+    switch (travelStyle) {
+      case "budget": baseBudgetPerPersonPerDay = 1500; break;
+      case "balanced": baseBudgetPerPersonPerDay = 2500; break;
+      case "luxury": baseBudgetPerPersonPerDay = 5000; break;
+      case "adventure": baseBudgetPerPersonPerDay = 3000; break;
+      default: baseBudgetPerPersonPerDay = 2500;
+    }
+    
+    // Calculate base budget
+    const baseBudget = baseBudgetPerPersonPerDay * calculatedDays * calculatedTravelers;
+    
+    // Calculate accommodation cost
+    let accommodationCost = 0;
+    if (accommodationType !== "na") {
+      let accommodationPerNight = 0;
+      switch (accommodationType) {
+        case "budget-hotel": accommodationPerNight = 1500; break;
+        case "hotel": accommodationPerNight = 3000; break;
+        case "boutique": accommodationPerNight = 5000; break;
+        case "resort": accommodationPerNight = 8000; break;
+        case "homestay": accommodationPerNight = 2000; break;
+        default: accommodationPerNight = 3000;
+      }
+      accommodationCost = accommodationPerNight * calculatedDays;
+    }
+    
+    // Calculate transportation cost
+    let transportationCost = 0;
+    if (transportationType === "own-vehicle" && vehicleType && vehicleMileage && fuelType && fuelCostPerLiter) {
+      // Calculate fuel cost based on vehicle details
+      const fuelCost = parseFloat(fuelCostPerLiter);
+      const mileage = parseFloat(vehicleMileage);
+      const estimatedDistance = calculatedDays * 200; // Average 200km per day
+      const fuelNeeded = estimatedDistance / mileage;
+      transportationCost = Math.round(fuelNeeded * fuelCost);
+      
+      vehicleCostInfo = `\nVehicle Details: ${vehicleType}, ${vehicleMileage} km/liter, ${fuelType}\nFuel Cost: ₹${fuelCost}/liter\nEstimated Distance: ${estimatedDistance}km\nTotal Fuel Cost: ₹${transportationCost.toLocaleString()}`;
+    } else if (transportationType !== "na") {
+      // Calculate transportation cost based on type
+      let transportPerPersonPerDay = 0;
+      switch (transportationType) {
+        case "train": transportPerPersonPerDay = 500; break;
+        case "bus": transportPerPersonPerDay = 300; break;
+        case "car": transportPerPersonPerDay = 2000; break;
+        case "flight": transportPerPersonPerDay = 3000; break;
+        case "mix": transportPerPersonPerDay = 1000; break;
+        default: transportPerPersonPerDay = 1000;
+      }
+      transportationCost = transportPerPersonPerDay * calculatedDays * calculatedTravelers;
+    }
+    
+    // Calculate food cost
+    let foodCostPerPersonPerDay = 0;
+    switch (travelStyle) {
+      case "budget": foodCostPerPersonPerDay = 500; break;
+      case "balanced": foodCostPerPersonPerDay = 800; break;
+      case "luxury": foodCostPerPersonPerDay = 2000; break;
+      case "adventure": foodCostPerPersonPerDay = 1000; break;
+      default: foodCostPerPersonPerDay = 800;
+    }
+    const foodCost = foodCostPerPersonPerDay * calculatedDays * calculatedTravelers;
+    
+    // Calculate attractions cost
+    let attractionsCostPerPersonPerDay = 0;
+    switch (travelStyle) {
+      case "budget": attractionsCostPerPersonPerDay = 300; break;
+      case "balanced": attractionsCostPerPersonPerDay = 600; break;
+      case "luxury": attractionsCostPerPersonPerDay = 1500; break;
+      case "adventure": attractionsCostPerPersonPerDay = 1000; break;
+      default: attractionsCostPerPersonPerDay = 600;
+    }
+    const attractionsCost = attractionsCostPerPersonPerDay * calculatedDays * calculatedTravelers;
+    
+    // Calculate miscellaneous cost (10% of total)
+    const miscellaneousCost = Math.round((accommodationCost + transportationCost + foodCost + attractionsCost) * 0.1);
+    
+    // Total calculated budget
+    calculatedBudget = accommodationCost + transportationCost + foodCost + attractionsCost + miscellaneousCost;
+    
+    // Create budget breakdown
+    budgetBreakdown = {
+      accommodation: accommodationCost,
+      transportation: transportationCost,
+      food: foodCost,
+      attractions: attractionsCost,
+      miscellaneous: miscellaneousCost,
+      total: calculatedBudget
+    };
+  }
+
+  const prompt = `You are an expert Indian travel planner. Generate a comprehensive trip plan for visiting ${placesList} in India.
+  
+${days ? `Duration: ${days} days` : "Duration: Auto-calculate based on destinations"}
+${travelers ? `Travelers: ${travelers} people` : "Travelers: Auto-calculate"}
+${budget ? `Budget: ₹${budget.toLocaleString()} INR` : `Budget: ₹${calculatedBudget.toLocaleString()} INR (auto-calculated)`}
 Travel Style: ${travelStyle}
-Accommodation: ${accommodationType}
-Transportation: ${transportationType}
+Accommodation: ${accommodationType === "na" ? "Not needed" : accommodationType}
+Transportation: ${transportationType === "na" ? "Not needed" : transportationType}${vehicleCostInfo}
 Interests: ${interestsList || "General sightseeing"}
 Dietary Restrictions: ${dietaryList || "None"}
 Accessibility Needs: ${accessibilityList || "None"}
 ${startDate ? `Start Date: ${startDate}` : ""}
 ${endDate ? `End Date: ${endDate}` : ""}
 ${specialRequests ? `Special Requests: ${specialRequests}` : ""}
+
+${budgetBreakdown ? `CALCULATED BUDGET BREAKDOWN:
+- Accommodation: ₹${budgetBreakdown.accommodation.toLocaleString()}
+- Transportation: ₹${budgetBreakdown.transportation.toLocaleString()}
+- Food: ₹${budgetBreakdown.food.toLocaleString()}
+- Attractions: ₹${budgetBreakdown.attractions.toLocaleString()}
+- Miscellaneous: ₹${budgetBreakdown.miscellaneous.toLocaleString()}
+- Total: ₹${budgetBreakdown.total.toLocaleString()}` : ""}
 
 Return JSON with this exact schema:
 {
@@ -249,12 +365,18 @@ Rules:
       travelStyle,
       accommodationType,
       transportationType,
+      vehicleType,
+      vehicleMileage,
+      fuelType,
+      fuelCostPerLiter,
       interests,
       dietaryRestrictions,
       accessibility,
       startDate,
       endDate,
-      specialRequests
+      specialRequests,
+      calculatedBudget,
+      budgetBreakdown
     };
     
     const doc = await db.collection("trips").add({

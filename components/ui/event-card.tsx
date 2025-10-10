@@ -55,7 +55,12 @@ export function EventCard({ event }: EventCardProps) {
   return (
     <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow duration-200">
       {event.imageUrl && (
-        <div className="h-48 bg-cover bg-center relative" style={{ backgroundImage: `url(${event.imageUrl})` }}>
+        <div className="h-48 relative overflow-hidden">
+          <img 
+            src={event.imageUrl} 
+            alt={event.title}
+            className="w-full h-full object-cover"
+          />
           <div className="absolute top-2 left-2">
             {event.category && (
               <Badge variant="secondary" className="bg-white/90 text-black">
@@ -65,7 +70,7 @@ export function EventCard({ event }: EventCardProps) {
           </div>
           {!isUpcoming && (
             <div className="absolute top-2 right-2">
-              <Badge variant="destructive">Past Event</Badge>
+              <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">Past Event</Badge>
             </div>
           )}
           {capacityFull && (
@@ -86,7 +91,7 @@ export function EventCard({ event }: EventCardProps) {
               <Badge variant="secondary">{event.category}</Badge>
             )}
             {!isUpcoming && (
-              <Badge variant="destructive">Past Event</Badge>
+              <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">Past Event</Badge>
             )}
             {capacityFull && (
               <Badge variant="outline" className="bg-red-100 text-red-800 border-red-300">

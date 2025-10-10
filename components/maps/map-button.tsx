@@ -54,7 +54,7 @@ export function MapButton({
       case "route":
         return "View Route";
       default:
-        return title;
+        return ""; // Show only icon for location type
     }
   };
 
@@ -67,12 +67,15 @@ export function MapButton({
       title={`Open ${title} in Google Maps`}
     >
       {showIcon && getIcon()}
-      {size !== "icon" && (
+      {size !== "icon" && getButtonText() && (
         <>
           {showIcon && <span className="ml-1" />}
           {getButtonText()}
           <ExternalLink className="w-3 h-3 ml-1 opacity-70" />
         </>
+      )}
+      {size !== "icon" && !getButtonText() && showIcon && (
+        <ExternalLink className="w-3 h-3 ml-1 opacity-70" />
       )}
     </Button>
   );
