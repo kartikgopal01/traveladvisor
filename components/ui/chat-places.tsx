@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MapButton } from "@/components/maps/map-button";
 import { generateMapsSearchUrl } from "@/lib/maps";
+import { MapPin } from "lucide-react";
 
 export default function ChatPlaces({ defaultCity }: { defaultCity?: string | null }) {
   const [city, setCity] = useState<string | null>(defaultCity || null);
@@ -53,19 +53,27 @@ export default function ChatPlaces({ defaultCity }: { defaultCity?: string | nul
       {city && (<div className="text-xs text-muted-foreground">Using location: <span className="font-medium">{city}</span></div>)}
       {loading && <div className="text-sm text-muted-foreground">Fetching places…</div>}
       {places.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {places.map((p, i) => (
-            <Card key={i} className="overflow-hidden">
-              {p.imageUrl && <img src={p.imageUrl} alt={p.title} className="w-full h-40 object-cover" />}
-              <CardContent className="pt-4">
-                <div className="font-semibold">{p.title}</div>
-                {p.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-3">{p.description}</p>}
-                <div className="mt-3">
-                  <MapButton url={generateMapsSearchUrl(`${p.title}${city ? ", " + city : ""}, India`)} title={p.title} size="sm" variant="outline" />
+        <div className="bg-muted/30 rounded-lg p-4">
+          <div className="text-sm text-muted-foreground mb-2">
+            {city ? `Here are the ${message} in ${city}:` : `Here are the ${message} in your area:`}
+          </div>
+          <div className="space-y-1">
+            {places.map((p, i) => (
+              <div key={i} className="flex items-center justify-between py-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm">•</span>
+                  <span className="text-sm font-medium">{p.title}</span>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <MapButton 
+                  url={generateMapsSearchUrl(`${p.title}${city ? ", " + city : ""}, India`)} 
+                  title={`Directions to ${p.title}`} 
+                  size="sm" 
+                  variant="ghost"
+                  className="h-6 px-2 text-xs"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

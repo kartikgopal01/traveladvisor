@@ -20,11 +20,63 @@ export async function POST(request: Request) {
   if (!message) return NextResponse.json({ error: "message required" }, { status: 400 });
 
   const model = getGenerativeModel();
-  const prompt = `You are a helpful travel assistant. Based on the user's request, return up to ${count} relevant places with a one-line description.
-${city ? `City: ${city}` : "Use the user's implicit location if provided."}
-User request: ${message || "Famous places"}
-Return strict JSON:
-{ "places": [ { "title": string, "description": string, "wikipediaTitle": string } ] }`;
+  
+  // Extract city/district names from the message if any are mentioned
+  const cityPattern = /\b(?:in|at|near|around|from)\s+([A-Za-z\s]+?)(?:\s|$|,|\.)/gi;
+  const mentionedCities = [];
+  let match;
+  while ((match = cityPattern.exec(message)) !== null) {
+    const cityName = match[1].trim();
+    if (cityName.length > 2 && 
+        !cityName.toLowerCase().includes('best') && 
+        !cityName.toLowerCase().includes('temple') &&
+        !cityName.toLowerCase().includes('restaurant') &&
+        !cityName.toLowerCase().includes('beach') &&
+        !cityName.toLowerCase().includes('park')) {
+      mentionedCities.push(cityName);
+    }
+  }
+  
+  // Also check for direct city/district mentions without prepositions
+  const directCityPattern = /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:district|city|state)\b/gi;
+  let directMatch;
+  while ((directMatch = directCityPattern.exec(message)) !== null) {
+    const directCity = directMatch[1].trim();
+    if (!mentionedCities.includes(directCity)) {
+      mentionedCities.push(directCity);
+    }
+  }
+  
+  // Determine the target city - prioritize mentioned cities over detected location
+  const targetCity = mentionedCities.length > 0 ? mentionedCities[0] : null;
+  
+  const locationText = targetCity ? targetCity : (city ? city : 'detected location');
+  
+  const prompt = `Find real ${message} that actually exist in ${locationText}, India.
+
+LOCATION REQUIREMENTS:
+- Return ONLY actual ${message} that are physically located in ${locationText}
+- If user mentions a city/district name, show places from that specific location
+- If no location mentioned, use the detected location
+- These must be real places that people can visit
+- Include the actual name of each ${message}
+
+FORBIDDEN:
+- Do NOT return administrative areas or general information
+- Do NOT return lists, movies, or unrelated content
+- Do NOT return places from other locations
+
+EXAMPLES for temples in ${locationText}:
+✅ "Shri Rameshwara Temple"
+✅ "Lakshmi Narasimha Temple" 
+✅ "Ganesha Temple"
+✅ "Durga Temple"
+❌ "Shivamogga district"
+❌ "Karnataka state"
+❌ "List of temples"
+
+Return real ${message} from ${locationText}:
+{ "places": [ { "title": "Actual Place Name", "description": "Brief description", "wikipediaTitle": "Place Name" } ] }`;
 
   let places: any[] = [];
   try {
@@ -39,7 +91,7 @@ Return strict JSON:
   // Fallback to Wikipedia search if AI returns nothing
   if (!places || places.length === 0) {
     try {
-      const query = `${message} ${city ? city + ' India' : 'India'}`.trim();
+      const query = `${message} ${targetCity ? targetCity + ' India' : 'India'}`.trim();
       const resp = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&srlimit=${count}`);
       const data = await resp.json();
       places = (data?.query?.search || []).slice(0, count).map((s: any) => ({
