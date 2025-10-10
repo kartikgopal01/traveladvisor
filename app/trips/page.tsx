@@ -161,23 +161,23 @@ export default function TripsPage() {
       <h1 className="text-3xl font-semibold">Your Trips</h1>
         <div className="flex items-center gap-4">
           {/* Tab Buttons */}
-          <div className="flex bg-gray-100 rounded-lg p-1">
+          <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('suggestions')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 activeTab === 'suggestions'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-purple-700 text-white'
+                  : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
               }`}
             >
               Destination Suggestions
             </button>
             <button
               onClick={() => setActiveTab('plans')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 activeTab === 'plans'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-purple-700 text-white'
+                  : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
               }`}
             >
               Trip Plans
@@ -365,25 +365,25 @@ export default function TripsPage() {
               {activeTab === 'suggestions' && t.input?.budgetINR && (
                 <div className="space-y-3">
                   {/* Main Budget Display */}
-                  <div className="p-4 bg-blue-50 rounded-lg">
+                  <div className="p-4 bg-muted rounded-lg">
                     <div className="space-y-1">
                       <div className="text-sm text-muted-foreground">Total Budget</div>
-                      <div className="text-lg font-semibold">₹{t.input.budgetINR?.toLocaleString()}</div>
+                      <div className="text-lg font-semibold text-foreground">₹{t.input.budgetINR?.toLocaleString()}</div>
                     </div>
                   </div>
                   
                   {/* Budget Breakdown if accommodation is included */}
                   {t.input?.includeAccommodation && t.input?.budgetAnalysis && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-green-50 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 bg-muted rounded-lg">
                       <div className="space-y-1">
                         <div className="text-sm text-muted-foreground">Accommodation Budget</div>
-                        <div className="text-lg font-semibold text-green-700">₹{t.input.budgetAnalysis.accommodationBudget?.toLocaleString()}</div>
-                        <div className="text-xs text-green-600">40% of total</div>
+                        <div className="text-lg font-semibold text-foreground">₹{t.input.budgetAnalysis.accommodationBudget?.toLocaleString()}</div>
+                        <div className="text-xs text-muted-foreground">40% of total</div>
                       </div>
                       <div className="space-y-1">
                         <div className="text-sm text-muted-foreground">Activity Budget</div>
-                        <div className="text-lg font-semibold text-blue-700">₹{t.input.budgetAnalysis.activityBudget?.toLocaleString()}</div>
-                        <div className="text-xs text-blue-600">60% of total</div>
+                        <div className="text-lg font-semibold text-foreground">₹{t.input.budgetAnalysis.activityBudget?.toLocaleString()}</div>
+                        <div className="text-xs text-muted-foreground">60% of total</div>
                       </div>
                     </div>
                   )}
@@ -409,10 +409,10 @@ export default function TripsPage() {
                             <div className="font-medium text-lg">{s.destination}</div>
                             <div className="text-sm text-muted-foreground">{s.state} • {s.region}</div>
                             <div className="flex items-center justify-between">
-                              <div className="text-lg font-semibold text-green-600">
+                              <div className="text-lg font-semibold text-foreground">
                                 Est. ₹{s.estimatedCost?.toLocaleString?.()}
                               </div>
-                              <div className="text-sm font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                              <div className="text-sm font-medium text-foreground bg-muted px-2 py-1 rounded-full">
                                 {t.input?.days || s.days || s.samplePlan?.days || 'N/A'} days
                               </div>
                             </div>
@@ -429,13 +429,13 @@ export default function TripsPage() {
 
                        {/* Pop-up Overlay */}
                        {isExpanded && (
-                         <div className={`absolute top-0 left-0 z-20 bg-white border border-blue-200 rounded-lg shadow-2xl p-4 ${getPopupClasses().width} ${getPopupClasses().height} overflow-y-auto`}>
+                         <div className={`absolute top-0 left-0 z-20 bg-background/95 backdrop-blur-lg border border-border/50 rounded-lg shadow-2xl p-4 ${getPopupClasses().width} ${getPopupClasses().height} overflow-y-auto`}>
                            <div className="space-y-3">
                             <div className="flex items-center justify-between border-b pb-2">
-                              <h3 className="font-semibold text-lg text-blue-600">{s.destination}</h3>
+                              <h3 className="font-semibold text-lg text-foreground">{s.destination}</h3>
                               <div className="flex items-center gap-2">
                                 {/* Width Adjustment Controls */}
-                                <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+                                <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
@@ -443,8 +443,8 @@ export default function TripsPage() {
                                     }}
                                     className={`px-2 py-1 rounded text-xs font-medium transition-all ${
                                       popupWidth === 'sm'
-                                        ? 'bg-white text-blue-600 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
                                     }`}
                                     title="Small (1/3 width, 80% height)"
                                   >
@@ -457,8 +457,8 @@ export default function TripsPage() {
                                     }}
                                     className={`px-2 py-1 rounded text-xs font-medium transition-all ${
                                       popupWidth === 'md'
-                                        ? 'bg-white text-blue-600 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
                                     }`}
                                     title="Medium (1/2 width, 70% height)"
                                   >
@@ -471,8 +471,8 @@ export default function TripsPage() {
                                     }}
                                     className={`px-2 py-1 rounded text-xs font-medium transition-all ${
                                       popupWidth === 'lg'
-                                        ? 'bg-white text-blue-600 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
                                     }`}
                                     title="Large (2/3 width, 60% height)"
                                   >
@@ -485,8 +485,8 @@ export default function TripsPage() {
                                     }}
                                     className={`px-2 py-1 rounded text-xs font-medium transition-all ${
                                       popupWidth === 'xl'
-                                        ? 'bg-white text-blue-600 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900'
+                                        ? 'bg-background text-foreground shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
                                     }`}
                                     title="Extra Large (3/4 width, 50% height)"
                                   >
@@ -498,7 +498,7 @@ export default function TripsPage() {
                                     e.stopPropagation();
                                     setExpandedCard(null);
                                   }}
-                                  className="text-gray-400 hover:text-gray-600 text-xl"
+                                  className="text-muted-foreground hover:text-foreground text-xl"
                                 >
                                   ×
                                 </button>
@@ -508,12 +508,12 @@ export default function TripsPage() {
                             {/* Places to Visit */}
                             {s.samplePlan?.attractions?.length > 0 && (
                               <div>
-                                <h4 className="font-medium text-sm mb-2 text-blue-600">
+                                <h4 className="font-medium text-sm mb-2 text-foreground">
                                   🏛️ Places to Visit
                                 </h4>
                                  <div className="space-y-2">
                                    {s.samplePlan.attractions.slice(0, 4).map((attraction: any, idx: number) => (
-                                     <div key={idx} className="p-2 bg-gray-50 rounded text-sm">
+                                     <div key={idx} className="p-2 bg-muted rounded text-sm">
                                        <div className="font-medium text-sm mb-1">{attraction.name}</div>
                                        <div className="text-xs text-muted-foreground mb-2">{attraction.location}</div>
                                        {attraction.mapsUrl && (
@@ -539,12 +539,12 @@ export default function TripsPage() {
                             {/* Accommodations */}
                             {s.samplePlan?.accommodations?.length > 0 && (
                               <div>
-                                <h4 className="font-medium text-sm mb-2 text-green-600">
+                                <h4 className="font-medium text-sm mb-2 text-foreground">
                                   🏨 Accommodations
                                 </h4>
                                  <div className="space-y-2">
                                    {s.samplePlan.accommodations.slice(0, 3).map((accommodation: any, idx: number) => (
-                                     <div key={idx} className="p-2 bg-gray-50 rounded text-sm">
+                                     <div key={idx} className="p-2 bg-muted rounded text-sm">
                                        <div className="font-medium text-sm mb-1">{accommodation.name}</div>
                                        <div className="text-xs text-muted-foreground mb-2">
                                          ₹{accommodation.price?.toLocaleString?.()}/night
@@ -567,12 +567,12 @@ export default function TripsPage() {
                             {/* Restaurants */}
                             {s.samplePlan?.restaurants?.length > 0 && (
                               <div>
-                                <h4 className="font-medium text-sm mb-2 text-orange-600">
+                                <h4 className="font-medium text-sm mb-2 text-foreground">
                                   🍽️ Local Cuisine
                                 </h4>
                                  <div className="space-y-2">
                                    {s.samplePlan.restaurants.slice(0, 3).map((restaurant: any, idx: number) => (
-                                     <div key={idx} className="p-2 bg-gray-50 rounded text-sm">
+                                     <div key={idx} className="p-2 bg-muted rounded text-sm">
                                        <div className="font-medium text-sm mb-1">{restaurant.name}</div>
                                        <div className="text-xs text-muted-foreground mb-2">{restaurant.cuisine}</div>
                                        {restaurant.mapsUrl && (
@@ -593,10 +593,10 @@ export default function TripsPage() {
                             {/* Accommodation Routes */}
                             {s.samplePlan?.accommodationRoutes?.length > 0 && (
                               <div>
-                                <h4 className="font-medium text-sm mb-2 text-purple-600">🗺️ Accommodation Routes</h4>
+                                <h4 className="font-medium text-sm mb-2 text-foreground">🗺️ Accommodation Routes</h4>
                                 <div className="space-y-2">
                                   {s.samplePlan.accommodationRoutes.slice(0, 3).map((route: any, idx: number) => (
-                                    <div key={idx} className="p-2 bg-purple-50 rounded text-sm">
+                                    <div key={idx} className="p-2 bg-muted rounded text-sm">
                                       <div className="font-medium text-sm mb-1">{route.fromAccommodation} → {route.toAttraction}</div>
                                       <div className="text-xs text-muted-foreground mb-2">
                                         {route.distance} • {route.duration}

@@ -955,6 +955,331 @@ html.dark .dynamic-color-text * {
   visibility: visible !important;
 }
 
+/* Enhanced Hover Effects for Buttons and Interactive Elements - Black/White Theme */
+@keyframes hoverColorShiftLight {
+  0% {
+    filter: brightness(0.9) contrast(1.1);
+  }
+  25% {
+    filter: brightness(0.8) contrast(1.2);
+  }
+  50% {
+    filter: brightness(0.7) contrast(1.3);
+  }
+  75% {
+    filter: brightness(0.8) contrast(1.2);
+  }
+  100% {
+    filter: brightness(0.9) contrast(1.1);
+  }
+}
+
+@keyframes hoverColorShiftDark {
+  0% {
+    filter: brightness(1.1) contrast(0.9);
+  }
+  25% {
+    filter: brightness(1.2) contrast(0.8);
+  }
+  50% {
+    filter: brightness(1.3) contrast(0.7);
+  }
+  75% {
+    filter: brightness(1.2) contrast(0.8);
+  }
+  100% {
+    filter: brightness(1.1) contrast(0.9);
+  }
+}
+
+@keyframes textHoverGlowLight {
+  0% {
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 15px rgba(0, 0, 0, 0.6), 0 0 25px rgba(0, 0, 0, 0.4);
+  }
+  100% {
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  }
+}
+
+@keyframes textHoverGlowDark {
+  0% {
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.6), 0 0 25px rgba(255, 255, 255, 0.4);
+  }
+  100% {
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  }
+}
+
+@keyframes buttonPulseLight {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+@keyframes buttonPulseDark {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+/* Enhanced Button Hover Effects - Black/White Theme */
+.btn-hover-enhanced {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Button hover effects without transparency */
+
+/* Light theme hover effects */
+html:not(.dark) .btn-hover-enhanced:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  animation: hoverColorShiftLight 2s ease-in-out infinite, buttonPulseLight 2s ease-in-out infinite;
+}
+
+/* Dark theme hover effects */
+html.dark .btn-hover-enhanced:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.15);
+  animation: hoverColorShiftDark 2s ease-in-out infinite, buttonPulseDark 2s ease-in-out infinite;
+}
+
+/* Text Hover Effects - Black/White Theme */
+.text-hover-glow {
+  transition: all 0.3s ease;
+}
+
+/* Light theme text hover */
+html:not(.dark) .text-hover-glow:hover {
+  animation: textHoverGlowLight 1.5s ease-in-out infinite;
+  transform: scale(1.05);
+}
+
+/* Dark theme text hover */
+html.dark .text-hover-glow:hover {
+  animation: textHoverGlowDark 1.5s ease-in-out infinite;
+  transform: scale(1.05);
+}
+
+/* Link Hover Effects - Black/White Theme */
+.link-hover-enhanced {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* Light theme link underline */
+html:not(.dark) .link-hover-enhanced::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 50%;
+  background: linear-gradient(90deg, #000000, #333333, #000000);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+/* Dark theme link underline */
+html.dark .link-hover-enhanced::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 50%;
+  background: linear-gradient(90deg, #ffffff, #cccccc, #ffffff);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.link-hover-enhanced:hover::after {
+  width: 100%;
+}
+
+/* Light theme link hover */
+html:not(.dark) .link-hover-enhanced:hover {
+  color: #000000;
+  transform: translateY(-1px);
+}
+
+/* Dark theme link hover */
+html.dark .link-hover-enhanced:hover {
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Card Hover Effects - Black/White Theme */
+.card-hover-enhanced {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Card hover effects without transparency */
+
+/* Light theme card hover */
+html:not(.dark) .card-hover-enhanced:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark theme card hover */
+html.dark .card-hover-enhanced:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(255, 255, 255, 0.1);
+}
+
+/* Card content positioning */
+
+/* Icon Hover Effects - Black/White Theme */
+.icon-hover-enhanced {
+  transition: all 0.3s ease;
+}
+
+/* Light theme icon hover */
+html:not(.dark) .icon-hover-enhanced:hover {
+  transform: scale(1.2) rotate(5deg);
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.6));
+}
+
+/* Dark theme icon hover */
+html.dark .icon-hover-enhanced:hover {
+  transform: scale(1.2) rotate(5deg);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.6));
+}
+
+/* Special hover effects for different button variants - Black/White Theme */
+.btn-primary-hover {
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+/* Light theme primary button */
+html:not(.dark) .btn-primary-hover {
+  background: linear-gradient(135deg, #000000, #333333);
+  color: white;
+}
+
+html:not(.dark) .btn-primary-hover:hover {
+  background-position: 100% 100%;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+/* Dark theme primary button */
+html.dark .btn-primary-hover {
+  background: linear-gradient(135deg, #ffffff, #cccccc);
+  color: black;
+}
+
+html.dark .btn-primary-hover:hover {
+  background-position: 100% 100%;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3);
+  color: black;
+}
+
+.btn-secondary-hover {
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+/* Light theme secondary button */
+html:not(.dark) .btn-secondary-hover {
+  background: linear-gradient(135deg, #666666, #999999);
+  color: white;
+}
+
+html:not(.dark) .btn-secondary-hover:hover {
+  background-position: 100% 100%;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+/* Dark theme secondary button */
+html.dark .btn-secondary-hover {
+  background: linear-gradient(135deg, #999999, #cccccc);
+  color: black;
+}
+
+html.dark .btn-secondary-hover:hover {
+  background-position: 100% 100%;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3);
+  color: black;
+}
+
+.btn-outline-hover {
+  border: 2px solid hsl(var(--border));
+  transition: all 0.3s ease;
+}
+
+/* Light theme outline button */
+html:not(.dark) .btn-outline-hover {
+  background: hsl(var(--background));
+  border: 2px solid #000000;
+}
+
+html:not(.dark) .btn-outline-hover:hover {
+  background: linear-gradient(135deg, #000000, #333333);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark theme outline button */
+html.dark .btn-outline-hover {
+  background: hsl(var(--background));
+  border: 2px solid #ffffff;
+}
+
+html.dark .btn-outline-hover:hover {
+  background: linear-gradient(135deg, #ffffff, #cccccc);
+  color: black;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3);
+}
+
+/* Ensure white text on dark buttons */
+.btn-primary-hover,
+.btn-secondary-hover {
+  color: white !important;
+}
+
+/* Dark theme adjustments for button text */
+html.dark .btn-primary-hover,
+html.dark .btn-secondary-hover {
+  color: black !important;
+}
+
+/* Light theme - ensure white text on dark backgrounds */
+html:not(.dark) .btn-primary-hover,
+html:not(.dark) .btn-secondary-hover {
+  color: white !important;
+}
+
 /* Rotating color ring animation for badge */
 
 

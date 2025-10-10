@@ -131,7 +131,7 @@ export function MapsIntegrationSummary({
         </div>
 
         {/* Integration Details */}
-        <div className="bg-muted/50 p-4 rounded-lg">
+        <div className="bg-muted p-4 rounded-lg">
           <h4 className="font-medium mb-3 flex items-center gap-2">
             <Info className="w-4 h-4" />
             How Google Maps Integration Works

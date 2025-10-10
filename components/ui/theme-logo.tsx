@@ -26,7 +26,7 @@ export function ThemeLogo() {
     <img
       src={isDark ? "/logoDark.png" : "/logowhite.png"}
       alt="Happy Journey Logo"
-      className="w-full h-60 opacity-100 transition-opacity duration-300"
+      className="w-full h-full opacity-100 transition-opacity duration-300"
     />
   );
 }

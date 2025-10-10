@@ -109,7 +109,7 @@ export function TripMap({ destinations, title = "Trip Route", className = "" }: 
 
         {/* Route Information */}
         {validDestinations.length > 1 && (
-          <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+          <div className="mt-4 p-3 bg-muted rounded-lg">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin className="w-4 h-4" />
               <span>

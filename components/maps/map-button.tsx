@@ -63,7 +63,7 @@ export function MapButton({
       variant={variant}
       size={size}
       onClick={handleClick}
-      className={`transition-all duration-200 hover:scale-105 ${className}`}
+      className={`transition-all duration-200 hover:scale-105 btn-hover-enhanced ${className}`}
       title={`Open ${title} in Google Maps`}
     >
       {showIcon && getIcon()}
@@ -97,7 +97,7 @@ export function MapLink({ url, children, className = "" }: MapLinkProps) {
     <a
       href={url}
       onClick={handleClick}
-      className={`inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors cursor-pointer ${className}`}
+      className={`inline-flex items-center gap-1 text-foreground hover:text-foreground/80 transition-colors cursor-pointer link-hover-enhanced ${className}`}
       target="_blank"
       rel="noopener noreferrer"
       title="Open in Google Maps"

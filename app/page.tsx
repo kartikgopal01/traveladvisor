@@ -477,7 +477,7 @@ export default function Home() {
                   Plan your next{" "}
                   <FlipWords
                     words={["Adventure", "Journey", "Experience", "Memory"]}
-                    className="dynamic-color-text"
+                    className="dynamic-color-text text-hover-glow"
                   />{" "}
                   with
                   <span className="text-foreground block">AI Superpowers</span>
@@ -487,12 +487,12 @@ export default function Home() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
                   <SignInButton mode="modal">
-                    <Button size="lg" className="flex items-center group bg-foreground text-background hover:bg-foreground/90 border-foreground w-full sm:w-auto">
+                    <Button size="lg" className="flex items-center group bg-foreground text-background hover:bg-foreground/90 border-foreground w-full sm:w-auto btn-hover-enhanced">
                       Get Started Free
                       <RiArrowRightLine className="h-4 w-4 ml-1" />
                     </Button>
                   </SignInButton>
-                  <Button variant="outline" size="lg" asChild className="border-foreground text-foreground hover:bg-foreground hover:text-background w-full sm:w-auto">
+                  <Button variant="outline" size="lg" asChild className="border-foreground text-foreground hover:bg-foreground hover:text-background w-full sm:w-auto btn-hover-enhanced">
                     <Link href="#features">Learn More</Link>
                   </Button>
                 </div>
@@ -522,7 +522,7 @@ export default function Home() {
                 onChange={(e) => setCustomCity(e.target.value)}
                 className="w-full sm:w-56"
               />
-              <Button size="sm" variant="outline" onClick={() => fetchPlacesByCity(customCity)} className="w-full sm:w-auto">Show places</Button>
+              <Button size="sm" variant="outline" onClick={() => fetchPlacesByCity(customCity)} className="w-full sm:w-auto btn-hover-enhanced">Show places</Button>
             </div>
 
               {localPlaces.length > 0 && (
@@ -619,7 +619,7 @@ export default function Home() {
                         {localPlaces.map((p, idx) => (
                           <Card 
                             key={idx} 
-                            className="flex-shrink-0 w-48 sm:w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                            className="flex-shrink-0 w-48 sm:w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group card-hover-enhanced"
                             onClick={(e) => {
                               // Only open maps if not dragging
                               if (!e.defaultPrevented && p.mapsUrl) {
@@ -712,7 +712,7 @@ export default function Home() {
           {/* Features Section */}
           <section
             id="features"
-            className="py-20 bg-muted/30 min-h-screen flex items-center justify-center w-full"
+            className="py-20 bg-muted min-h-screen flex items-center justify-center w-full"
           >
             <div className="container px-4 sm:px-6 lg:px-8">
               <div className="text-center mb-16">
@@ -1057,11 +1057,11 @@ export default function Home() {
 
           <Tabs defaultValue="plan" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="plan" className="flex items-center gap-2">
+            <TabsTrigger value="plan" className="flex items-center gap-2 bg-purple-100 text-purple-700 data-[state=active]:bg-purple-700 data-[state=active]:text-white hover:bg-purple-200 rounded-full">
               <MapPin className="w-4 h-4" />
               Plan by Places
             </TabsTrigger>
-            <TabsTrigger value="suggest" className="flex items-center gap-2">
+            <TabsTrigger value="suggest" className="flex items-center gap-2 bg-purple-100 text-purple-700 data-[state=active]:bg-purple-700 data-[state=active]:text-white hover:bg-purple-200 rounded-full">
               <IndianRupee className="w-4 h-4" />
               Suggest by Budget
             </TabsTrigger>

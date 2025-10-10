@@ -43,12 +43,11 @@ export function MapPreview({
         <div className="relative">
           {/* Map Preview Area */}
           <div
-            className="bg-muted/30 flex items-center justify-center border-b"
-            style={{
-              width: isFullscreen ? '100%' : width,
-              height: isFullscreen ? '100%' : height,
-              minHeight: isFullscreen ? '400px' : height,
-            }}
+            className={`bg-muted flex items-center justify-center border-b ${
+              isFullscreen 
+                ? 'w-full h-full min-h-[400px]' 
+                : `w-[${width}px] h-[${height}px]`
+            }`}
           >
             {/* Placeholder for static map - replace with actual static map when API key is available */}
             <div className="flex flex-col items-center justify-center text-center p-6 space-y-4">

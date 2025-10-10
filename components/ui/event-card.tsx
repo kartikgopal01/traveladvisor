@@ -53,7 +53,7 @@ export function EventCard({ event }: EventCardProps) {
   const capacityFull = event.maxCapacity && event.currentCapacity && event.currentCapacity >= event.maxCapacity;
 
   return (
-    <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow duration-200">
+    <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow duration-200 card-hover-enhanced">
       {event.imageUrl && (
         <div className="h-48 relative overflow-hidden">
           <img 

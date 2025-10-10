@@ -178,7 +178,7 @@ export default function AdminHotelsPage() {
               <Input value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} />
             </div>
           </div>
-          <Button onClick={addHotel} className="w-full">Add Hotel</Button>
+          <Button onClick={addHotel} className="w-full btn-hover-enhanced">Add Hotel</Button>
         </CardContent>
       </Card>
 

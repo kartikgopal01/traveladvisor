@@ -411,11 +411,11 @@ export default function AdminEventsPage() {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button onClick={editingEvent ? updateEvent : addEvent} className="flex-1">
+            <Button onClick={editingEvent ? updateEvent : addEvent} className="flex-1 btn-hover-enhanced">
               {editingEvent ? "Update Event" : "Add Event"}
             </Button>
             {editingEvent && (
-              <Button variant="outline" onClick={cancelEdit}>
+              <Button variant="outline" onClick={cancelEdit} className="btn-hover-enhanced">
                 Cancel
               </Button>
             )}
@@ -436,7 +436,11 @@ export default function AdminEventsPage() {
             {events.map((event: any) => (
               <Card key={event.id} className="overflow-hidden">
                 {event.imageUrl && (
-                  <div className="h-48 bg-cover bg-center" style={{ backgroundImage: `url(${event.imageUrl})` }} />
+                  <img 
+                    src={event.imageUrl} 
+                    alt={event.title}
+                    className="h-48 w-full object-cover"
+                  />
                 )}
                 <CardContent className="pt-4">
                   <div className="space-y-2">

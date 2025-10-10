@@ -193,93 +193,12 @@ export function ScrollableHeader() {
       <div className={`w-full px-4 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between ${
         theme === 'dark' ? 'glass-header-content-dark-medium' : 'glass-header-content-medium'
       }`}>
-        <div className="flex items-center gap-4">
-          <a href="/" className="flex items-center mr-4 sm:ml-6" title="Happy Journey - Go to Home">
-            <div className="transform scale-20 sm:scale-25">
+        <div className="flex items-center overflow-hidden">
+          <a href="/" className="flex items-center justify-center h-full w-full sm:h-16 sm:w-full ml-4 sm:ml-25 overflow-hidden" title="Happy Journey - Go to Home">
+            <div className="h-full w-full sm:h-full sm:w-full flex items-center justify-center">
               <ThemeLogo />
             </div>
           </a>
-          
-          {/* Breadcrumbs */}
-          <div className="hidden sm:flex items-center space-x-1 min-w-0">
-            {breadcrumbs.map((breadcrumb, index) => (
-            <div key={breadcrumb.path} className="flex items-center min-w-0">
-              <RiArrowRightSLine className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
-              {index === breadcrumbs.length - 1 ? (
-                <span className="font-medium text-foreground flex items-center gap-1 sm:gap-2 group min-w-0">
-                  {breadcrumb.icon && (
-                    <breadcrumb.icon className="h-4 w-4 inline flex-shrink-0" />
-                  )}
-                  {breadcrumb.editable && breadcrumb.isDocument && isEditing ? (
-                    <div className="flex items-center gap-1 min-w-0">
-                      <Input
-                        value={editTitle}
-                        onChange={(e) => setEditTitle(e.target.value)}
-                        className="h-6 text-sm w-32 sm:w-48"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleSaveTitle();
-                          } else if (e.key === "Escape") {
-                            handleCancelEdit();
-                          }
-                        }}
-                        autoFocus
-                      />
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={handleSaveTitle}
-                        disabled={isUpdating}
-                        className="h-6 w-6 p-0 flex-shrink-0"
-                        title="Save changes"
-                      >
-                        {isUpdating ? (
-                          <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
-                        ) : (
-                          <RiCheckLine className="h-3 w-3" />
-                        )}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={handleCancelEdit}
-                        disabled={isUpdating}
-                        className="h-6 w-6 p-0 flex-shrink-0"
-                        title="Cancel editing"
-                      >
-                        <RiCloseLine className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 min-w-0">
-                      <span className="truncate">{breadcrumb.label}</span>
-                      {breadcrumb.editable && breadcrumb.isDocument && canEdit && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={handleEditClick}
-                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                          title="Edit document title"
-                        >
-                          <RiEditLine className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </span>
-              ) : (
-                <Button variant="ghost" size="sm" asChild className="min-w-0">
-                  <Link href={breadcrumb.path}>
-                    {breadcrumb.icon && (
-                      <breadcrumb.icon className="h-4 w-4 mr-1 flex-shrink-0" />
-                    )}
-                    <span className="truncate">{breadcrumb.label}</span>
-                  </Link>
-                </Button>
-              )}
-            </div>
-            ))}
-          </div>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
@@ -302,16 +221,16 @@ export function ScrollableHeader() {
           )}
 
           {/* Auth buttons */}
-          <Button variant="ghost" size="sm" asChild className="border border-border">
+          <Button variant="ghost" size="sm" asChild className="border border-border icon-hover-enhanced">
             <Link href="/">
-              <RiHomeLine className="h-4 w-4" />
+              <RiHomeLine className="h-5 w-5" />
             </Link>
           </Button>
           
           {/* Trips Button - After Home */}
-          <Button variant="ghost" size="sm" asChild className="border border-border">
+          <Button variant="ghost" size="sm" asChild className="border border-border icon-hover-enhanced">
             <Link href="/trips">
-              <RiRoadMapLine className="h-4 w-4" />
+              <RiRoadMapLine className="h-5 w-5" />
             </Link>
           </Button>
           
@@ -320,13 +239,13 @@ export function ScrollableHeader() {
           <SignedOut>
             <div className="flex items-center gap-1 sm:gap-2">
               <SignInButton mode="modal">
-                <button className="px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors">
+                <button className="px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors btn-hover-enhanced">
                   <span className="hidden sm:inline">Sign In</span>
                   <span className="sm:hidden">Sign In</span>
                 </button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <button className="px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-background bg-foreground border border-foreground rounded-md hover:bg-foreground/90 transition-colors">
+                <button className="px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-background bg-foreground border border-foreground rounded-md hover:bg-foreground/90 transition-colors btn-hover-enhanced">
                   <span className="hidden sm:inline">Sign Up</span>
                   <span className="sm:hidden">Sign Up</span>
                 </button>
@@ -343,7 +262,7 @@ export function ScrollableHeader() {
             size="sm"
             onClick={() => request()}
             disabled={geoStatus === "prompt"}
-            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm icon-hover-enhanced"
             title={geoStatus === "prompt" ? "Detecting location..." : "Refresh location"}
           >
             {geoStatus === "prompt" ? (

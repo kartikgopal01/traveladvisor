@@ -167,7 +167,7 @@ export function DirectionsPanel({
         </div>
 
         {/* Travel Tips */}
-        <div className="bg-muted/50 p-4 rounded-lg">
+        <div className="bg-muted p-4 rounded-lg">
           <div className="flex items-start gap-3">
             <Clock className="w-5 h-5 text-blue-600 mt-0.5" />
             <div>
