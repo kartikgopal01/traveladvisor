@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebaseAdmin";
 
+interface EventData {
+  id: string;
+  eventDate: string;
+  isActive?: boolean;
+  createdAt?: number;
+  category?: string;
+  city?: string;
+  [key: string]: any;
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const city = searchParams.get("city");
@@ -15,7 +25,7 @@ export async function GET(request: Request) {
   if (recent) {
     // Get all events and sort by creation date client-side to avoid index issues
     const snap = await query.limit(100).get(); // Get more events to sort from
-    let events = snap.docs.map((d) => {
+    let events: EventData[] = snap.docs.map((d) => {
       const data = d.data();
       return {
         id: d.id,
@@ -40,7 +50,7 @@ export async function GET(request: Request) {
   
   // For regular (upcoming) events, also use client-side filtering to avoid index issues
   const snap = await query.limit(100).get(); // Get more events to filter from
-  let events = snap.docs.map((d) => {
+  let events: EventData[] = snap.docs.map((d) => {
     const data = d.data();
     return {
       id: d.id,

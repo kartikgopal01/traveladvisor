@@ -8,13 +8,14 @@ function ensureAdmin(userId?: string | null) {
   return !!userId && (ADMIN_IDS.length === 0 || ADMIN_IDS.includes(userId));
 }
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth();
   if (!ensureAdmin(userId)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   
+  const { id } = await params;
   const body = await request.json();
   const db = getAdminDb();
-  const docRef = db.collection("events").doc(params.id);
+  const docRef = db.collection("events").doc(id);
   
   // Update only the fields provided
   const updateData: any = { updatedAt: Date.now() };
@@ -44,11 +45,12 @@ export async function PATCH(request: Request, { params }: { params: { id: string
   return NextResponse.json({ success: true });
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth();
   if (!ensureAdmin(userId)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   
+  const { id } = await params;
   const db = getAdminDb();
-  await db.collection("events").doc(params.id).delete();
+  await db.collection("events").doc(id).delete();
   return NextResponse.json({ success: true });
 }
