@@ -7,6 +7,11 @@ import {
   RiEditLine,
   RiCheckLine,
   RiCloseLine,
+  RiSearchLine,
+  RiMapPinLine,
+  RiMoneyDollarCircleLine,
+  RiHotelLine,
+  RiMap2Line,
 } from "@remixicon/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -15,8 +20,10 @@ import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { RiMapPinFill } from "@remixicon/react";
 import { useGeolocation } from "@/components/maps/use-geolocation";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { RiSettingsLine, RiCalendarLine } from "@remixicon/react";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeLogo } from "@/components/ui/theme-logo";
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -155,6 +162,20 @@ export default function Navigation() {
         continue;
       } else if (segment === "new") {
         breadcrumbs.push({ label: "New Document", path, icon: null, editable: false });
+      } else if (segment === "events") {
+        breadcrumbs.push({ label: "Events", path, icon: RiCalendarLine, editable: false });
+      } else if (segment === "trips") {
+        breadcrumbs.push({ label: "Trips", path, icon: RiMap2Line, editable: false });
+      } else if (segment === "admin") {
+        breadcrumbs.push({ label: "Admin", path, icon: RiSettingsLine, editable: false });
+      } else if (segment === "hotels") {
+        breadcrumbs.push({ label: "Hotels", path, icon: RiHotelLine, editable: false });
+      } else if (segment === "search") {
+        breadcrumbs.push({ label: "Search", path, icon: RiSearchLine, editable: false });
+      } else if (segment === "location") {
+        breadcrumbs.push({ label: "Location Search", path, icon: RiMapPinLine, editable: false });
+      } else if (segment === "price") {
+        breadcrumbs.push({ label: "Price Search", path, icon: RiMoneyDollarCircleLine, editable: false });
       } else if (segment !== "[id]" && segment.length > 0) {
         // This is likely a document ID - use the fetched title or fallback
         const title = documentTitle || "Document";
@@ -174,118 +195,164 @@ export default function Navigation() {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <nav className="flex items-center justify-between text-sm text-muted-foreground px-4 py-2 border-b bg-muted/30">
-      <div className="flex items-center space-x-1">
-        <Button variant="ghost" size="sm" asChild>
-          <Link href="/">
-            <RiHomeLine className="h-4 w-4" />
-          </Link>
-        </Button>
+    <header className="border-b bg-background">
+      <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between">
+        {/* Left side - Logo and Breadcrumbs */}
+        <div className="flex items-center gap-4">
+          <a href="/" className="flex items-center" title="Happy Journey - Go to Home">
+            <div className="transform scale-25">
+              <ThemeLogo />
+            </div>
+          </a>
+          
+          {/* Breadcrumbs */}
+          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/">
+                <RiHomeLine className="h-4 w-4" />
+              </Link>
+            </Button>
 
-        {breadcrumbs.map((breadcrumb, index) => (
-        <div key={breadcrumb.path} className="flex items-center">
-          <RiArrowRightSLine className="h-4 w-4 mr-2" />
-          {index === breadcrumbs.length - 1 ? (
-            <span className="font-medium text-foreground flex items-center gap-2 group">
-              {breadcrumb.icon && (
-                <breadcrumb.icon className="h-4 w-4 inline" />
-              )}
-              {breadcrumb.editable && breadcrumb.isDocument && isEditing ? (
-                <div className="flex items-center gap-1">
-                  <Input
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    className="h-6 text-sm w-48"
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleSaveTitle();
-                      } else if (e.key === "Escape") {
-                        handleCancelEdit();
-                      }
-                    }}
-                    autoFocus
-                  />
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleSaveTitle}
-                    disabled={isUpdating}
-                    className="h-6 w-6 p-0"
-                    title="Save changes"
-                  >
-                    {isUpdating ? (
-                      <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
-                    ) : (
-                      <RiCheckLine className="h-3 w-3" />
-                    )}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleCancelEdit}
-                    disabled={isUpdating}
-                    className="h-6 w-6 p-0"
-                    title="Cancel editing"
-                  >
-                    <RiCloseLine className="h-3 w-3" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1">
-                  <span>{breadcrumb.label}</span>
-                  {breadcrumb.editable && breadcrumb.isDocument && canEdit && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleEditClick}
-                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Edit document title"
-                    >
-                      <RiEditLine className="h-3 w-3" />
-                    </Button>
+            {breadcrumbs.map((breadcrumb, index) => (
+            <div key={breadcrumb.path} className="flex items-center">
+              <RiArrowRightSLine className="h-4 w-4 mr-2" />
+              {index === breadcrumbs.length - 1 ? (
+                <span className="font-medium text-foreground flex items-center gap-2 group">
+                  {breadcrumb.icon && (
+                    <breadcrumb.icon className="h-4 w-4 inline" />
                   )}
-                </div>
+                  {breadcrumb.editable && breadcrumb.isDocument && isEditing ? (
+                    <div className="flex items-center gap-1">
+                      <Input
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="h-6 text-sm w-48"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleSaveTitle();
+                          } else if (e.key === "Escape") {
+                            handleCancelEdit();
+                          }
+                        }}
+                        autoFocus
+                      />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleSaveTitle}
+                        disabled={isUpdating}
+                        className="h-6 w-6 p-0"
+                        title="Save changes"
+                      >
+                        {isUpdating ? (
+                          <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
+                        ) : (
+                          <RiCheckLine className="h-3 w-3" />
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleCancelEdit}
+                        disabled={isUpdating}
+                        className="h-6 w-6 p-0"
+                        title="Cancel editing"
+                      >
+                        <RiCloseLine className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <span>{breadcrumb.label}</span>
+                      {breadcrumb.editable && breadcrumb.isDocument && canEdit && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={handleEditClick}
+                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Edit document title"
+                        >
+                          <RiEditLine className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </span>
+              ) : (
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href={breadcrumb.path}>
+                    {breadcrumb.icon && (
+                      <breadcrumb.icon className="h-4 w-4 mr-1" />
+                    )}
+                    {breadcrumb.label}
+                  </Link>
+                </Button>
               )}
-            </span>
-          ) : (
-            <Button variant="ghost" size="sm" asChild>
-              <Link href={breadcrumb.path}>
-                {breadcrumb.icon && (
-                  <breadcrumb.icon className="h-4 w-4 mr-1" />
-                )}
-                {breadcrumb.label}
-              </Link>
-            </Button>
-          )}
-        </div>
-        ))}
-      </div>
-
-      <div className="flex items-center gap-4">
-        {userId && isAdmin && (
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/admin/events">
-                <RiCalendarLine className="h-4 w-4" />
-                Admin Events
-              </Link>
-            </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/admin/hotels">
-                <RiSettingsLine className="h-4 w-4" />
-                Admin Hotels
-              </Link>
-            </Button>
+            </div>
+            ))}
           </div>
-        )}
-        
-        <div className="flex items-center gap-2">
-          <RiMapPinFill className="h-4 w-4 text-foreground" />
-          <span className="text-foreground">
-            {navCity || (geoStatus === "granted" ? "Locating..." : "Detecting location...")}
-          </span>
+        </div>
+
+        {/* Right side - Navigation, Admin, Location, Auth */}
+        <div className="flex items-center gap-4">
+          {/* Main Navigation */}
+          <nav className="flex items-center gap-4">
+            <SignedIn>
+              <a href="/trips" className="text-sm text-foreground hover:text-primary transition-colors">
+                Trips
+              </a>
+            </SignedIn>
+          </nav>
+
+          {/* Admin Controls */}
+          {userId && isAdmin && (
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/admin/events">
+                  <RiCalendarLine className="h-4 w-4" />
+                  Admin Events
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/admin/hotels">
+                  <RiSettingsLine className="h-4 w-4" />
+                  Admin Hotels
+                </Link>
+              </Button>
+            </div>
+          )}
+          
+          {/* Location Display */}
+          <div className="flex items-center gap-2">
+            <RiMapPinFill className="h-4 w-4 text-foreground" />
+            <span className="text-sm text-foreground">
+              {navCity || (geoStatus === "granted" ? "Locating..." : "Detecting location...")}
+            </span>
+          </div>
+
+          {/* Theme Toggle and Auth */}
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            <SignedOut>
+              <div className="flex items-center gap-2">
+                <SignInButton mode="modal">
+                  <button className="px-4 py-2 text-sm font-medium text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="px-4 py-2 text-sm font-medium text-background bg-foreground border border-foreground rounded-md hover:bg-foreground/90 transition-colors">
+                    Sign Up
+                  </button>
+                </SignUpButton>
+              </div>
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+          </div>
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
