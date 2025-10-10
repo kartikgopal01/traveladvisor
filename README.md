@@ -50,5 +50,5 @@ npm run dev
 
 - Plan trips by place: `/api/ai/plan`
 - Suggest trips by budget: `/api/ai/suggest`
-- History stored in Firestore, accessible at `/trips`
+- History stored in Firestore, accessible at `/trips`.
 - Google Maps links included in itineraries
