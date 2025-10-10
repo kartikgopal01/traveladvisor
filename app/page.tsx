@@ -96,6 +96,32 @@ export default function Home() {
     return colors[colorIndex];
   }
 
+  // Helper function to extract location name from various formats
+  function getLocationName(day: any): string {
+    // Try different possible field names
+    if (day.locationName) return day.locationName;
+    if (day.destination) return day.destination;
+    if (day.city) return day.city;
+    if (day.place) return day.place;
+    
+    // If location is a URL, try to extract the query parameter
+    if (day.location && day.location.includes('google.com/maps')) {
+      try {
+        const url = new URL(day.location);
+        const query = url.searchParams.get('query');
+        if (query) {
+          // Remove "India" suffix and decode
+          return decodeURIComponent(query).replace(/,?\s*India\s*$/, '').trim();
+        }
+      } catch (e) {
+        // If URL parsing fails, fall back to original
+      }
+    }
+    
+    // Fall back to original location or default
+    return day.location || 'Location';
+  }
+
   async function fetchPlacesByCity(cityName: string) {
     if (!cityName.trim()) return;
     setLocalLoading(true);
@@ -1602,7 +1628,7 @@ export default function Home() {
                       {planResult.roadmap.map((day: any) => (
                         <Card key={day.day}>
                           <CardHeader>
-                            <CardTitle className="text-lg">Day {day.day}: {day.location}</CardTitle>
+                            <CardTitle className="text-lg">Day {day.day}: {getLocationName(day)}</CardTitle>
                             <CardDescription>{day.date && new Date(day.date).toLocaleDateString()}</CardDescription>
                             <p className="text-sm">{day.summary}</p>
                           </CardHeader>
@@ -1689,12 +1715,15 @@ export default function Home() {
                 {planResult.roadmap && planResult.roadmap.length > 0 && (
                   <div className="space-y-4">
                     <TripMap
-                      destinations={planResult.roadmap.map((day: any) => ({
-                        name: day.location,
-                        location: day.location,
-                        mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(day.location)}, India`,
-                        day: day.day,
-                      }))}
+                      destinations={planResult.roadmap.map((day: any) => {
+                        const locationName = getLocationName(day);
+                        return {
+                          name: locationName,
+                          location: locationName,
+                          mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}, India`,
+                          day: day.day,
+                        };
+                      })}
                       title="Your Trip Route"
                     />
                   </div>
@@ -1704,12 +1733,15 @@ export default function Home() {
                 {planResult.roadmap && planResult.roadmap.length > 1 && (
                   <div className="space-y-4">
                     <DirectionsPanel
-                      destinations={planResult.roadmap.map((day: any) => ({
-                        name: day.location,
-                        location: day.location,
-                        mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(day.location)}, India`,
-                        day: day.day,
-                      }))}
+                      destinations={planResult.roadmap.map((day: any) => {
+                        const locationName = getLocationName(day);
+                        return {
+                          name: locationName,
+                          location: locationName,
+                          mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}, India`,
+                          day: day.day,
+                        };
+                      })}
                       title="Navigation & Directions"
                     />
                   </div>
