@@ -35,7 +35,7 @@ import { FlipWords } from "@/components/ui/flip-words";
 import { useGeolocation } from "@/components/maps/use-geolocation";
 import { ChatPlaces, EventsSection } from "@/components/ui";
 
-// Theme-aware logo component
+// Theme-aware logo component for hero section with dynamic colors
 function ThemeLogo() {
   const [isDark, setIsDark] = useState(false);
 
@@ -60,7 +60,9 @@ function ThemeLogo() {
     <img
       src={isDark ? "/logoDark.png" : "/logowhite.png"}
       alt="Happy Journey Logo"
-      className="w-full h-60 opacity-100 transition-opacity duration-300"
+      className={`w-full h-60 opacity-100 transition-opacity duration-300 ${
+        isDark ? 'dynamic-logo-dark' : 'dynamic-logo-light'
+      }`}
     />
   );
 }
@@ -449,7 +451,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-black/0"></div>
             
             {/* Hero Icons */}
-            <div className="mt-12 flex gap-8 justify-center relative z-10">
+            <div className="mt-8 sm:mt-12 flex gap-4 sm:gap-8 justify-center relative z-10">
               <motion.div
                 initial={{ opacity: 0, y: 150 }}
                 animate={{ opacity: 1, y: 50 }}
@@ -464,14 +466,14 @@ export default function Home() {
               </motion.div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16 relative z-10">
+            <div className="container-responsive pt-12 sm:pt-20 pb-12 sm:pb-16 relative z-10">
               <div className="text-center">
-                <Badge variant="secondary" className="mb-4">
+                <Badge variant="secondary" className="mb-3 sm:mb-4 text-xs sm:text-sm">
                   <RiFlashlightLine className="w-3 h-3 mr-1" />
                   AI trip planning
                 </Badge>
 
-                <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6 text-foreground">
+                <h1 className="text-responsive-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 sm:mb-6 text-foreground">
                   Plan your next{" "}
                   <FlipWords
                     words={["Adventure", "Journey", "Experience", "Memory"]}
@@ -480,17 +482,17 @@ export default function Home() {
                   with
                   <span className="text-foreground block">AI Superpowers</span>
                 </h1>
-                <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+                <p className="text-responsive-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
                   Create detailed itineraries with AI, compare destinations by budget, and visualize routes on interactive maps. All in one fast, modern app.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
                   <SignInButton mode="modal">
-                    <Button size="lg" className="flex items-center group bg-foreground text-background hover:bg-foreground/90 border-foreground">
+                    <Button size="lg" className="flex items-center group bg-foreground text-background hover:bg-foreground/90 border-foreground w-full sm:w-auto">
                       Get Started Free
-                      <RiArrowRightLine className="h-4 w-4" />
+                      <RiArrowRightLine className="h-4 w-4 ml-1" />
                     </Button>
                   </SignInButton>
-                  <Button variant="outline" size="lg" asChild className="border-foreground text-foreground hover:bg-foreground hover:text-background">
+                  <Button variant="outline" size="lg" asChild className="border-foreground text-foreground hover:bg-foreground hover:text-background w-full sm:w-auto">
                     <Link href="#features">Learn More</Link>
                   </Button>
                 </div>
@@ -499,10 +501,10 @@ export default function Home() {
           </section>
 
           {/* Local Discover Section */}
-          <section className="py-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <section className="section-padding">
+            <div className="container-responsive">
               <div className="flex flex-col items-center gap-2 text-center">
-                <div className="text-sm text-muted-foreground">
+                <div className="text-responsive-sm text-muted-foreground">
                   {localCity ? (
                     <>You are near <span className="font-medium text-foreground">{localCity}</span></>
                   ) : (
@@ -513,14 +515,14 @@ export default function Home() {
               </div>
 
             {/* Change location */}
-            <div className="mt-3 flex items-center justify-center gap-2">
+            <div className="mt-3 flex flex-col sm:flex-row items-center justify-center gap-2">
               <Input
                 placeholder="Change city (e.g., Jaipur)"
                 value={customCity}
                 onChange={(e) => setCustomCity(e.target.value)}
-                className="w-56"
+                className="w-full sm:w-56"
               />
-              <Button size="sm" variant="outline" onClick={() => fetchPlacesByCity(customCity)}>Show places</Button>
+              <Button size="sm" variant="outline" onClick={() => fetchPlacesByCity(customCity)} className="w-full sm:w-auto">Show places</Button>
             </div>
 
               {localPlaces.length > 0 && (
@@ -617,7 +619,7 @@ export default function Home() {
                         {localPlaces.map((p, idx) => (
                           <Card 
                             key={idx} 
-                            className="flex-shrink-0 w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                            className="flex-shrink-0 w-48 sm:w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
                             onClick={(e) => {
                               // Only open maps if not dragging
                               if (!e.defaultPrevented && p.mapsUrl) {
@@ -626,20 +628,20 @@ export default function Home() {
                             }}
                           >
                             {p.imageUrl ? (
-                              <img src={p.imageUrl} alt={p.title} className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300" />
+                              <img src={p.imageUrl} alt={p.title} className="w-full h-32 sm:h-40 object-cover group-hover:scale-110 transition-transform duration-300" />
                             ) : (
-                              <div className={`w-full h-40 bg-gradient-to-br ${getPlaceCardColor(p.title)} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                                <div className="text-white text-center px-4">
-                                  <div className="text-lg font-bold">{p.title}</div>
+                              <div className={`w-full h-32 sm:h-40 bg-gradient-to-br ${getPlaceCardColor(p.title)} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                                <div className="text-white text-center px-3 sm:px-4">
+                                  <div className="text-sm sm:text-lg font-bold">{p.title}</div>
                                 </div>
                               </div>
                             )}
-                            <CardContent className="pt-4">
-                              <div className="font-semibold group-hover:text-primary transition-colors duration-300">{p.title}</div>
+                            <CardContent className="pt-3 sm:pt-4">
+                              <div className="font-semibold text-sm sm:text-base group-hover:text-primary transition-colors duration-300">{p.title}</div>
                               {p.description && (
-                                <p className="text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
+                                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
                               )}
-                              <div className="mt-3">
+                              <div className="mt-2 sm:mt-3">
                                 <MapButton 
                                   url={p.mapsUrl || ''} 
                                   title="View on Maps" 
@@ -655,7 +657,7 @@ export default function Home() {
                         {localPlaces.map((p, idx) => (
                           <Card 
                             key={`duplicate-${idx}`} 
-                            className="flex-shrink-0 w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                            className="flex-shrink-0 w-48 sm:w-56 hover:scale-105 hover:shadow-lg transition-all duration-300 cursor-pointer group"
                             onClick={(e) => {
                               // Only open maps if not dragging
                               if (!e.defaultPrevented && p.mapsUrl) {
@@ -664,20 +666,20 @@ export default function Home() {
                             }}
                           >
                             {p.imageUrl ? (
-                              <img src={p.imageUrl} alt={p.title} className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-300" />
+                              <img src={p.imageUrl} alt={p.title} className="w-full h-32 sm:h-40 object-cover group-hover:scale-110 transition-transform duration-300" />
                             ) : (
-                              <div className={`w-full h-40 bg-gradient-to-br ${getPlaceCardColor(p.title)} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                                <div className="text-white text-center px-4">
-                                  <div className="text-lg font-bold">{p.title}</div>
+                              <div className={`w-full h-32 sm:h-40 bg-gradient-to-br ${getPlaceCardColor(p.title)} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                                <div className="text-white text-center px-3 sm:px-4">
+                                  <div className="text-sm sm:text-lg font-bold">{p.title}</div>
                                 </div>
                               </div>
                             )}
-                            <CardContent className="pt-4">
-                              <div className="font-semibold group-hover:text-primary transition-colors duration-300">{p.title}</div>
+                            <CardContent className="pt-3 sm:pt-4">
+                              <div className="font-semibold text-sm sm:text-base group-hover:text-primary transition-colors duration-300">{p.title}</div>
                               {p.description && (
-                                <p className="text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
+                                <p className="text-xs sm:text-sm text-muted-foreground line-clamp-3 mt-1">{p.description}</p>
                               )}
-                              <div className="mt-3">
+                              <div className="mt-2 sm:mt-3">
                                 <MapButton 
                                   url={p.mapsUrl || ''} 
                                   title="View on Maps" 
@@ -695,7 +697,7 @@ export default function Home() {
               )}
 
               {localLoading && (
-                <div className="mt-4 text-center text-sm text-muted-foreground">Loading places near you…</div>
+                <div className="mt-4 text-center text-responsive-sm text-muted-foreground">Loading places near you…</div>
               )}
             </div>
           </section>

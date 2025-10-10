@@ -47,38 +47,686 @@
   }
 }
 
-/* Map CSS variables to Tailwind tokens (Tailwind v4) */
-@theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --radius: var(--radius);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
 @layer base {
-  * { @apply border-border; }
+  * { 
+    border-color: hsl(var(--border)); 
+  }
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-family: Arial, Helvetica, sans-serif;
   }
+}
+
+/* Responsive utilities */
+@layer utilities {
+  /* Mobile-first responsive spacing */
+  .container-responsive {
+    width: 100%;
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .container-responsive {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .container-responsive {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  .section-padding {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+  
+  @media (min-width: 640px) {
+    .section-padding {
+      padding-top: 3rem;
+      padding-bottom: 3rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .section-padding {
+      padding-top: 4rem;
+      padding-bottom: 4rem;
+    }
+  }
+  
+  .card-grid-responsive {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .card-grid-responsive {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .card-grid-responsive {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .card-grid-responsive {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+  
+  .text-responsive-sm {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .text-responsive-sm {
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+  }
+  
+  .text-responsive-base {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  @media (min-width: 640px) {
+    .text-responsive-base {
+      font-size: 1rem;
+      line-height: 1.5rem;
+    }
+  }
+  
+  .text-responsive-lg {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+  
+  @media (min-width: 640px) {
+    .text-responsive-lg {
+      font-size: 1.125rem;
+      line-height: 1.75rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .text-responsive-lg {
+      font-size: 1.25rem;
+      line-height: 1.75rem;
+    }
+  }
+  
+  .text-responsive-xl {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+  
+  @media (min-width: 640px) {
+    .text-responsive-xl {
+      font-size: 1.25rem;
+      line-height: 1.75rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .text-responsive-xl {
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+  }
+  
+  .text-responsive-2xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  
+  @media (min-width: 640px) {
+    .text-responsive-2xl {
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .text-responsive-2xl {
+      font-size: 1.875rem;
+      line-height: 2.25rem;
+    }
+  }
+  
+  .text-responsive-3xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  
+  @media (min-width: 640px) {
+    .text-responsive-3xl {
+      font-size: 1.875rem;
+      line-height: 2.25rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .text-responsive-3xl {
+      font-size: 2.25rem;
+      line-height: 2.5rem;
+    }
+  }
+  
+  /* Responsive flex utilities */
+  .flex-responsive {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  @media (min-width: 640px) {
+    .flex-responsive {
+      flex-direction: row;
+    }
+  }
+  
+  .flex-responsive-reverse {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  
+  @media (min-width: 640px) {
+    .flex-responsive-reverse {
+      flex-direction: row;
+    }
+  }
+  
+  /* Responsive gap utilities */
+  .gap-responsive {
+    gap: 0.5rem;
+  }
+  
+  @media (min-width: 640px) {
+    .gap-responsive {
+      gap: 1rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .gap-responsive {
+      gap: 1.5rem;
+    }
+  }
+  
+  .gap-responsive-lg {
+    gap: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .gap-responsive-lg {
+      gap: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .gap-responsive-lg {
+      gap: 2rem;
+    }
+  }
+  
+  /* Responsive padding utilities */
+  .p-responsive {
+    padding: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .p-responsive {
+      padding: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .p-responsive {
+      padding: 2rem;
+    }
+  }
+  
+  .px-responsive {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .px-responsive {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .px-responsive {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
+  }
+  
+  .py-responsive {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .py-responsive {
+      padding-top: 1.5rem;
+      padding-bottom: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .py-responsive {
+      padding-top: 2rem;
+      padding-bottom: 2rem;
+    }
+  }
+  
+  /* Responsive margin utilities */
+  .m-responsive {
+    margin: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .m-responsive {
+      margin: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .m-responsive {
+      margin: 2rem;
+    }
+  }
+  
+  .mx-responsive {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .mx-responsive {
+      margin-left: 1.5rem;
+      margin-right: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .mx-responsive {
+      margin-left: 2rem;
+      margin-right: 2rem;
+    }
+  }
+  
+  .my-responsive {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .my-responsive {
+      margin-top: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .my-responsive {
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+    }
+  }
+  
+  /* Responsive width utilities */
+  .w-responsive-full {
+    width: 100%;
+  }
+  
+  @media (min-width: 640px) {
+    .w-responsive-full {
+      width: auto;
+    }
+  }
+  
+  .max-w-responsive {
+    max-width: 20rem; /* max-w-xs */
+  }
+  
+  @media (min-width: 640px) {
+    .max-w-responsive {
+      max-width: 24rem; /* max-w-sm */
+    }
+  }
+  
+  @media (min-width: 768px) {
+    .max-w-responsive {
+      max-width: 28rem; /* max-w-md */
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .max-w-responsive {
+      max-width: 32rem; /* max-w-lg */
+    }
+  }
+  
+  @media (min-width: 1280px) {
+    .max-w-responsive {
+      max-width: 36rem; /* max-w-xl */
+    }
+  }
+  
+  /* Responsive height utilities */
+  .h-responsive-screen {
+    height: 100vh;
+  }
+  
+  @media (min-width: 640px) {
+    .h-responsive-screen {
+      height: auto;
+    }
+  }
+  
+  /* Responsive visibility utilities */
+  .mobile-only {
+    display: block;
+  }
+  
+  @media (min-width: 640px) {
+    .mobile-only {
+      display: none;
+    }
+  }
+  
+  .desktop-only {
+    display: none;
+  }
+  
+  @media (min-width: 640px) {
+    .desktop-only {
+      display: block;
+    }
+  }
+  
+  .tablet-up {
+    display: none;
+  }
+  
+  @media (min-width: 768px) {
+    .tablet-up {
+      display: block;
+    }
+  }
+  
+  .mobile-tablet-only {
+    display: block;
+  }
+  
+  @media (min-width: 768px) {
+    .mobile-tablet-only {
+      display: none;
+    }
+  }
+  
+        /* Enhanced glass morphism effects */
+        .glass-header {
+          border-bottom: 1px solid hsl(var(--border) / 0.5);
+          box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+          position: relative;
+        }
+
+        .glass-header::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: -1;
+          pointer-events: none;
+          display: none;
+        }
+
+        .glass-header.dynamic-header-bg::before,
+        .glass-header.dynamic-header-bg-light::before,
+        .glass-header.dynamic-header-bg-medium::before,
+        .glass-header.dynamic-header-bg-strong::before,
+        .glass-header.dynamic-header-bg-intense::before {
+          display: block;
+        }
+
+        /* Explicitly hide dynamic colors for dark mode */
+        .glass-header.no-dynamic-colors::before {
+          display: none !important;
+          background: none !important;
+          animation: none !important;
+        }
+
+        /* Additional dark mode protection */
+        html.dark .glass-header::before {
+          display: none !important;
+          background: none !important;
+          animation: none !important;
+        }
+
+        /* Dynamic color background - applied to ::before pseudo-element */
+        .glass-header.dynamic-header-bg::before {
+          background: linear-gradient(
+            45deg,
+            #e0f2fe,
+            #f0f9ff,
+            #fef3c7,
+            #fef7cd,
+            #fce7f3,
+            #f3e8ff,
+            #e0e7ff,
+            #dbeafe,
+            #dcfce7,
+            #f0fdf4,
+            #fefce8,
+            #fff7ed
+          );
+          background-size: 600% 600%;
+          animation: gradientShift 35s ease-in-out infinite;
+          opacity: 0.4;
+        }
+
+        .glass-header.dynamic-header-bg-light::before {
+          background: linear-gradient(
+            45deg,
+            #e0f2fe,
+            #f0f9ff,
+            #fef3c7,
+            #fef7cd,
+            #fce7f3,
+            #f3e8ff,
+            #e0e7ff,
+            #dbeafe,
+            #dcfce7,
+            #f0fdf4,
+            #fefce8,
+            #fff7ed
+          );
+          background-size: 600% 600%;
+          animation: gradientShift 35s ease-in-out infinite;
+          opacity: 0.2;
+        }
+
+        .glass-header.dynamic-header-bg-medium::before {
+          background: linear-gradient(
+            45deg,
+            #e0f2fe,
+            #f0f9ff,
+            #fef3c7,
+            #fef7cd,
+            #fce7f3,
+            #f3e8ff,
+            #e0e7ff,
+            #dbeafe,
+            #dcfce7,
+            #f0fdf4,
+            #fefce8,
+            #fff7ed
+          );
+          background-size: 600% 600%;
+          animation: gradientShift 25s ease-in-out infinite;
+          opacity: 0.6;
+        }
+
+        .glass-header.dynamic-header-bg-strong::before {
+          background: linear-gradient(
+            45deg,
+            #e0f2fe,
+            #f0f9ff,
+            #fef3c7,
+            #fef7cd,
+            #fce7f3,
+            #f3e8ff,
+            #e0e7ff,
+            #dbeafe,
+            #dcfce7,
+            #f0fdf4,
+            #fefce8,
+            #fff7ed
+          );
+          background-size: 600% 600%;
+          animation: gradientShift 35s ease-in-out infinite;
+          opacity: 0.6;
+        }
+
+        .glass-header.dynamic-header-bg-intense::before {
+          background: linear-gradient(
+            45deg,
+            #e0f2fe,
+            #f0f9ff,
+            #fef3c7,
+            #fef7cd,
+            #fce7f3,
+            #f3e8ff,
+            #e0e7ff,
+            #dbeafe,
+            #dcfce7,
+            #f0fdf4,
+            #fefce8,
+            #fff7ed
+          );
+          background-size: 600% 600%;
+          animation: gradientShift 35s ease-in-out infinite;
+          opacity: 0.8;
+        }
+
+        /* Header content opacity variations */
+        .glass-header-content {
+          position: relative;
+          z-index: 10;
+          background: rgba(255, 255, 255, 0.1);
+          -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+          border-radius: 8px;
+          padding: 8px 16px;
+        }
+
+        .glass-header-content-light {
+          background: rgba(255, 255, 255, 0.05);
+          -webkit-backdrop-filter: blur(5px);
+          backdrop-filter: blur(5px);
+        }
+
+        .glass-header-content-medium {
+          background: rgba(255, 255, 255, 0.1);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          backdrop-filter: blur(20px) saturate(180%);
+        }
+
+        .glass-header-content-strong {
+          background: rgba(255, 255, 255, 0.15);
+          -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
+        }
+
+        .glass-header-content-intense {
+          background: rgba(255, 255, 255, 0.2);
+          -webkit-backdrop-filter: blur(15px);
+          backdrop-filter: blur(15px);
+        }
+
+        .glass-header-content-dark {
+          background: rgba(0, 0, 0, 0.15);
+        }
+
+        .glass-header-content-dark-light {
+          background: rgba(0, 0, 0, 0.08);
+          -webkit-backdrop-filter: blur(5px);
+          backdrop-filter: blur(5px);
+        }
+
+        .glass-header-content-dark-medium {
+          background: rgba(0, 0, 0, 0.15);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
+          backdrop-filter: blur(20px) saturate(180%);
+        }
+
+        .glass-header-content-dark-strong {
+          background: rgba(0, 0, 0, 0.2);
+          -webkit-backdrop-filter: blur(12px);
+          backdrop-filter: blur(12px);
+        }
+
+        .glass-header-content-dark-intense {
+          background: rgba(0, 0, 0, 0.25);
+          -webkit-backdrop-filter: blur(15px);
+          backdrop-filter: blur(15px);
+        }
+
+        .glass-navigation {
+          background-color: hsl(var(--background) / 0.8);
+          -webkit-backdrop-filter: blur(16px);
+          backdrop-filter: blur(16px);
+          border-bottom: 1px solid hsl(var(--border) / 0.3);
+          box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+        }
+
+        @keyframes gradientShift {
+          0% {
+            background-position: 0% 50%;
+          }
+          25% {
+            background-position: 100% 0%;
+          }
+          50% {
+            background-position: 100% 100%;
+          }
+          75% {
+            background-position: 0% 100%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
+        }
+
+        /* Enhanced backdrop blur for better visibility */
+        .backdrop-blur-glass {
+          -webkit-backdrop-filter: blur(16px) saturate(180%);
+          backdrop-filter: blur(16px) saturate(180%);
+        }
 }
 
 /* Continuous right-to-left scrolling animation */
@@ -129,8 +777,13 @@
   display: flex;
   width: calc(200% + 8rem);
   overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+@supports (scrollbar-width: none) {
+  .animate-scroll-all-cards {
+    scrollbar-width: none; /* Firefox */
+  }
 }
 
 .animate-scroll-all-cards::-webkit-scrollbar {
@@ -196,4 +849,114 @@ html.dark .dynamic-color-text * {
   color: inherit !important;
 }
 
+/* Dynamic logo color animations - avoiding white colors */
+@keyframes logoColorShiftLight {
+  0% {
+    filter: hue-rotate(0deg) saturate(2.0) brightness(0.8) contrast(1.3) opacity(0.8);
+  }
+  8.33% {
+    filter: hue-rotate(30deg) saturate(2.2) brightness(0.9) contrast(1.4) opacity(0.85);
+  }
+  16.66% {
+    filter: hue-rotate(60deg) saturate(2.1) brightness(0.7) contrast(1.2) opacity(0.8);
+  }
+  25% {
+    filter: hue-rotate(90deg) saturate(2.3) brightness(0.9) contrast(1.5) opacity(0.9);
+  }
+  33.33% {
+    filter: hue-rotate(120deg) saturate(2.0) brightness(0.8) contrast(1.3) opacity(0.8);
+  }
+  41.66% {
+    filter: hue-rotate(150deg) saturate(2.2) brightness(0.9) contrast(1.4) opacity(0.85);
+  }
+  50% {
+    filter: hue-rotate(180deg) saturate(2.1) brightness(0.7) contrast(1.2) opacity(0.8);
+  }
+  58.33% {
+    filter: hue-rotate(210deg) saturate(2.3) brightness(0.9) contrast(1.5) opacity(0.9);
+  }
+  66.66% {
+    filter: hue-rotate(240deg) saturate(2.0) brightness(0.8) contrast(1.3) opacity(0.8);
+  }
+  75% {
+    filter: hue-rotate(270deg) saturate(2.2) brightness(0.9) contrast(1.4) opacity(0.85);
+  }
+  83.33% {
+    filter: hue-rotate(300deg) saturate(2.1) brightness(0.7) contrast(1.2) opacity(0.8);
+  }
+  91.66% {
+    filter: hue-rotate(330deg) saturate(2.3) brightness(0.9) contrast(1.5) opacity(0.9);
+  }
+  100% {
+    filter: hue-rotate(360deg) saturate(2.0) brightness(0.8) contrast(1.3) opacity(0.8);
+  }
+}
+
+@keyframes logoColorShiftDark {
+  0% {
+    filter: hue-rotate(180deg) saturate(2.0) brightness(0.8) contrast(1.3) opacity(1.0);
+  }
+  8.33% {
+    filter: hue-rotate(210deg) saturate(2.2) brightness(0.9) contrast(1.4) opacity(1.0);
+  }
+  16.66% {
+    filter: hue-rotate(240deg) saturate(2.1) brightness(0.7) contrast(1.2) opacity(0.95);
+  }
+  25% {
+    filter: hue-rotate(270deg) saturate(2.3) brightness(0.9) contrast(1.5) opacity(1.0);
+  }
+  33.33% {
+    filter: hue-rotate(300deg) saturate(2.0) brightness(0.8) contrast(1.3) opacity(1.0);
+  }
+  41.66% {
+    filter: hue-rotate(330deg) saturate(2.2) brightness(0.9) contrast(1.4) opacity(1.0);
+  }
+  50% {
+    filter: hue-rotate(360deg) saturate(2.1) brightness(0.7) contrast(1.2) opacity(0.95);
+  }
+  58.33% {
+    filter: hue-rotate(30deg) saturate(2.3) brightness(0.9) contrast(1.5) opacity(1.0);
+  }
+  66.66% {
+    filter: hue-rotate(60deg) saturate(2.0) brightness(0.8) contrast(1.3) opacity(1.0);
+  }
+  75% {
+    filter: hue-rotate(90deg) saturate(2.2) brightness(0.9) contrast(1.4) opacity(1.0);
+  }
+  83.33% {
+    filter: hue-rotate(120deg) saturate(2.1) brightness(0.7) contrast(1.2) opacity(0.95);
+  }
+  91.66% {
+    filter: hue-rotate(150deg) saturate(2.3) brightness(0.9) contrast(1.5) opacity(1.0);
+  }
+  100% {
+    filter: hue-rotate(180deg) saturate(2.0) brightness(0.8) contrast(1.3) opacity(1.0);
+  }
+}
+
+/* Dynamic logo classes with longer duration */
+.dynamic-logo-light {
+  animation: logoColorShiftLight 60s ease-in-out infinite;
+}
+
+.dynamic-logo-dark {
+  animation: logoColorShiftDark 60s ease-in-out infinite;
+}
+
+/* Always visible header */
+.header-always-visible {
+  transform: translateY(0px) !important;
+  position: fixed !important;
+  top: 0px !important;
+  left: 0px !important;
+  right: 0px !important;
+  z-index: 50 !important;
+  display: block !important;
+  visibility: visible !important;
+}
+
 /* Rotating color ring animation for badge */
+
+
+
+

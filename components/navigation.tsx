@@ -17,6 +17,7 @@ import { RiMapPinFill } from "@remixicon/react";
 import { useGeolocation } from "@/components/maps/use-geolocation";
 import { useAuth } from "@clerk/nextjs";
 import { RiSettingsLine, RiCalendarLine } from "@remixicon/react";
+import { useScrollVisibility } from "@/components/scrollable-header";
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -30,6 +31,8 @@ export default function Navigation() {
   const [isUpdating, setIsUpdating] = useState(false);
   const { status: geoStatus, location, error: geoError, request } = useGeolocation();
   const [navCity, setNavCity] = useState<string | null>(null);
+  const isHeaderVisible = useScrollVisibility();
+  
   // Export navCity to window so home can read it as a last resort
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -174,8 +177,10 @@ export default function Navigation() {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <nav className="flex items-center justify-between text-sm text-muted-foreground px-4 py-2 border-b bg-muted/30">
-      <div className="flex items-center space-x-1">
+    <nav className={`fixed top-16 sm:top-18 left-0 right-0 z-40 flex items-center justify-between text-sm text-muted-foreground px-2 sm:px-4 py-2 glass-navigation backdrop-blur-glass transition-transform duration-300 ${
+      isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+    }`}>
+      <div className="flex items-center space-x-1 min-w-0 flex-1">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/">
             <RiHomeLine className="h-4 w-4" />
@@ -183,19 +188,19 @@ export default function Navigation() {
         </Button>
 
         {breadcrumbs.map((breadcrumb, index) => (
-        <div key={breadcrumb.path} className="flex items-center">
-          <RiArrowRightSLine className="h-4 w-4 mr-2" />
+        <div key={breadcrumb.path} className="flex items-center min-w-0">
+          <RiArrowRightSLine className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
           {index === breadcrumbs.length - 1 ? (
-            <span className="font-medium text-foreground flex items-center gap-2 group">
+            <span className="font-medium text-foreground flex items-center gap-1 sm:gap-2 group min-w-0">
               {breadcrumb.icon && (
-                <breadcrumb.icon className="h-4 w-4 inline" />
+                <breadcrumb.icon className="h-4 w-4 inline flex-shrink-0" />
               )}
               {breadcrumb.editable && breadcrumb.isDocument && isEditing ? (
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 min-w-0">
                   <Input
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="h-6 text-sm w-48"
+                    className="h-6 text-sm w-32 sm:w-48"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         handleSaveTitle();
@@ -210,7 +215,7 @@ export default function Navigation() {
                     variant="ghost"
                     onClick={handleSaveTitle}
                     disabled={isUpdating}
-                    className="h-6 w-6 p-0"
+                    className="h-6 w-6 p-0 flex-shrink-0"
                     title="Save changes"
                   >
                     {isUpdating ? (
@@ -224,21 +229,21 @@ export default function Navigation() {
                     variant="ghost"
                     onClick={handleCancelEdit}
                     disabled={isUpdating}
-                    className="h-6 w-6 p-0"
+                    className="h-6 w-6 p-0 flex-shrink-0"
                     title="Cancel editing"
                   >
                     <RiCloseLine className="h-3 w-3" />
                   </Button>
                 </div>
               ) : (
-                <div className="flex items-center gap-1">
-                  <span>{breadcrumb.label}</span>
+                <div className="flex items-center gap-1 min-w-0">
+                  <span className="truncate">{breadcrumb.label}</span>
                   {breadcrumb.editable && breadcrumb.isDocument && canEdit && (
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={handleEditClick}
-                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
                       title="Edit document title"
                     >
                       <RiEditLine className="h-3 w-3" />
@@ -248,12 +253,12 @@ export default function Navigation() {
               )}
             </span>
           ) : (
-            <Button variant="ghost" size="sm" asChild>
+            <Button variant="ghost" size="sm" asChild className="min-w-0">
               <Link href={breadcrumb.path}>
                 {breadcrumb.icon && (
-                  <breadcrumb.icon className="h-4 w-4 mr-1" />
+                  <breadcrumb.icon className="h-4 w-4 mr-1 flex-shrink-0" />
                 )}
-                {breadcrumb.label}
+                <span className="truncate">{breadcrumb.label}</span>
               </Link>
             </Button>
           )}
@@ -261,27 +266,27 @@ export default function Navigation() {
         ))}
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
         {userId && isAdmin && (
-          <div className="flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2">
             <Button variant="ghost" size="sm" asChild>
               <Link href="/admin/events">
                 <RiCalendarLine className="h-4 w-4" />
-                Admin Events
+                <span className="hidden lg:inline ml-1">Admin Events</span>
               </Link>
             </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link href="/admin/hotels">
                 <RiSettingsLine className="h-4 w-4" />
-                Admin Hotels
+                <span className="hidden lg:inline ml-1">Admin Hotels</span>
               </Link>
             </Button>
           </div>
         )}
         
-        <div className="flex items-center gap-2">
-          <RiMapPinFill className="h-4 w-4 text-foreground" />
-          <span className="text-foreground">
+        <div className="flex items-center gap-1 sm:gap-2">
+          <RiMapPinFill className="h-4 w-4 text-foreground flex-shrink-0" />
+          <span className="text-foreground text-xs sm:text-sm truncate max-w-24 sm:max-w-none">
             {navCity || (geoStatus === "granted" ? "Locating..." : "Detecting location...")}
           </span>
         </div>
