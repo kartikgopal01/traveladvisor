@@ -17,7 +17,25 @@ import { RiMapPinFill } from "@remixicon/react";
 import { useGeolocation } from "@/components/maps/use-geolocation";
 import { useAuth } from "@clerk/nextjs";
 import { RiSettingsLine, RiCalendarLine } from "@remixicon/react";
-import { useScrollVisibility } from "@/components/scrollable-header";
+// Simple scroll visibility hook
+function useScrollVisibility() {
+  const [isVisible, setIsVisible] = useState(true);
+  
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+    
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      setIsVisible(currentScrollY < lastScrollY || currentScrollY < 10);
+      lastScrollY = currentScrollY;
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
+  return isVisible;
+}
 
 export default function Navigation() {
   const pathname = usePathname();
