@@ -505,6 +505,122 @@ export default function TripsPage() {
                               </div>
                             </div>
 
+                            {/* Budget Breakdown */}
+                            {s.breakdown && (
+                              <div>
+                                <h4 className="font-medium text-sm mb-2 text-foreground">
+                                  💰 Budget Breakdown
+                                </h4>
+                                <div className="grid grid-cols-2 gap-2">
+                                  {s.breakdown.flights && (
+                                    <div className="p-2 bg-blue-50 rounded text-sm">
+                                      <div className="text-xs text-blue-800 mb-1">✈️ Flights</div>
+                                      <div className="text-sm font-bold text-blue-900">₹{s.breakdown.flights?.toLocaleString()}</div>
+                                    </div>
+                                  )}
+                                  {s.breakdown.accommodation && (
+                                    <div className="p-2 bg-green-50 rounded text-sm">
+                                      <div className="text-xs text-green-800 mb-1">🏨 Stay</div>
+                                      <div className="text-sm font-bold text-green-900">₹{s.breakdown.accommodation?.toLocaleString()}</div>
+                                    </div>
+                                  )}
+                                  {s.breakdown.food && (
+                                    <div className="p-2 bg-orange-50 rounded text-sm">
+                                      <div className="text-xs text-orange-800 mb-1">🍽️ Food</div>
+                                      <div className="text-sm font-bold text-orange-900">₹{s.breakdown.food?.toLocaleString()}</div>
+                                    </div>
+                                  )}
+                                  {s.breakdown.localTransport && (
+                                    <div className="p-2 bg-purple-50 rounded text-sm">
+                                      <div className="text-xs text-purple-800 mb-1">🚗 Transport</div>
+                                      <div className="text-sm font-bold text-purple-900">₹{s.breakdown.localTransport?.toLocaleString()}</div>
+                                    </div>
+                                  )}
+                                  {s.breakdown.attractions && (
+                                    <div className="p-2 bg-yellow-50 rounded text-sm">
+                                      <div className="text-xs text-yellow-800 mb-1">🎯 Activities</div>
+                                      <div className="text-sm font-bold text-yellow-900">₹{s.breakdown.attractions?.toLocaleString()}</div>
+                                    </div>
+                                  )}
+                                  {s.breakdown.miscellaneous && (
+                                    <div className="p-2 bg-gray-50 rounded text-sm">
+                                      <div className="text-xs text-gray-800 mb-1">📦 Misc</div>
+                                      <div className="text-sm font-bold text-gray-900">₹{s.breakdown.miscellaneous?.toLocaleString()}</div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Transportation Details */}
+                            {s.transportation && (
+                              <div>
+                                <h4 className="font-medium text-sm mb-2 text-foreground">
+                                  🚗 Transportation Details
+                                </h4>
+                                
+                                {/* Primary Transportation Option */}
+                                {s.transportation.toDestination && (
+                                  <div className="p-3 bg-purple-50 rounded text-sm mb-3">
+                                    <div className="font-medium mb-1 text-purple-800">Primary Option: {s.transportation.toDestination.mode}</div>
+                                    <div className="text-xs text-muted-foreground mb-1">
+                                      Duration: {s.transportation.toDestination.duration}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground mb-1">
+                                      Cost: ₹{s.transportation.toDestination.cost?.toLocaleString()}
+                                    </div>
+                                    {s.transportation.toDestination.tips && (
+                                      <div className="text-xs text-blue-600 mt-1">
+                                        💡 {s.transportation.toDestination.tips}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                {/* All Available Transportation Options */}
+                                {s.transportation.availableOptions && s.transportation.availableOptions.length > 0 && (
+                                  <div className="space-y-2">
+                                    <div className="text-xs font-medium text-muted-foreground">All Available Options:</div>
+                                    {s.transportation.availableOptions.map((option: any, idx: number) => (
+                                      <div key={idx} className="p-2 bg-gray-50 rounded text-sm border">
+                                        <div className="flex items-center justify-between mb-1">
+                                          <div className="font-medium text-sm">{option.mode}</div>
+                                          <div className="text-sm font-bold text-green-600">₹{option.cost?.toLocaleString()}</div>
+                                        </div>
+                                        <div className="text-xs text-muted-foreground mb-1">
+                                          Duration: {option.duration}
+                                        </div>
+                                        {option.description && (
+                                          <div className="text-xs text-muted-foreground mb-1">
+                                            {option.description}
+                                          </div>
+                                        )}
+                                        {option.tips && (
+                                          <div className="text-xs text-blue-600">
+                                            💡 {option.tips}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Highlights */}
+                            {s.highlights && s.highlights.length > 0 && (
+                              <div>
+                                <h4 className="font-medium text-sm mb-2 text-foreground">
+                                  ⭐ Highlights
+                                </h4>
+                                <div className="space-y-1">
+                                  {s.highlights.map((highlight: string, idx: number) => (
+                                    <div key={idx} className="text-sm text-muted-foreground">• {highlight}</div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
                             {/* Places to Visit */}
                             {s.samplePlan?.attractions?.length > 0 && (
                               <div>
@@ -618,6 +734,23 @@ export default function TripsPage() {
                               </div>
                             )}
 
+                            {/* Local Tips */}
+                            {s.localTips && s.localTips.length > 0 && (
+                              <div>
+                                <h4 className="font-medium text-sm mb-2 text-foreground">
+                                  💡 Travel Tips & Notes
+                                </h4>
+                                <div className="space-y-2">
+                                  {s.localTips.map((tip: string, idx: number) => (
+                                    <div key={idx} className="flex items-start gap-2 p-2 bg-blue-50 rounded">
+                                      <span className="text-blue-600 mt-1">💡</span>
+                                      <span className="text-sm">{tip}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
                              {/* Quick Map Access */}
                              <div className="pt-2 border-t">
                                <div className="space-y-2">
@@ -642,8 +775,63 @@ export default function TripsPage() {
                                    Explore {s.destination}
                                  </Button>
                                  
-                                 {/* QR Code and Share Buttons for Suggestions */}
+                                 {/* Export, QR Code and Share Buttons for Suggestions */}
                                  <div className="flex gap-2">
+                                   <Button
+                                     onClick={(e) => {
+                                       e.stopPropagation();
+                                       // Create comprehensive trip summary
+                                       const summary = `
+${s.destination} Trip Summary
+${s.state}, ${s.region}
+
+💰 Budget Breakdown:
+${s.breakdown?.flights ? `✈️ Flights: ₹${s.breakdown.flights.toLocaleString()}` : ''}
+${s.breakdown?.accommodation ? `🏨 Stay: ₹${s.breakdown.accommodation.toLocaleString()}` : ''}
+${s.breakdown?.food ? `🍽️ Food: ₹${s.breakdown.food.toLocaleString()}` : ''}
+${s.breakdown?.localTransport ? `🚗 Transport: ₹${s.breakdown.localTransport.toLocaleString()}` : ''}
+${s.breakdown?.attractions ? `🎯 Activities: ₹${s.breakdown.attractions.toLocaleString()}` : ''}
+${s.breakdown?.miscellaneous ? `📦 Misc: ₹${s.breakdown.miscellaneous.toLocaleString()}` : ''}
+
+🚗 Transportation Options:
+Primary: ${s.transportation?.toDestination?.mode || 'N/A'} - ₹${s.transportation?.toDestination?.cost?.toLocaleString() || 'N/A'} (${s.transportation?.toDestination?.duration || 'N/A'})
+${s.transportation?.availableOptions?.map((opt: any) => `• ${opt.mode}: ₹${opt.cost?.toLocaleString()} (${opt.duration}) - ${opt.description || ''}`).join('\n') || ''}
+
+⭐ Highlights:
+${s.highlights?.map((h: string) => `• ${h}`).join('\n') || 'N/A'}
+
+🏛️ Places to Visit:
+${s.samplePlan?.attractions?.map((a: any) => `• ${a.name} - ${a.location}`).join('\n') || 'N/A'}
+
+🏨 Accommodations:
+${s.samplePlan?.accommodations?.map((acc: any) => `• ${acc.name} - ₹${acc.price?.toLocaleString()}/night`).join('\n') || 'N/A'}
+
+🍽️ Restaurants:
+${s.samplePlan?.restaurants?.map((r: any) => `• ${r.name} - ${r.cuisine}`).join('\n') || 'N/A'}
+
+💡 Travel Tips:
+${s.localTips?.map((tip: string) => `• ${tip}`).join('\n') || 'N/A'}
+
+📍 Google Maps: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.destination)}, ${encodeURIComponent(s.state)}, India
+                                       `.trim();
+                                       
+                                       // Create and download text file
+                                       const blob = new Blob([summary], { type: 'text/plain' });
+                                       const url = URL.createObjectURL(blob);
+                                       const a = document.createElement('a');
+                                       a.href = url;
+                                       a.download = `${s.destination}-trip-summary.txt`;
+                                       document.body.appendChild(a);
+                                       a.click();
+                                       document.body.removeChild(a);
+                                       URL.revokeObjectURL(url);
+                                     }}
+                                     variant="default"
+                                     size="sm"
+                                     className="flex-1 flex items-center gap-2"
+                                   >
+                                     📄 Export
+                                   </Button>
                                    <Button
                                      onClick={(e) => {
                                        e.stopPropagation();

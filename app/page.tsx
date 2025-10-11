@@ -2017,11 +2017,11 @@ export default function Home() {
                       <Card className="h-full hover:shadow-md transition-shadow">
                         <CardHeader className="pb-3">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="flex-1">
-                              <CardTitle className="text-lg">{suggestion.destination}</CardTitle>
-                              <CardDescription className="flex items-center gap-1 text-sm">
-                                <MapPin className="w-3 h-3" />
-                                {suggestion.state}, {suggestion.region}
+                            <div className="flex-1 min-w-0">
+                              <CardTitle className="text-lg break-words">{suggestion.destination}</CardTitle>
+                              <CardDescription className="flex items-center gap-1 text-sm break-words">
+                                <MapPin className="w-3 h-3 flex-shrink-0" />
+                                <span className="truncate">{suggestion.state}, {suggestion.region}</span>
                               </CardDescription>
                             </div>
                             <div className="text-right">
@@ -2038,11 +2038,11 @@ export default function Home() {
                           {/* Compact Info */}
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 text-sm">
-                              <Calendar className="w-3 h-3" />
-                              <span className="text-muted-foreground">{suggestion.bestTimeToVisit}</span>
+                              <Calendar className="w-3 h-3 flex-shrink-0" />
+                              <span className="text-muted-foreground break-words">{suggestion.bestTimeToVisit}</span>
                             </div>
                             {suggestion.highlights && suggestion.highlights.length > 0 && (
-                              <div className="text-xs text-muted-foreground">
+                              <div className="text-xs text-muted-foreground break-words line-clamp-2">
                                 {suggestion.highlights.slice(0, 2).join(" • ")}
                               </div>
                             )}
@@ -2087,20 +2087,45 @@ export default function Home() {
 
                       {/* Full Details Popup */}
                       {expandedSuggestion === idx && (
-                        <div className="suggestion-popup absolute top-0 left-0 z-20 bg-white border border-blue-200 rounded-lg shadow-2xl p-4 w-[120%] max-w-5xl max-h-[60vh] overflow-y-auto">
+                        <div className="suggestion-popup absolute top-0 left-0 z-20 bg-white border border-blue-200 rounded-lg shadow-2xl p-4 w-[90vw] max-w-6xl h-[80vh] max-h-[90vh] overflow-y-auto overflow-x-hidden resize-y min-h-[400px]">
+                          {/* Resize Handle */}
+                          <div className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize opacity-30 hover:opacity-60 transition-opacity">
+                            <div className="absolute bottom-1 right-1 w-2 h-2 border-r-2 border-b-2 border-gray-400"></div>
+                          </div>
+                          
                           <div className="space-y-3">
                             {/* Header */}
                             <div className="flex items-center justify-between border-b pb-3">
                               <div>
-                                <h3 className="text-2xl font-bold text-blue-600">{suggestion.destination}</h3>
-                                <p className="text-muted-foreground">{suggestion.state}, {suggestion.region}</p>
+                                <h3 className="text-2xl font-bold text-blue-600 break-words">{suggestion.destination}</h3>
+                                <p className="text-muted-foreground break-words">{suggestion.state}, {suggestion.region}</p>
                               </div>
-                              <button
-                                onClick={() => setExpandedSuggestion(null)}
-                                className="text-gray-400 hover:text-gray-600 text-2xl"
-                              >
-                                ×
-                              </button>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => {
+                                    const popup = document.querySelector('.suggestion-popup') as HTMLElement;
+                                    if (popup) {
+                                      if (popup.style.width === '95vw') {
+                                        popup.style.width = '90vw';
+                                        popup.style.height = '80vh';
+                                      } else {
+                                        popup.style.width = '95vw';
+                                        popup.style.height = '90vh';
+                                      }
+                                    }
+                                  }}
+                                  className="text-gray-400 hover:text-gray-600 text-lg px-2 py-1 rounded hover:bg-gray-100"
+                                  title="Maximize/Minimize"
+                                >
+                                  ⛶
+                                </button>
+                                <button
+                                  onClick={() => setExpandedSuggestion(null)}
+                                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                                >
+                                  ×
+                                </button>
+                              </div>
                             </div>
 
                             {/* Full Day Details */}
@@ -2126,14 +2151,14 @@ export default function Home() {
                                         {day.activities.map((activity: any, actIdx: number) => (
                                           <div key={actIdx} className="flex items-start gap-3 p-2 bg-white rounded border">
                                             <div className="flex-1">
-                                              <div className="font-medium text-sm">{activity.title}</div>
+                                              <div className="font-medium text-sm break-words">{activity.title}</div>
                                               {activity.description && (
-                                                <div className="text-xs text-muted-foreground mt-1">
+                                                <div className="text-xs text-muted-foreground mt-1 break-words">
                                                   {activity.description}
                                                 </div>
                                               )}
                                               {activity.location && (
-                                                <div className="text-xs text-blue-600 mt-1">
+                                                <div className="text-xs text-blue-600 mt-1 break-words">
                                                   📍 {activity.location}
                                                 </div>
                                               )}
@@ -2220,20 +2245,52 @@ export default function Home() {
                                 <h4 className="text-base font-bold text-purple-700 bg-purple-100 px-3 py-2 rounded-lg border-l-4 border-purple-500">
                                   🚗 Transportation Details
                                 </h4>
-                                <div className="p-4 bg-purple-50 rounded-lg">
-                                  <div className="font-medium">{suggestion.transportation.toDestination?.mode}</div>
-                                  <div className="text-sm text-muted-foreground">
-                                    Duration: {suggestion.transportation.toDestination?.duration}
-                                  </div>
-                                  <div className="text-sm text-muted-foreground">
-                                    Cost: ₹{suggestion.transportation.toDestination?.cost?.toLocaleString()}
-                                  </div>
-                                  {suggestion.transportation.toDestination?.tips && (
-                                    <div className="text-sm text-blue-600 mt-2">
-                                      💡 {suggestion.transportation.toDestination.tips}
+                                
+                                {/* Primary Transportation Option */}
+                                {suggestion.transportation.toDestination && (
+                                  <div className="p-4 bg-purple-50 rounded-lg mb-3">
+                                    <div className="font-medium text-purple-800 mb-2">Primary Option: {suggestion.transportation.toDestination.mode}</div>
+                                    <div className="text-sm text-muted-foreground">
+                                      Duration: {suggestion.transportation.toDestination.duration}
                                     </div>
-                                  )}
-                                </div>
+                                    <div className="text-sm text-muted-foreground">
+                                      Cost: ₹{suggestion.transportation.toDestination.cost?.toLocaleString()}
+                                    </div>
+                                    {suggestion.transportation.toDestination.tips && (
+                                      <div className="text-sm text-blue-600 mt-2">
+                                        💡 {suggestion.transportation.toDestination.tips}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                                
+                                {/* All Available Transportation Options */}
+                                {suggestion.transportation.availableOptions && suggestion.transportation.availableOptions.length > 0 && (
+                                  <div className="space-y-3">
+                                    <div className="text-sm font-medium text-muted-foreground">All Available Options:</div>
+                                    {suggestion.transportation.availableOptions.map((option: any, idx: number) => (
+                                      <div key={idx} className="p-3 bg-gray-50 rounded-lg border">
+                                        <div className="flex items-center justify-between mb-2">
+                                          <div className="font-medium text-sm">{option.mode}</div>
+                                          <div className="text-sm font-bold text-green-600">₹{option.cost?.toLocaleString()}</div>
+                                        </div>
+                                        <div className="text-sm text-muted-foreground mb-1">
+                                          Duration: {option.duration}
+                                        </div>
+                                        {option.description && (
+                                          <div className="text-sm text-muted-foreground mb-1">
+                                            {option.description}
+                                          </div>
+                                        )}
+                                        {option.tips && (
+                                          <div className="text-sm text-blue-600">
+                                            💡 {option.tips}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                             )}
 
