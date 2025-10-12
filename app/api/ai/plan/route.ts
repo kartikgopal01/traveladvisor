@@ -191,9 +191,26 @@ ${budget ? `Budget: ₹${budget.toLocaleString()} INR` : `Budget: ₹${calculate
 Travel Style: ${travelStyle}
 Accommodation: ${accommodationType === "na" ? "Not needed" : accommodationType}
 Transportation: ${transportationType === "na" ? "Not needed" : transportationType}${vehicleCostInfo}
-Interests: ${interestsList || "General sightseeing"}
-Dietary Restrictions: ${dietaryList || "None"}
-Accessibility Needs: ${accessibilityList || "None"}
+
+CRITICAL USER PREFERENCES ANALYSIS:
+${interestsList ? `🎯 INTERESTS & ACTIVITIES: ${interestsList}
+- Prioritize activities that match these interests
+- Include specific recommendations for each interest category
+- Highlight how each activity relates to user interests` : "🎯 INTERESTS: General sightseeing"}
+
+${dietaryList ? `🍽️ DIETARY RESTRICTIONS: ${dietaryList}
+- CRITICAL: All restaurant recommendations MUST accommodate these dietary needs
+- Include specific dietary-friendly restaurants and food options
+- Mention dietary considerations for each meal suggestion
+- Provide alternatives for restricted foods` : "🍽️ DIETARY: No restrictions"}
+
+${accessibilityList ? `♿ ACCESSIBILITY REQUIREMENTS: ${accessibilityList}
+- CRITICAL: All activities, accommodations, and transportation must be accessible
+- Include wheelchair-accessible venues and routes
+- Provide accessibility information for each location
+- Suggest accessible alternatives when needed
+- Include accessibility tips and considerations` : "♿ ACCESSIBILITY: No special requirements"}
+
 ${startDate ? `Start Date: ${startDate}` : ""}
 ${endDate ? `End Date: ${endDate}` : ""}
 ${specialRequests ? `Special Requests: ${specialRequests}` : ""}
@@ -226,7 +243,10 @@ Return JSON with this exact schema:
           "duration": string,
           "cost": number,
           "mapsUrl": string,
-          "tips": string
+          "tips": string,
+          "interestMatch": [string],
+          "accessibilityInfo": string,
+          "dietaryConsiderations": string
         }
       ],
       "meals": [
@@ -234,7 +254,9 @@ Return JSON with this exact schema:
           "type": string,
           "suggestion": string,
           "cost": number,
-          "location": string
+          "location": string,
+          "dietaryCompliance": [string],
+          "accessibilityInfo": string
         }
       ],
       "transportation": {
@@ -254,7 +276,9 @@ Return JSON with this exact schema:
       "rating": number,
       "amenities": [string],
       "mapsUrl": string,
-      "bookingUrl": string
+      "bookingUrl": string,
+      "accessibilityFeatures": [string],
+      "dietaryOptions": [string]
     }
   ],
   "attractions": [
@@ -266,7 +290,9 @@ Return JSON with this exact schema:
       "bestTime": string,
       "duration": string,
       "tips": string,
-      "mapsUrl": string
+      "mapsUrl": string,
+      "interestMatch": [string],
+      "accessibilityInfo": string
     }
   ],
   "restaurants": [
@@ -277,7 +303,9 @@ Return JSON with this exact schema:
       "priceRange": string,
       "specialties": [string],
       "dietaryOptions": [string],
-      "mapsUrl": string
+      "mapsUrl": string,
+      "accessibilityInfo": string,
+      "dietaryCompliance": [string]
     }
   ],
   "transportation": {
@@ -306,6 +334,24 @@ Return JSON with this exact schema:
     "police": string,
     "hospital": string,
     "touristHelpline": string
+  },
+  "preferenceAnalysis": {
+    "interestsCoverage": {
+      "matchedInterests": [string],
+      "coveragePercentage": number,
+      "highlights": [string]
+    },
+    "dietaryCompliance": {
+      "restrictions": [string],
+      "compliancePercentage": number,
+      "dietaryFriendlyVenues": number
+    },
+    "accessibilityCompliance": {
+      "requirements": [string],
+      "compliancePercentage": number,
+      "accessibleVenues": number,
+      "accessibilityTips": [string]
+    }
   }
 }
 
@@ -320,6 +366,18 @@ Rules:
 - Provide multiple map options when relevant (directions, street view, etc.)
 - Include estimated walking/driving times between locations
 - Consider local customs, festivals, and weather.
+
+CRITICAL PREFERENCE ANALYSIS REQUIREMENTS:
+- For each activity, specify which user interests it matches in "interestMatch" array
+- For each meal/restaurant, specify dietary compliance in "dietaryCompliance" array
+- For each venue, provide accessibility information in "accessibilityInfo" field
+- Calculate preference analysis percentages based on user selections
+- Highlight how each recommendation specifically addresses user preferences
+- Provide alternative options when preferences cannot be fully met
+- Include specific tips for dietary restrictions and accessibility needs
+- Ensure at least 80% compliance with user preferences when possible
+
+GENERAL REQUIREMENTS:
 - Include vegetarian and local food options.
 - Provide practical transportation options (trains, buses, cabs, etc.).
 - Include safety tips and local customs.

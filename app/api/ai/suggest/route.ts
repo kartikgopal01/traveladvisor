@@ -418,6 +418,8 @@ Return JSON with this MINIMAL FRONTEND-COMPATIBLE schema:
       "estimatedCost": number,
       "budgetCategory": "budget" | "mid-range" | "luxury",
       "highlights": [string],
+      "interestMatch": [string],
+      "preferenceScore": number,
       "breakdown": {
         "flights": number,
         "accommodation": number,
@@ -612,7 +614,13 @@ ${includeAccommodation ? `- Activity Budget: ₹${activityBudget.toLocaleString(
 - Preferred Location: ${preferredLocation || 'Anywhere in India'}
 
 Travel Style: ${travelStyle}
-Interests: ${interestsList || "General sightseeing"}
+
+CRITICAL USER PREFERENCES ANALYSIS:
+${interestsList ? `🎯 INTERESTS & ACTIVITIES: ${interestsList}
+- Prioritize destinations that excel in these interest areas
+- Include specific activities and attractions for each interest
+- Highlight how each destination matches user interests` : "🎯 INTERESTS: General sightseeing"}
+
 Preferred Season: ${preferredSeason || "Any"}
 ${preferredLocation ? `STRICT LOCATION FILTER: Only suggest destinations in ${preferredLocation}` : ""}
 
@@ -637,6 +645,8 @@ Return JSON with this FRONTEND-COMPATIBLE schema (to prevent truncation):
       "estimatedCost": number,
       "budgetCategory": "budget" | "mid-range" | "luxury",
       "highlights": [string],
+      "interestMatch": [string],
+      "preferenceScore": number,
       "breakdown": {
         "flights": number,
         "accommodation": number,
@@ -682,7 +692,13 @@ Rules:
 - Ensure estimatedCost <= ${budgetINR} for each suggestion.
 - ${preferredLocation ? `LOCATION RESTRICTION: ALL destinations MUST be within ${preferredLocation} only.` : 'Include diverse destinations across different regions of India.'}
 - Provide realistic costs in Indian Rupees (INR).
-- Consider the specified travel style and interests.
+
+CRITICAL PREFERENCE ANALYSIS REQUIREMENTS:
+- For each destination, specify which user interests it matches in "interestMatch" array
+- Calculate a "preferenceScore" (0-100) based on how well the destination matches user interests
+- Prioritize destinations with higher preference scores
+- Highlight specific activities and attractions that align with user interests
+- Provide detailed explanations of how each destination caters to user preferences
 - ROAD TRANSPORTATION COST REQUIREMENTS (NO FLIGHTS):
   * ALWAYS provide realistic road transportation costs - never use ₹0
   * For trains: ₹500-3,000 depending on class and distance  

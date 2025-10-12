@@ -282,6 +282,23 @@ export default function Home() {
   const [endDate, setEndDate] = useState("");
   const [specialRequests, setSpecialRequests] = useState("");
   const [expandedSuggestion, setExpandedSuggestion] = useState<number | null>(null);
+  const [popupWidth, setPopupWidth] = useState<'sm' | 'md' | 'lg' | 'xl'>('lg');
+
+  // Popup size helper function
+  const getPopupClasses = () => {
+    switch (popupWidth) {
+      case 'sm':
+        return { width: 'w-[70vw] max-w-2xl', height: 'h-[60vh] max-h-[70vh]' };
+      case 'md':
+        return { width: 'w-[80vw] max-w-4xl', height: 'h-[70vh] max-h-[80vh]' };
+      case 'lg':
+        return { width: 'w-[90vw] max-w-6xl', height: 'h-[80vh] max-h-[90vh]' };
+      case 'xl':
+        return { width: 'w-[95vw] max-w-7xl', height: 'h-[90vh] max-h-[95vh]' };
+      default:
+        return { width: 'w-[90vw] max-w-6xl', height: 'h-[80vh] max-h-[90vh]' };
+    }
+  };
 
   // Handle click outside to close popup
   const handleClickOutside = (e: React.MouseEvent) => {
@@ -1567,42 +1584,116 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-8">
+                {/* Preference Analysis */}
+                {planResult.preferenceAnalysis && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold">🎯 Your Preferences Analysis</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Interests Coverage */}
+                      <Card className="border-blue-200 bg-blue-50 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shadow-md">
+                              <span className="text-white text-lg font-bold">🎯</span>
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-blue-800 text-lg">Interests Coverage</div>
+                              <div className="text-sm text-blue-600 font-medium">{planResult.preferenceAnalysis.interestsCoverage.coveragePercentage}% Match</div>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            {planResult.preferenceAnalysis.interestsCoverage.matchedInterests.map((interest: string, idx: number) => (
+                              <div key={idx} className="text-xs bg-blue-100 text-blue-800 px-3 py-2 rounded-lg border border-blue-200 shadow-sm">
+                                ✓ {interest}
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Dietary Compliance */}
+                      <Card className="border-green-200 bg-green-50 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center shadow-md">
+                              <span className="text-white text-lg font-bold">🍽️</span>
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-green-800 text-lg">Dietary Compliance</div>
+                              <div className="text-sm text-green-600 font-medium">{planResult.preferenceAnalysis.dietaryCompliance.compliancePercentage}% Compliant</div>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            {planResult.preferenceAnalysis.dietaryCompliance.restrictions.map((restriction: string, idx: number) => (
+                              <div key={idx} className="text-xs bg-green-100 text-green-800 px-3 py-2 rounded-lg border border-green-200 shadow-sm">
+                                ✓ {restriction}
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Accessibility Compliance */}
+                      <Card className="border-purple-200 bg-purple-50 shadow-lg hover:shadow-xl transition-all duration-300">
+                        <CardContent className="pt-6">
+                          <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center shadow-md">
+                              <span className="text-white text-lg font-bold">♿</span>
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-purple-800 text-lg">Accessibility</div>
+                              <div className="text-sm text-purple-600 font-medium">{planResult.preferenceAnalysis.accessibilityCompliance.compliancePercentage}% Accessible</div>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            {planResult.preferenceAnalysis.accessibilityCompliance.requirements.map((requirement: string, idx: number) => (
+                              <div key={idx} className="text-xs bg-purple-100 text-purple-800 px-3 py-2 rounded-lg border border-purple-200 shadow-sm">
+                                ✓ {requirement}
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                )}
+
                 {/* Budget Breakdown */}
                 {planResult.budgetBreakdown && (
                   <div className="space-y-4">
                     <h4 className="text-lg font-semibold">Budget Breakdown</h4>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      <Card>
+                      <Card className="border-muted bg-background shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="pt-6">
                           <div className="text-2xl font-bold">₹{planResult.budgetBreakdown.accommodation?.toLocaleString()}</div>
                           <p className="text-sm text-muted-foreground">Accommodation</p>
                         </CardContent>
                       </Card>
-                      <Card>
+                      <Card className="border-muted bg-background shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="pt-6">
                           <div className="text-2xl font-bold">₹{planResult.budgetBreakdown.transportation?.toLocaleString()}</div>
                           <p className="text-sm text-muted-foreground">Transportation</p>
                         </CardContent>
                       </Card>
-                      <Card>
+                      <Card className="border-muted bg-background shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="pt-6">
                           <div className="text-2xl font-bold">₹{planResult.budgetBreakdown.food?.toLocaleString()}</div>
                           <p className="text-sm text-muted-foreground">Food</p>
                         </CardContent>
                       </Card>
-                      <Card>
+                      <Card className="border-muted bg-background shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="pt-6">
                           <div className="text-2xl font-bold">₹{planResult.budgetBreakdown.attractions?.toLocaleString()}</div>
                           <p className="text-sm text-muted-foreground">Attractions</p>
                         </CardContent>
                       </Card>
-                      <Card>
+                      <Card className="border-muted bg-background shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="pt-6">
                           <div className="text-2xl font-bold">₹{planResult.budgetBreakdown.miscellaneous?.toLocaleString()}</div>
                           <p className="text-sm text-muted-foreground">Miscellaneous</p>
                         </CardContent>
                       </Card>
-                      <Card>
+                      <Card className="border-green-200 bg-green-50 shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardContent className="pt-6">
                           <div className="text-2xl font-bold text-green-600">₹{planResult.budgetBreakdown.total?.toLocaleString()}</div>
                           <p className="text-sm text-muted-foreground">Total</p>
@@ -1636,16 +1727,42 @@ export default function Home() {
                                 </h5>
                                 <div className="space-y-2">
                                   {day.activities.map((activity: any, idx: number) => (
-                                    <div key={idx} className="border rounded p-3">
+                                    <div key={idx} className="border border-muted rounded-lg p-4 bg-background shadow-lg hover:shadow-xl transition-all duration-300">
                                       <div className="flex items-start justify-between gap-4">
                                         <div className="flex-1">
-                                          <div className="font-medium">{activity.title}</div>
-                                          <div className="text-sm text-muted-foreground">{activity.description}</div>
-                                          <div className="text-xs text-muted-foreground mt-1">
+                                          <div className="font-medium text-lg mb-2">{activity.title}</div>
+                                          <div className="text-sm text-muted-foreground mb-3">{activity.description}</div>
+                                          <div className="text-xs text-muted-foreground mb-3 bg-muted px-3 py-2 rounded-lg">
                                             {activity.time} • {activity.duration} • ₹{activity.cost}
                                           </div>
+                                          
+                                          {/* Interest Match Badges */}
+                                          {activity.interestMatch && activity.interestMatch.length > 0 && (
+                                            <div className="flex flex-wrap gap-2 mb-3">
+                                              {activity.interestMatch.map((interest: string, i: number) => (
+                                                <span key={i} className="text-xs bg-blue-100 text-blue-800 px-3 py-2 rounded-lg border border-blue-200 shadow-sm">
+                                                  🎯 {interest}
+                                                </span>
+                                              ))}
+                                            </div>
+                                          )}
+                                          
+                                          {/* Accessibility Info */}
+                                          {activity.accessibilityInfo && (
+                                            <div className="text-xs text-purple-600 bg-purple-50 px-3 py-2 rounded-lg border border-purple-200 shadow-sm mb-3">
+                                              ♿ {activity.accessibilityInfo}
+                                            </div>
+                                          )}
+                                          
+                                          {/* Dietary Considerations */}
+                                          {activity.dietaryConsiderations && (
+                                            <div className="text-xs text-green-600 bg-green-50 px-3 py-2 rounded-lg border border-green-200 shadow-sm mb-3">
+                                              🍽️ {activity.dietaryConsiderations}
+                                            </div>
+                                          )}
+                                          
                                           {activity.tips && (
-                                            <div className="text-xs mt-1 text-blue-600">💡 {activity.tips}</div>
+                                            <div className="text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200 shadow-sm">💡 {activity.tips}</div>
                                           )}
                                         </div>
                                         {activity.mapsUrl && (
@@ -1672,10 +1789,28 @@ export default function Home() {
                                 </h5>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                   {day.meals.map((meal: any, idx: number) => (
-                                    <div key={idx} className="text-sm border rounded p-2">
-                                      <div className="font-medium">{meal.type}</div>
-                                      <div>{meal.suggestion}</div>
-                                      <div className="text-xs text-muted-foreground">₹{meal.cost}</div>
+                                    <div key={idx} className="text-sm border border-muted rounded-lg p-4 bg-background shadow-lg hover:shadow-xl transition-all duration-300">
+                                      <div className="font-medium text-lg mb-2">{meal.type}</div>
+                                      <div className="text-muted-foreground mb-3">{meal.suggestion}</div>
+                                      <div className="text-xs text-muted-foreground mb-3 bg-muted px-3 py-2 rounded-lg">₹{meal.cost}</div>
+                                      
+                                      {/* Dietary Compliance */}
+                                      {meal.dietaryCompliance && meal.dietaryCompliance.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 mb-3">
+                                          {meal.dietaryCompliance.map((diet: string, i: number) => (
+                                            <span key={i} className="text-xs bg-green-100 text-green-800 px-3 py-2 rounded-lg border border-green-200 shadow-sm">
+                                              ✓ {diet}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      )}
+                                      
+                                      {/* Accessibility Info */}
+                                      {meal.accessibilityInfo && (
+                                        <div className="text-xs text-purple-600 bg-purple-50 px-3 py-2 rounded-lg border border-purple-200 shadow-sm">
+                                          ♿ {meal.accessibilityInfo}
+                                        </div>
+                                      )}
                                     </div>
                                   ))}
                                 </div>
@@ -1841,14 +1976,33 @@ export default function Home() {
                     <h4 className="text-lg font-semibold">Must-Visit Attractions</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {planResult.attractions.map((place: any, idx: number) => (
-                        <Card key={idx}>
+                        <Card key={idx} className="border-muted bg-background shadow-lg hover:shadow-xl transition-all duration-300">
                           <CardContent className="pt-6">
-                            <h5 className="font-semibold">{place.name}</h5>
-                            <p className="text-sm text-muted-foreground">{place.location}</p>
-                            <p className="text-sm mt-2">{place.description}</p>
-                            <div className="flex items-center justify-between mt-3">
+                            <h5 className="font-semibold text-lg mb-2">{place.name}</h5>
+                            <p className="text-sm text-muted-foreground mb-3">{place.location}</p>
+                            <p className="text-sm mb-4">{place.description}</p>
+                            
+                            {/* Interest Match Badges */}
+                            {place.interestMatch && place.interestMatch.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mb-3">
+                                {place.interestMatch.map((interest: string, i: number) => (
+                                  <span key={i} className="text-xs bg-blue-100 text-blue-800 px-3 py-2 rounded-lg border border-blue-200 shadow-sm">
+                                    🎯 {interest}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            
+                            {/* Accessibility Info */}
+                            {place.accessibilityInfo && (
+                              <div className="text-xs text-purple-600 bg-purple-50 px-3 py-2 rounded-lg border border-purple-200 shadow-sm mb-3">
+                                ♿ {place.accessibilityInfo}
+                              </div>
+                            )}
+                            
+                            <div className="flex items-center justify-between mt-4">
                               <div className="text-sm">
-                                <div>₹{place.entryFee}</div>
+                                <div className="text-lg font-bold">₹{place.entryFee}</div>
                                 <div className="text-xs text-muted-foreground">
                                   {place.bestTime} • {place.duration}
                                 </div>
@@ -1861,7 +2015,7 @@ export default function Home() {
                               />
                             </div>
                             {place.tips && (
-                              <div className="text-xs mt-2 text-blue-600">💡 {place.tips}</div>
+                              <div className="text-xs mt-3 text-blue-600 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200 shadow-sm">💡 {place.tips}</div>
                             )}
                           </CardContent>
                         </Card>
@@ -1884,21 +2038,44 @@ export default function Home() {
                     <h4 className="text-lg font-semibold">Recommended Accommodations</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {planResult.accommodations.map((hotel: any, idx: number) => (
-                        <Card key={idx}>
+                        <Card key={idx} className="border-muted bg-background shadow-lg hover:shadow-xl transition-all duration-300">
                           <CardContent className="pt-6">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex-1">
-                                <h5 className="font-semibold">{hotel.name}</h5>
-                                <p className="text-sm text-muted-foreground">{hotel.location}</p>
-                                <p className="text-sm">{hotel.type}</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                  <span className="text-sm font-medium">₹{hotel.pricePerNight}/night</span>
+                                <h5 className="font-semibold text-lg mb-2">{hotel.name}</h5>
+                                <p className="text-sm text-muted-foreground mb-3">{hotel.location}</p>
+                                <p className="text-sm mb-3">{hotel.type}</p>
+                                <div className="flex items-center gap-2 mb-3">
+                                  <span className="text-lg font-medium">₹{hotel.pricePerNight}/night</span>
                                   {hotel.rating && <span className="text-xs">⭐ {hotel.rating}</span>}
                                 </div>
+                                
+                                {/* Accessibility Features */}
+                                {hotel.accessibilityFeatures && hotel.accessibilityFeatures.length > 0 && (
+                                  <div className="flex flex-wrap gap-2 mb-3">
+                                    {hotel.accessibilityFeatures.map((feature: string, i: number) => (
+                                      <span key={i} className="text-xs bg-purple-100 text-purple-800 px-3 py-2 rounded-lg border border-purple-200 shadow-sm">
+                                        ♿ {feature}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                                
+                                {/* Dietary Options */}
+                                {hotel.dietaryOptions && hotel.dietaryOptions.length > 0 && (
+                                  <div className="flex flex-wrap gap-2 mb-3">
+                                    {hotel.dietaryOptions.map((option: string, i: number) => (
+                                      <span key={i} className="text-xs bg-green-100 text-green-800 px-3 py-2 rounded-lg border border-green-200 shadow-sm">
+                                        🍽️ {option}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                                
                                 {hotel.amenities && (
-                                  <div className="flex flex-wrap gap-1 mt-2">
+                                  <div className="flex flex-wrap gap-2">
                                     {hotel.amenities.slice(0, 3).map((amenity: string, i: number) => (
-                                      <span key={i} className="text-xs bg-muted px-2 py-1 rounded">
+                                      <span key={i} className="text-xs bg-muted px-3 py-2 rounded-lg border border-muted shadow-sm">
                                         {amenity}
                                       </span>
                                     ))}
@@ -1929,14 +2106,33 @@ export default function Home() {
                     <h4 className="text-lg font-semibold">Recommended Restaurants</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {planResult.restaurants.map((restaurant: any, idx: number) => (
-                        <Card key={idx}>
+                        <Card key={idx} className="border-muted bg-background shadow-lg hover:shadow-xl transition-all duration-300">
                           <CardContent className="pt-6">
-                            <h5 className="font-semibold">{restaurant.name}</h5>
-                            <p className="text-sm text-muted-foreground">{restaurant.cuisine}</p>
-                            <p className="text-sm">{restaurant.location}</p>
-                            <div className="flex items-center justify-between mt-2">
+                            <h5 className="font-semibold text-lg mb-2">{restaurant.name}</h5>
+                            <p className="text-sm text-muted-foreground mb-3">{restaurant.cuisine}</p>
+                            <p className="text-sm mb-4">{restaurant.location}</p>
+                            
+                            {/* Dietary Compliance */}
+                            {restaurant.dietaryCompliance && restaurant.dietaryCompliance.length > 0 && (
+                              <div className="flex flex-wrap gap-2 mb-3">
+                                {restaurant.dietaryCompliance.map((diet: string, i: number) => (
+                                  <span key={i} className="text-xs bg-green-100 text-green-800 px-3 py-2 rounded-lg border border-green-200 shadow-sm">
+                                    ✓ {diet}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            
+                            {/* Accessibility Info */}
+                            {restaurant.accessibilityInfo && (
+                              <div className="text-xs text-purple-600 bg-purple-50 px-3 py-2 rounded-lg border border-purple-200 shadow-sm mb-3">
+                                ♿ {restaurant.accessibilityInfo}
+                              </div>
+                            )}
+                            
+                            <div className="flex items-center justify-between mt-4">
                               <div className="text-sm">
-                                <div className="font-medium">{restaurant.priceRange}</div>
+                                <div className="font-medium text-lg">{restaurant.priceRange}</div>
                                 <div className="text-xs text-muted-foreground">
                                   {restaurant.specialties?.join(", ")}
                                 </div>
@@ -2080,7 +2276,7 @@ export default function Home() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {suggestResult.suggestions?.map((suggestion: any, idx: number) => (
                     <div key={idx} className="relative">
-                      <Card className="h-full hover:shadow-md transition-shadow">
+                      <Card className="h-full border-muted bg-background shadow-lg hover:shadow-xl transition-all duration-300">
                         <CardHeader className="pb-3">
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex-1 min-w-0">
@@ -2097,6 +2293,14 @@ export default function Home() {
                               <div className="text-xs text-muted-foreground capitalize">
                                 {suggestion.budgetCategory}
                               </div>
+                              {/* Preference Score */}
+                              {suggestion.preferenceScore && (
+                                <div className="text-xs mt-1">
+                                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                    🎯 {suggestion.preferenceScore}% Match
+                                  </span>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </CardHeader>
@@ -2107,6 +2311,23 @@ export default function Home() {
                               <Calendar className="w-3 h-3 flex-shrink-0" />
                               <span className="text-muted-foreground break-words">{suggestion.bestTimeToVisit}</span>
                             </div>
+                            
+                            {/* Interest Match Badges */}
+                            {suggestion.interestMatch && suggestion.interestMatch.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {suggestion.interestMatch.slice(0, 3).map((interest: string, i: number) => (
+                                  <span key={i} className="text-xs bg-blue-100 text-blue-800 px-3 py-2 rounded-lg border border-blue-200 shadow-sm">
+                                    🎯 {interest}
+                                  </span>
+                                ))}
+                                {suggestion.interestMatch.length > 3 && (
+                                  <span className="text-xs text-muted-foreground">
+                                    +{suggestion.interestMatch.length - 3} more
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            
                             {suggestion.highlights && suggestion.highlights.length > 0 && (
                               <div className="text-xs text-muted-foreground break-words line-clamp-2">
                                 {suggestion.highlights.slice(0, 2).join(" • ")}
@@ -2153,38 +2374,66 @@ export default function Home() {
 
                       {/* Full Details Popup */}
                       {expandedSuggestion === idx && (
-                        <div className="suggestion-popup absolute top-0 left-0 z-20 bg-white border border-blue-200 rounded-lg shadow-2xl p-4 w-[90vw] max-w-6xl h-[80vh] max-h-[90vh] overflow-y-auto overflow-x-hidden resize-y min-h-[400px]">
-                          {/* Resize Handle */}
-                          <div className="absolute bottom-0 right-0 w-4 h-4 cursor-se-resize opacity-30 hover:opacity-60 transition-opacity">
-                            <div className="absolute bottom-1 right-1 w-2 h-2 border-r-2 border-b-2 border-gray-400"></div>
-                          </div>
-                          
+                        <div className={`suggestion-popup absolute top-0 left-0 z-20 bg-blue-50 border border-blue-200 rounded-lg shadow-2xl p-4 ${getPopupClasses().width} ${getPopupClasses().height} overflow-y-auto`}>
                           <div className="space-y-3">
                             {/* Header */}
-                            <div className="flex items-center justify-between border-b pb-3">
+                            <div className="flex items-center justify-between border-b border-blue-200 pb-3">
                               <div>
-                                <h3 className="text-2xl font-bold text-blue-600 break-words">{suggestion.destination}</h3>
+                                <h3 className="text-2xl font-bold text-blue-800 break-words">{suggestion.destination}</h3>
                                 <p className="text-muted-foreground break-words">{suggestion.state}, {suggestion.region}</p>
                               </div>
                               <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => {
-                                    const popup = document.querySelector('.suggestion-popup') as HTMLElement;
-                                    if (popup) {
-                                      if (popup.style.width === '95vw') {
-                                        popup.style.width = '90vw';
-                                        popup.style.height = '80vh';
-                                      } else {
-                                        popup.style.width = '95vw';
-                                        popup.style.height = '90vh';
-                                      }
-                                    }
-                                  }}
-                                  className="text-gray-400 hover:text-gray-600 text-lg px-2 py-1 rounded hover:bg-gray-100"
-                                  title="Maximize/Minimize"
-                                >
-                                  ⛶
-                                </button>
+                                {/* Width Adjustment Controls */}
+                                <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPopupWidth('sm');
+                                    }}
+                                    className={`px-2 py-1 text-xs rounded transition-colors ${
+                                      popupWidth === 'sm' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted-foreground/20'
+                                    }`}
+                                    title="Small"
+                                  >
+                                    SM
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPopupWidth('md');
+                                    }}
+                                    className={`px-2 py-1 text-xs rounded transition-colors ${
+                                      popupWidth === 'md' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted-foreground/20'
+                                    }`}
+                                    title="Medium"
+                                  >
+                                    MD
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPopupWidth('lg');
+                                    }}
+                                    className={`px-2 py-1 text-xs rounded transition-colors ${
+                                      popupWidth === 'lg' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted-foreground/20'
+                                    }`}
+                                    title="Large"
+                                  >
+                                    LG
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setPopupWidth('xl');
+                                    }}
+                                    className={`px-2 py-1 text-xs rounded transition-colors ${
+                                      popupWidth === 'xl' ? 'bg-primary text-primary-foreground' : 'hover:bg-muted-foreground/20'
+                                    }`}
+                                    title="Extra Large"
+                                  >
+                                    XL
+                                  </button>
+                                </div>
                                 <button
                                   onClick={() => setExpandedSuggestion(null)}
                                   className="text-gray-400 hover:text-gray-600 text-2xl"

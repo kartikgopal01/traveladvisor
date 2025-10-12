@@ -258,18 +258,126 @@ export default function TripsPage() {
                 </div>
               )}
 
+              {/* Preference Analysis for Trip Plans */}
+              {activeTab === 'plans' && t.result?.preferenceAnalysis && (
+                <div className="space-y-3">
+                  <div className="text-sm font-medium">🎯 Your Preferences Analysis</div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {/* Interests Coverage */}
+                    <div className="border border-blue-200 bg-blue-50 rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shadow-md">
+                          <span className="text-white text-sm font-bold">🎯</span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-semibold text-blue-800">Interests</div>
+                          <div className="text-xs text-blue-600 font-medium">{t.result.preferenceAnalysis.interestsCoverage.coveragePercentage}% Match</div>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        {t.result.preferenceAnalysis.interestsCoverage.matchedInterests.slice(0, 2).map((interest: string, idx: number) => (
+                          <div key={idx} className="text-xs bg-blue-100 text-blue-800 px-3 py-2 rounded-lg border border-blue-200 shadow-sm">
+                            ✓ {interest}
+                          </div>
+                        ))}
+                        {t.result.preferenceAnalysis.interestsCoverage.matchedInterests.length > 2 && (
+                          <div className="text-xs text-blue-600">
+                            +{t.result.preferenceAnalysis.interestsCoverage.matchedInterests.length - 2} more
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Dietary Compliance */}
+                    <div className="border border-green-200 bg-green-50 rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center shadow-md">
+                          <span className="text-white text-sm font-bold">🍽️</span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-semibold text-green-800">Dietary</div>
+                          <div className="text-xs text-green-600 font-medium">{t.result.preferenceAnalysis.dietaryCompliance.compliancePercentage}% Compliant</div>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        {t.result.preferenceAnalysis.dietaryCompliance.restrictions.slice(0, 2).map((restriction: string, idx: number) => (
+                          <div key={idx} className="text-xs bg-green-100 text-green-800 px-3 py-2 rounded-lg border border-green-200 shadow-sm">
+                            ✓ {restriction}
+                          </div>
+                        ))}
+                        {t.result.preferenceAnalysis.dietaryCompliance.restrictions.length > 2 && (
+                          <div className="text-xs text-green-600">
+                            +{t.result.preferenceAnalysis.dietaryCompliance.restrictions.length - 2} more
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Accessibility Compliance */}
+                    <div className="border border-purple-200 bg-purple-50 rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center shadow-md">
+                          <span className="text-white text-sm font-bold">♿</span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-sm font-semibold text-purple-800">Accessibility</div>
+                          <div className="text-xs text-purple-600 font-medium">{t.result.preferenceAnalysis.accessibilityCompliance.compliancePercentage}% Accessible</div>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        {t.result.preferenceAnalysis.accessibilityCompliance.requirements.slice(0, 2).map((requirement: string, idx: number) => (
+                          <div key={idx} className="text-xs bg-purple-100 text-purple-800 px-3 py-2 rounded-lg border border-purple-200 shadow-sm">
+                            ✓ {requirement}
+                          </div>
+                        ))}
+                        {t.result.preferenceAnalysis.accessibilityCompliance.requirements.length > 2 && (
+                          <div className="text-xs text-purple-600">
+                            +{t.result.preferenceAnalysis.accessibilityCompliance.requirements.length - 2} more
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {activeTab === 'plans' && t.result?.attractions?.length > 0 && (
                 <div>
                   <div className="text-sm font-medium mb-2">Top Attractions</div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {(expandedTripCard === t.id ? t.result.attractions : t.result.attractions.slice(0, 2)).map((p: any, i: number) => (
-                      <div key={i} className="border rounded p-3 text-sm flex items-center justify-between gap-3">
-                        <div>
-                          <div className="font-medium">{p.name}</div>
-                          <div className="text-xs text-muted-foreground">{p.location}</div>
+                      <div key={i} className="border border-muted/50 rounded-lg p-4 text-sm bg-background/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <div className="flex-1">
+                            <div className="font-medium text-lg mb-2">{p.name}</div>
+                            <div className="text-xs text-muted-foreground">{p.location}</div>
+                          </div>
+                          {p.mapsUrl && (
+                            <MapButton url={p.mapsUrl} title={p.name} size="sm" variant="outline" />
+                          )}
                         </div>
-                        {p.mapsUrl && (
-                          <MapButton url={p.mapsUrl} title={p.name} size="sm" variant="outline" />
+                        
+                        {/* Interest Match Badges */}
+                        {p.interestMatch && p.interestMatch.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mb-3">
+                            {p.interestMatch.slice(0, 2).map((interest: string, idx: number) => (
+                              <span key={idx} className="text-xs bg-blue-100 text-blue-800 px-3 py-2 rounded-lg border border-blue-200 shadow-sm">
+                                🎯 {interest}
+                              </span>
+                            ))}
+                            {p.interestMatch.length > 2 && (
+                              <span className="text-xs text-blue-600">
+                                +{p.interestMatch.length - 2} more
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Accessibility Info */}
+                        {p.accessibilityInfo && (
+                          <div className="text-xs text-purple-600 bg-purple-50 px-3 py-2 rounded-lg border border-purple-200 shadow-sm">
+                            ♿ {p.accessibilityInfo}
+                          </div>
                         )}
                       </div>
                     ))}
@@ -602,28 +710,54 @@ export default function TripsPage() {
                      return (
                        <div key={i} className="relative card-container">
                          <Card 
-                           className={`cursor-pointer transition-all duration-300 hover:shadow-md ${
+                           className={`cursor-pointer transition-all duration-300 border-muted bg-background shadow-lg hover:shadow-xl ${
                              isExpanded ? 'ring-2 ring-blue-500 shadow-xl z-10' : ''
                            }`}
                            onClick={() => handleCardClick(cardId)}
                          >
-                        <CardContent className="pt-6 space-y-3">
-                          <div className="space-y-1">
-                            <div className="font-medium text-lg">{s.destination}</div>
-                            <div className="text-sm text-muted-foreground">{s.state} • {s.region}</div>
-                            <div className="flex items-center justify-between">
-                              <div className="text-lg font-semibold text-foreground">
-                                Est. ₹{s.estimatedCost?.toLocaleString?.()}
-                              </div>
-                              <div className="text-sm font-medium text-foreground bg-muted px-2 py-1 rounded-full">
-                                {t.input?.days || s.days || s.samplePlan?.days || 'N/A'} days
+                        <CardContent className="pt-6 space-y-3 flex flex-col h-full">
+                          <div className="flex-1 space-y-3">
+                            <div className="space-y-1">
+                              <div className="font-medium text-lg">{s.destination}</div>
+                              <div className="text-sm text-muted-foreground">{s.state} • {s.region}</div>
+                              <div className="flex items-center justify-between">
+                                <div className="text-lg font-semibold text-foreground">
+                                  Est. ₹{s.estimatedCost?.toLocaleString?.()}
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="text-sm font-medium text-foreground bg-muted px-2 py-1 rounded-full">
+                                    {t.input?.days || s.days || s.samplePlan?.days || 'N/A'} days
+                                  </div>
+                                  {/* Preference Score */}
+                                  {s.preferenceScore && (
+                                    <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                      🎯 {s.preferenceScore}% Match
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
-                          </div>
 
-                          {/* Click hint */}
+                            {/* Interest Match Badges */}
+                            {s.interestMatch && s.interestMatch.length > 0 && (
+                              <div className="flex flex-wrap gap-2">
+                                {s.interestMatch.slice(0, 3).map((interest: string, i: number) => (
+                                  <span key={i} className="text-xs bg-blue-100 text-blue-800 px-3 py-2 rounded-lg border border-blue-200 shadow-sm">
+                                    🎯 {interest}
+                                  </span>
+                                ))}
+                                {s.interestMatch.length > 3 && (
+                                  <span className="text-xs text-muted-foreground">
+                                    +{s.interestMatch.length - 3} more
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Click hint - moved to bottom */}
                           {!isExpanded && (
-                            <div className="text-xs text-muted-foreground text-center pt-2 border-t">
+                            <div className="text-xs text-muted-foreground text-center pt-3 mt-auto border-t">
                               Click to see places to visit
                             </div>
                           )}
@@ -632,11 +766,17 @@ export default function TripsPage() {
 
                        {/* Pop-up Overlay */}
                        {isExpanded && (
-                         <div className={`absolute top-0 left-0 z-20 bg-background/95 backdrop-blur-lg border border-border/50 rounded-lg shadow-2xl p-4 ${getPopupClasses().width} ${getPopupClasses().height} overflow-y-auto`}>
+                         <div className={`absolute top-0 left-0 z-20 bg-blue-50 border border-blue-200 rounded-lg shadow-2xl p-4 ${getPopupClasses().width} ${getPopupClasses().height} overflow-y-auto`}>
                            <div className="space-y-3">
-                            <div className="flex items-center justify-between border-b pb-2">
-                              <h3 className="font-semibold text-lg text-foreground">{s.destination}</h3>
+                            <div className="flex items-center justify-between border-b border-blue-200 pb-2">
+                              <h3 className="font-semibold text-lg text-blue-800">{s.destination}</h3>
                               <div className="flex items-center gap-2">
+                                {/* Preference Score */}
+                                {s.preferenceScore && (
+                                  <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                    🎯 {s.preferenceScore}% Match
+                                  </div>
+                                )}
                                 {/* Width Adjustment Controls */}
                                 <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
                                   <button
@@ -707,6 +847,22 @@ export default function TripsPage() {
                                 </button>
                               </div>
                             </div>
+
+                            {/* Interest Match Badges */}
+                            {s.interestMatch && s.interestMatch.length > 0 && (
+                              <div>
+                                <h4 className="font-medium text-sm mb-2 text-foreground">
+                                  🎯 Matches Your Interests
+                                </h4>
+                                <div className="flex flex-wrap gap-2">
+                                  {s.interestMatch.map((interest: string, i: number) => (
+                                    <span key={i} className="text-xs bg-blue-100 text-blue-800 px-3 py-2 rounded-lg border border-blue-200 shadow-sm">
+                                      🎯 {interest}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
 
                             {/* Budget Breakdown */}
                             {s.breakdown && (
@@ -835,6 +991,30 @@ export default function TripsPage() {
                                      <div key={idx} className="p-2 bg-muted rounded text-sm">
                                        <div className="font-medium text-sm mb-1">{attraction.name}</div>
                                        <div className="text-xs text-muted-foreground mb-2">{attraction.location}</div>
+                                       
+                                       {/* Interest Match Badges */}
+                                       {attraction.interestMatch && attraction.interestMatch.length > 0 && (
+                                         <div className="flex flex-wrap gap-2 mb-2">
+                                           {attraction.interestMatch.slice(0, 2).map((interest: string, i: number) => (
+                                             <span key={i} className="text-xs bg-blue-100 text-blue-800 px-3 py-2 rounded-lg border border-blue-200 shadow-sm">
+                                               🎯 {interest}
+                                             </span>
+                                           ))}
+                                           {attraction.interestMatch.length > 2 && (
+                                             <span className="text-xs text-blue-600">
+                                               +{attraction.interestMatch.length - 2} more
+                                             </span>
+                                           )}
+                                         </div>
+                                       )}
+                                       
+                                       {/* Accessibility Info */}
+                                       {attraction.accessibilityInfo && (
+                                         <div className="text-xs text-purple-600 bg-purple-50 px-3 py-2 rounded-lg border border-purple-200 shadow-sm mb-2">
+                                           ♿ {attraction.accessibilityInfo}
+                                         </div>
+                                       )}
+                                       
                                        {attraction.mapsUrl && (
                                          <MapButton
                                            url={attraction.mapsUrl}
@@ -868,6 +1048,23 @@ export default function TripsPage() {
                                        <div className="text-xs text-muted-foreground mb-2">
                                          ₹{accommodation.price?.toLocaleString?.()}/night
                                        </div>
+                                       
+                                       {/* Accessibility Features */}
+                                       {accommodation.accessibilityFeatures && accommodation.accessibilityFeatures.length > 0 && (
+                                         <div className="flex flex-wrap gap-2 mb-2">
+                                           {accommodation.accessibilityFeatures.slice(0, 2).map((feature: string, i: number) => (
+                                             <span key={i} className="text-xs bg-purple-100 text-purple-800 px-3 py-2 rounded-lg border border-purple-200 shadow-sm">
+                                               ♿ {feature}
+                                             </span>
+                                           ))}
+                                           {accommodation.accessibilityFeatures.length > 2 && (
+                                             <span className="text-xs text-purple-600">
+                                               +{accommodation.accessibilityFeatures.length - 2} more
+                                             </span>
+                                           )}
+                                         </div>
+                                       )}
+                                       
                                        {accommodation.mapsUrl && (
                                          <MapButton
                                            url={accommodation.mapsUrl}
@@ -894,6 +1091,23 @@ export default function TripsPage() {
                                      <div key={idx} className="p-2 bg-muted rounded text-sm">
                                        <div className="font-medium text-sm mb-1">{restaurant.name}</div>
                                        <div className="text-xs text-muted-foreground mb-2">{restaurant.cuisine}</div>
+                                       
+                                       {/* Dietary Compliance */}
+                                       {restaurant.dietaryCompliance && restaurant.dietaryCompliance.length > 0 && (
+                                         <div className="flex flex-wrap gap-2 mb-2">
+                                           {restaurant.dietaryCompliance.slice(0, 2).map((diet: string, i: number) => (
+                                             <span key={i} className="text-xs bg-green-100 text-green-800 px-3 py-2 rounded-lg border border-green-200 shadow-sm">
+                                               ✓ {diet}
+                                             </span>
+                                           ))}
+                                           {restaurant.dietaryCompliance.length > 2 && (
+                                             <span className="text-xs text-green-600">
+                                               +{restaurant.dietaryCompliance.length - 2} more
+                                             </span>
+                                           )}
+                                         </div>
+                                       )}
+                                       
                                        {restaurant.mapsUrl && (
                                          <MapButton
                                            url={restaurant.mapsUrl}
