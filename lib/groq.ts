@@ -11,7 +11,8 @@ export function getGroqClient() {
 }
 
 export function getGroqModel() {
-  // Default to a currently supported Groq model; override with GROQ_MODEL
+  // Default to a currently supported GROQ model
+  // Using llama-3.1-8b-instant as it's still supported
   return process.env.GROQ_MODEL || "llama-3.1-8b-instant";
 }
 

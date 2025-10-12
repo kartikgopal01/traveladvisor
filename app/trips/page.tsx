@@ -1,6 +1,6 @@
 "use client";
 import useSWR from "swr";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MapButton } from "@/components/maps/map-button";
@@ -18,33 +18,58 @@ export default function TripsPage() {
   const [popupWidth, setPopupWidth] = useState<'sm' | 'md' | 'lg' | 'xl'>('md');
   const [expandedTripCard, setExpandedTripCard] = useState<string | null>(null);
   
+  // Handle keyboard events for popup
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && expandedCard) {
+        setExpandedCard(null);
+        // Restore body scroll
+        document.body.style.overflow = '';
+      }
+    };
+
+    // Prevent body scroll when popup is open
+    if (expandedCard) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      // Restore body scroll on cleanup
+      document.body.style.overflow = '';
+    };
+  }, [expandedCard]);
+  
   // Get popup width and height classes
   const getPopupClasses = () => {
     switch (popupWidth) {
       case 'sm': return {
         width: 'w-[90vw] sm:w-[70vw] md:w-[60vw] lg:w-[50vw] max-w-2xl',
         height: 'h-[70vh] max-h-[80vh]',
-        position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+        position: 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50'
       };
       case 'md': return {
         width: 'w-[95vw] sm:w-[80vw] md:w-[70vw] lg:w-[60vw] max-w-4xl',
         height: 'h-[80vh] max-h-[85vh]',
-        position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+        position: 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50'
       };
       case 'lg': return {
         width: 'w-[98vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] max-w-6xl',
         height: 'h-[85vh] max-h-[90vh]',
-        position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+        position: 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50'
       };
       case 'xl': return {
         width: 'w-[99vw] sm:w-[95vw] md:w-[90vw] lg:w-[80vw] max-w-7xl',
         height: 'h-[90vh] max-h-[95vh]',
-        position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+        position: 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50'
       };
       default: return {
         width: 'w-[95vw] sm:w-[80vw] md:w-[70vw] lg:w-[60vw] max-w-4xl',
         height: 'h-[80vh] max-h-[85vh]',
-        position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+        position: 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50'
       };
     }
   };
@@ -774,87 +799,93 @@ export default function TripsPage() {
 
                        {/* Pop-up Overlay */}
                        {isExpanded && (
-                         <div className={`${getPopupClasses().position} z-20 bg-blue-50 border border-blue-200 rounded-lg shadow-2xl p-3 sm:p-4 ${getPopupClasses().width} ${getPopupClasses().height}`}>
-                           <div className="space-y-2 sm:space-y-3">
-                             <div className="flex items-center justify-between border-b border-blue-200 pb-2">
-                               <h3 className="font-semibold text-mobile-lg text-blue-800">{s.destination}</h3>
-                              <div className="flex items-center gap-2">
-                                {/* Preference Score */}
-                                {s.preferenceScore && (
-                                  <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                                    🎯 {s.preferenceScore}% Match
+                         <>
+                           {/* Backdrop */}
+                           <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setExpandedCard(null)} />
+                           
+                           {/* Popup */}
+                           <div className={`${getPopupClasses().position} bg-blue-50 border border-blue-200 rounded-lg shadow-2xl p-3 sm:p-4 ${getPopupClasses().width} ${getPopupClasses().height} overflow-y-auto max-w-[95vw] max-h-[95vh]`}>
+                             <div className="space-y-2 sm:space-y-3">
+                               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-blue-200 pb-2 gap-3">
+                                 <h3 className="font-semibold text-lg sm:text-xl text-blue-800">{s.destination}</h3>
+                                <div className="flex items-center gap-2">
+                                  {/* Preference Score */}
+                                  {s.preferenceScore && (
+                                    <div className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                      🎯 {s.preferenceScore}% Match
+                                    </div>
+                                  )}
+                                  {/* Width Adjustment Controls - Hidden on mobile */}
+                                  <div className="hidden sm:flex items-center gap-1 bg-muted rounded-lg p-1">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setPopupWidth('sm');
+                                      }}
+                                      className={`px-1 sm:px-2 py-1 rounded text-xs font-medium transition-all touch-target ${
+                                        popupWidth === 'sm'
+                                          ? 'bg-background text-foreground shadow-sm'
+                                          : 'text-muted-foreground hover:text-foreground'
+                                      }`}
+                                      title="Small (1/3 width, 80% height)"
+                                    >
+                                      S
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setPopupWidth('md');
+                                      }}
+                                      className={`px-1 sm:px-2 py-1 rounded text-xs font-medium transition-all touch-target ${
+                                        popupWidth === 'md'
+                                          ? 'bg-background text-foreground shadow-sm'
+                                          : 'text-muted-foreground hover:text-foreground'
+                                      }`}
+                                      title="Medium (1/2 width, 70% height)"
+                                    >
+                                      M
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setPopupWidth('lg');
+                                      }}
+                                      className={`px-1 sm:px-2 py-1 rounded text-xs font-medium transition-all touch-target ${
+                                        popupWidth === 'lg'
+                                          ? 'bg-background text-foreground shadow-sm'
+                                          : 'text-muted-foreground hover:text-foreground'
+                                      }`}
+                                      title="Large (2/3 width, 60% height)"
+                                    >
+                                      L
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setPopupWidth('xl');
+                                      }}
+                                      className={`px-1 sm:px-2 py-1 rounded text-xs font-medium transition-all touch-target ${
+                                        popupWidth === 'xl'
+                                          ? 'bg-background text-foreground shadow-sm'
+                                          : 'text-muted-foreground hover:text-foreground'
+                                      }`}
+                                      title="Extra Large (3/4 width, 50% height)"
+                                    >
+                                      XL
+                                    </button>
                                   </div>
-                                )}
-                                {/* Width Adjustment Controls */}
-                                <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setPopupWidth('sm');
+                                      setExpandedCard(null);
                                     }}
-                                    className={`px-1 sm:px-2 py-1 rounded text-xs font-medium transition-all touch-target ${
-                                      popupWidth === 'sm'
-                                        ? 'bg-background text-foreground shadow-sm'
-                                        : 'text-muted-foreground hover:text-foreground'
-                                    }`}
-                                    title="Small (1/3 width, 80% height)"
+                                    className="text-muted-foreground hover:text-foreground text-xl touch-target mobile-hover hover:bg-gray-200 rounded-full p-1 transition-colors"
+                                    title="Close popup"
                                   >
-                                    S
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setPopupWidth('md');
-                                    }}
-                                    className={`px-1 sm:px-2 py-1 rounded text-xs font-medium transition-all touch-target ${
-                                      popupWidth === 'md'
-                                        ? 'bg-background text-foreground shadow-sm'
-                                        : 'text-muted-foreground hover:text-foreground'
-                                    }`}
-                                    title="Medium (1/2 width, 70% height)"
-                                  >
-                                    M
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setPopupWidth('lg');
-                                    }}
-                                    className={`px-1 sm:px-2 py-1 rounded text-xs font-medium transition-all touch-target ${
-                                      popupWidth === 'lg'
-                                        ? 'bg-background text-foreground shadow-sm'
-                                        : 'text-muted-foreground hover:text-foreground'
-                                    }`}
-                                    title="Large (2/3 width, 60% height)"
-                                  >
-                                    L
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setPopupWidth('xl');
-                                    }}
-                                    className={`px-1 sm:px-2 py-1 rounded text-xs font-medium transition-all touch-target ${
-                                      popupWidth === 'xl'
-                                        ? 'bg-background text-foreground shadow-sm'
-                                        : 'text-muted-foreground hover:text-foreground'
-                                    }`}
-                                    title="Extra Large (3/4 width, 50% height)"
-                                  >
-                                    XL
+                                    ×
                                   </button>
                                 </div>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setExpandedCard(null);
-                                  }}
-                                  className="text-muted-foreground hover:text-foreground text-xl touch-target mobile-hover"
-                                >
-                                  ×
-                                </button>
                               </div>
-                            </div>
 
                             {/* Interest Match Badges */}
                             {s.interestMatch && s.interestMatch.length > 0 && (
@@ -1288,6 +1319,7 @@ ${s.localTips?.map((tip: string) => `• ${tip}`).join('\n') || 'N/A'}
                              </div>
                           </div>
                           </div>
+                        </>
                         )}
                     </div>
                     );

@@ -289,33 +289,33 @@ export default function Home() {
     switch (popupWidth) {
       case 'sm':
         return { 
-          width: 'w-[90vw] sm:w-[70vw] md:w-[60vw] lg:w-[50vw] max-w-2xl', 
-          height: 'h-[70vh] max-h-[80vh]',
-          position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+          width: 'w-[95vw] sm:w-[80vw] md:w-[60vw] lg:w-[50vw] xl:w-[45vw] max-w-2xl', 
+          height: 'h-[80vh] max-h-[85vh]',
+          position: 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50'
         };
       case 'md':
         return { 
-          width: 'w-[95vw] sm:w-[80vw] md:w-[70vw] lg:w-[60vw] max-w-4xl', 
-          height: 'h-[80vh] max-h-[85vh]',
-          position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+          width: 'w-[95vw] sm:w-[85vw] md:w-[70vw] lg:w-[60vw] xl:w-[55vw] max-w-4xl', 
+          height: 'h-[85vh] max-h-[90vh]',
+          position: 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50'
         };
       case 'lg':
         return { 
-          width: 'w-[98vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] max-w-6xl', 
-          height: 'h-[85vh] max-h-[90vh]',
-          position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+          width: 'w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] xl:w-[65vw] max-w-6xl', 
+          height: 'h-[90vh] max-h-[95vh]',
+          position: 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50'
         };
       case 'xl':
         return { 
-          width: 'w-[99vw] sm:w-[95vw] md:w-[90vw] lg:w-[80vw] max-w-7xl', 
-          height: 'h-[90vh] max-h-[95vh]',
-          position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+          width: 'w-[95vw] sm:w-[95vw] md:w-[90vw] lg:w-[80vw] xl:w-[75vw] max-w-7xl', 
+          height: 'h-[95vh] max-h-[98vh]',
+          position: 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50'
         };
       default:
         return { 
-          width: 'w-[98vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] max-w-6xl', 
-          height: 'h-[85vh] max-h-[90vh]',
-          position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+          width: 'w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] xl:w-[65vw] max-w-6xl', 
+          height: 'h-[90vh] max-h-[95vh]',
+          position: 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50'
         };
     }
   };
@@ -326,6 +326,26 @@ export default function Home() {
       setExpandedSuggestion(null);
     }
   };
+
+  // Handle keyboard events for popup
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && expandedSuggestion !== null) {
+        setExpandedSuggestion(null);
+      }
+    };
+
+    if (expandedSuggestion !== null) {
+      document.addEventListener('keydown', handleKeyDown);
+      // Prevent body scroll when popup is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'unset';
+    };
+  }, [expandedSuggestion]);
 
   // Form states for suggest
   const [budgetINR, setBudgetINR] = useState(50000);
@@ -1430,7 +1450,7 @@ export default function Home() {
                   Get Destination Suggestions
                 </CardTitle>
                 <CardDescription className="text-mobile-sm">
-                  Let AI suggest the best Indian destinations based on your budget and preferences
+                  Let AI suggest 5-15 Indian destinations based on your budget and preferences
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-6 p-mobile">
@@ -2309,11 +2329,11 @@ export default function Home() {
                   Destination Suggestions
                 </CardTitle>
                 <CardDescription>
-                  {suggestResult.suggestions?.length} destinations matching your preferences
+                  {suggestResult.suggestions?.length} destinations matching your preferences (5-15 based on budget)
                 </CardDescription>
               </CardHeader>
-              <CardContent onClick={handleClickOutside}>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" onClick={handleClickOutside}>
                   {suggestResult.suggestions?.map((suggestion: any, idx: number) => (
                     <div key={idx} className="relative">
                       <Card className="h-full border-muted bg-background shadow-lg hover:shadow-xl transition-all duration-300">
@@ -2414,7 +2434,14 @@ export default function Home() {
 
                       {/* Full Details Popup */}
                       {expandedSuggestion === idx && (
-                        <div className={`suggestion-popup ${getPopupClasses().position} z-20 bg-blue-50 border border-blue-200 rounded-lg shadow-2xl p-4 ${getPopupClasses().width} ${getPopupClasses().height} overflow-y-auto`}>
+                        <>
+                          {/* Backdrop */}
+                          <div 
+                            className="fixed inset-0 bg-black/50 z-40"
+                            onClick={() => setExpandedSuggestion(null)}
+                          />
+                          {/* Popup */}
+                          <div className={`suggestion-popup ${getPopupClasses().position} bg-blue-50 border border-blue-200 rounded-lg shadow-2xl p-4 ${getPopupClasses().width} ${getPopupClasses().height} overflow-y-auto max-w-[95vw] max-h-[95vh]`}>
                           <div className="space-y-3">
                             {/* Header */}
                             <div className="flex items-center justify-between border-b border-blue-200 pb-3">
@@ -2476,7 +2503,8 @@ export default function Home() {
                                 </div>
                                 <button
                                   onClick={() => setExpandedSuggestion(null)}
-                                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                                  className="text-gray-400 hover:text-gray-600 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
+                                  title="Close popup"
                                 >
                                   ×
                                 </button>
@@ -2520,7 +2548,7 @@ export default function Home() {
                                             </div>
                                             {activity.location && (
                                               <MapButton
-                                                url={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activity.location)}, ${encodeURIComponent(suggestion.destination)}, ${encodeURIComponent(suggestion.state)}, India`}
+                                                url={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(activity.location)}, ${encodeURIComponent(suggestion.destination)}, ${encodeURIComponent(preferredLocation || suggestion.state)}, India`}
                                                 title={activity.title}
                                                 size="sm"
                                                 variant="outline"
@@ -2545,7 +2573,7 @@ export default function Home() {
                                           </div>
                                           {day.accommodation.location && (
                                             <MapButton
-                                              url={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(day.accommodation.location)}, ${encodeURIComponent(suggestion.destination)}, ${encodeURIComponent(suggestion.state)}, India`}
+                                              url={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(day.accommodation.location)}, ${encodeURIComponent(suggestion.destination)}, ${encodeURIComponent(preferredLocation || suggestion.state)}, India`}
                                               title={day.accommodation.name}
                                               size="sm"
                                               variant="outline"
@@ -2676,7 +2704,8 @@ export default function Home() {
                               </div>
                             </div>
                           </div>
-                        </div>
+                          </div>
+                        </>
                       )}
                     </div>
                   ))}
@@ -2692,7 +2721,7 @@ export default function Home() {
                     name: suggestion.destination,
                     location: `${suggestion.state}, India`,
                     mapsUrl: suggestion.samplePlan?.accommodations?.[0]?.mapsUrl ||
-                            `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestion.destination)}, ${suggestion.state}, India`,
+                            `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(suggestion.destination)}, ${encodeURIComponent(preferredLocation || suggestion.state)}, India`,
                     day: index + 1,
                   }))}
                   title="Compare All Suggested Destinations"

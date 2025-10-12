@@ -339,6 +339,90 @@ function extractJson(text: string) {
   return null;
 }
 
+function extractPartialSuggestions(text: string): any[] {
+  const suggestions: any[] = [];
+  
+  try {
+    // Try to extract suggestions from truncated JSON
+    const suggestionsMatch = text.match(/"suggestions"\s*:\s*\[([\s\S]*?)(?:\]|$)/);
+    if (suggestionsMatch) {
+      const suggestionsText = suggestionsMatch[1];
+      
+      // Try to extract individual suggestion objects
+      const suggestionMatches = suggestionsText.match(/\{[^{}]*"destination"[^{}]*\}/g);
+      if (suggestionMatches) {
+        for (const match of suggestionMatches) {
+          try {
+            let cleaned = match
+              .replace(/,(\s*[}\]])/g, "$1")
+              .replace(/[\u201C\u201D\u201E\u201F\u2033]/g, '"')
+              .replace(/[\u2018\u2019\u201B]/g, "'")
+              .replace(/\n/g, " ")
+              .replace(/\r/g, " ")
+              .replace(/\t/g, " ")
+              .replace(/\s+/g, " ")
+              .trim();
+            
+            // Try to complete incomplete JSON objects
+            if (!cleaned.endsWith('}')) {
+              // Find the last complete field
+              const lastCompleteField = cleaned.lastIndexOf('",');
+              if (lastCompleteField !== -1) {
+                cleaned = cleaned.substring(0, lastCompleteField + 1) + '}';
+              } else {
+                cleaned += '}';
+              }
+            }
+            
+            const parsed = JSON.parse(cleaned);
+            if (parsed.destination) {
+              // Fill in missing fields with defaults
+              const suggestion = {
+                destination: parsed.destination,
+                state: parsed.state || "Unknown",
+                region: parsed.region || "Unknown",
+                bestTimeToVisit: parsed.bestTimeToVisit || "Year-round",
+                estimatedCost: parsed.estimatedCost || 20000,
+                budgetCategory: parsed.budgetCategory || "mid-range",
+                highlights: parsed.highlights || ["Local attractions"],
+                interestMatch: parsed.interestMatch || ["General sightseeing"],
+                preferenceScore: parsed.preferenceScore || 70,
+                breakdown: parsed.breakdown || {
+                  flights: 0,
+                  accommodation: 8000,
+                  food: 4000,
+                  localTransport: 1000,
+                  attractions: 6000,
+                  miscellaneous: 1000
+                },
+                transportation: parsed.transportation || {
+                  toDestination: {
+                    mode: "Bus",
+                    duration: "4 hours",
+                    cost: 800,
+                    tips: "Book in advance"
+                  }
+                },
+                localTips: parsed.localTips || ["Plan your visit in advance"],
+                safetyNotes: parsed.safetyNotes || ["Follow local guidelines"],
+                culturalNotes: parsed.culturalNotes || ["Respect local customs"]
+              };
+              suggestions.push(suggestion);
+            }
+          } catch (e) {
+            // Skip this suggestion if it can't be parsed
+            continue;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Partial extraction failed:", e);
+  }
+  
+  return suggestions;
+}
+
 function extractFallbackSuggestions(text: string): any[] {
   const suggestions: any[] = [];
   
@@ -386,7 +470,7 @@ function extractFallbackSuggestions(text: string): any[] {
   return suggestions;
 }
 
-async function retryWithMinimalSchema(request: Request, maxPlaces: number) {
+async function retryWithMinimalSchema(requestData: any, maxPlaces: number) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
@@ -399,7 +483,7 @@ async function retryWithMinimalSchema(request: Request, maxPlaces: number) {
     interests = [],
     preferredSeason,
     groupSize = 2
-  } = await request.json();
+  } = requestData;
   
   if (!budgetINR) return NextResponse.json({ error: "Missing budgetINR" }, { status: 400 });
 
@@ -488,7 +572,7 @@ TRANSPORTATION COST REQUIREMENTS:
       const chat = await groq.chat.completions.create({
         model,
         messages: [
-          { role: "system", content: "You are a helpful travel planner that outputs ONLY valid JSON. Never use markdown formatting, code blocks, or any text outside the JSON structure. Always validate your JSON before responding." },
+          { role: "system", content: "You are a travel planner. Output ONLY valid JSON. No markdown, no explanations. Keep responses concise." },
           { role: "user", content: prompt },
         ],
         temperature: 0.7,
@@ -580,72 +664,41 @@ export async function POST(request: Request) {
     accommodationLevel = "budget";
   }
   
-  // Reduce number of places to prevent response truncation
-  // AI models often have token limits that can cause truncation
-  // Based on the detailed JSON schema, each place generates ~3000-4000 characters
-  // Very conservative limit to stay well under 30K character limit
-  const maxPlaces = 4; // Extremely conservative limit to prevent truncation
-  if (numberOfPlaces > maxPlaces) {
+  // Adjust number of places based on budget with reasonable limits
+  // Minimum 5 places, maximum 15 places as requested
+  const minPlaces = 5;
+  const maxPlaces = 15;
+  
+  if (numberOfPlaces < minPlaces) {
+    numberOfPlaces = minPlaces;
+    console.log(`Increased number of places to minimum ${minPlaces}`);
+  } else if (numberOfPlaces > maxPlaces) {
     numberOfPlaces = maxPlaces;
-    console.log(`Reduced number of places from original to ${maxPlaces} to prevent truncation`);
+    console.log(`Reduced number of places to maximum ${maxPlaces}`);
   }
 
-  const prompt = `You are an expert Indian travel planner. Suggest EXACTLY ${numberOfPlaces} diverse destinations ONLY within ${preferredLocation || 'India'} that fit within a total budget of ₹${budgetINR.toLocaleString()} INR for a ${days}-day trip.
+  const prompt = `Suggest ${numberOfPlaces} diverse destinations in ${preferredLocation || 'India'} for ₹${budgetINR.toLocaleString()} budget, ${days} days, ${groupSize} travelers.
 
-IMPORTANT: Generate ${numberOfPlaces} unique destinations - do not repeat similar places. Include variety in:
-- Different states/regions within the specified area
-- Different types of experiences (beaches, mountains, cities, heritage sites, wildlife, etc.)
-- Different budget categories (mix of budget, mid-range, luxury options)
-- Different seasons and climates
-- Different cultural experiences
+Requirements:
+- Travel Style: ${travelStyle}
+- Interests: ${interestsList || "General sightseeing"}
+- Season: ${preferredSeason || "Any"}
+- ${preferredLocation ? `Location: ${preferredLocation} only` : "Diverse Indian destinations"}
+- Include variety: different states, experiences, budget levels
+- Each destination must fit within ₹${budgetINR} total budget
 
-CRITICAL REQUIREMENT: ALL suggestions MUST be within ${preferredLocation || 'India'}. Do not suggest destinations outside this area.
-
-Budget Analysis:
-- Total Budget: ₹${budgetINR.toLocaleString()}
-- Days: ${days}
-- Group Size: ${groupSize} travelers
-- Include Accommodation: ${includeAccommodation ? 'Yes' : 'No'}
-${includeAccommodation ? `- Accommodation Budget: ₹${accommodationBudget.toLocaleString()} (40% of total budget)` : ''}
-${includeAccommodation ? `- Activity Budget: ₹${activityBudget.toLocaleString()} (60% of total budget)` : ''}
-- Activity Budget per person per day: ₹${activityBudgetPerPerson.toFixed(0)}
-- Accommodation Level: ${accommodationLevel}
-- Number of Places: ${numberOfPlaces} (scaled based on activity budget)
-- Preferred Location: ${preferredLocation || 'Anywhere in India'}
-
-Travel Style: ${travelStyle}
-
-CRITICAL USER PREFERENCES ANALYSIS:
-${interestsList ? `🎯 INTERESTS & ACTIVITIES: ${interestsList}
-- Prioritize destinations that excel in these interest areas
-- Include specific activities and attractions for each interest
-- Highlight how each destination matches user interests` : "🎯 INTERESTS: General sightseeing"}
-
-Preferred Season: ${preferredSeason || "Any"}
-${preferredLocation ? `STRICT LOCATION FILTER: Only suggest destinations in ${preferredLocation}` : ""}
-
-IMPORTANT BUDGET GUIDELINES:
-- For budget accommodation (₹${activityBudgetPerPerson.toFixed(0)}/person/day): Focus on hostels, guesthouses, budget hotels
-- For mid-range accommodation: Focus on 3-star hotels, homestays, boutique properties
-- For luxury accommodation: Focus on 4-5 star hotels, resorts, premium properties
-- Adjust number of attractions and activities based on activity budget level
-- Include free/low-cost activities for budget travelers
-- Include premium experiences for luxury travelers
-${includeAccommodation ? `- ACCOMMODATION REQUIREMENTS: Must include specific accommodation suggestions within ₹${accommodationBudgetPerDay.toFixed(0)}/day budget` : ''}
-${includeAccommodation ? `- ACCOMMODATION ROUTES: Generate Google Maps routes connecting accommodations to tourist places` : ''}
-
-Return JSON with this FRONTEND-COMPATIBLE schema (to prevent truncation):
+Return JSON:
 {
   "suggestions": [
     {
-      "destination": string,
-      "state": string,
-      "region": string,
-      "bestTimeToVisit": string,
+      "destination": "string",
+      "state": "string", 
+      "region": "string",
+      "bestTimeToVisit": "string",
       "estimatedCost": number,
-      "budgetCategory": "budget" | "mid-range" | "luxury",
-      "highlights": [string],
-      "interestMatch": [string],
+      "budgetCategory": "budget|mid-range|luxury",
+      "highlights": ["string"],
+      "interestMatch": ["string"],
       "preferenceScore": number,
       "breakdown": {
         "flights": number,
@@ -657,117 +710,20 @@ Return JSON with this FRONTEND-COMPATIBLE schema (to prevent truncation):
       },
       "transportation": {
         "toDestination": {
-          "mode": string,
-          "duration": string,
+          "mode": "string",
+          "duration": "string",
           "cost": number,
-          "tips": string
-        },
-        "availableOptions": [
-            {
-              "mode": string,
-            "duration": string,
-            "cost": number,
-              "description": string,
-            "tips": string
-          }
-        ]
+          "tips": "string"
+        }
       },
-      "localTips": [string]
+      "localTips": ["string"]
     }
   ]
 }
 
-CRITICAL JSON FORMATTING RULES:
-- Output ONLY valid JSON - no markdown, no code blocks, no explanations
-- Start with { and end with }
-- Use double quotes for all strings
-- No trailing commas
-- No comments or extra text outside the JSON
-- Ensure all strings are properly escaped
-- Validate JSON structure before responding
+Rules: Valid JSON only. Cost <= ₹${budgetINR}. Realistic costs. Keep responses concise.`;
 
-Rules:
-- Only valid JSON output, no markdown.
-- Keep responses concise to prevent truncation.
-- Ensure estimatedCost <= ${budgetINR} for each suggestion.
-- ${preferredLocation ? `LOCATION RESTRICTION: ALL destinations MUST be within ${preferredLocation} only.` : 'Include diverse destinations across different regions of India.'}
-- Provide realistic costs in Indian Rupees (INR).
-
-CRITICAL PREFERENCE ANALYSIS REQUIREMENTS:
-- For each destination, specify which user interests it matches in "interestMatch" array
-- Calculate a "preferenceScore" (0-100) based on how well the destination matches user interests
-- Prioritize destinations with higher preference scores
-- Highlight specific activities and attractions that align with user interests
-- Provide detailed explanations of how each destination caters to user preferences
-- ROAD TRANSPORTATION COST REQUIREMENTS (NO FLIGHTS):
-  * ALWAYS provide realistic road transportation costs - never use ₹0
-  * For trains: ₹500-3,000 depending on class and distance  
-  * For buses: ₹200-1,500 depending on distance and type
-  * For taxis/cabs: ₹500-2,000 per day depending on usage
-  * For self-drive: ₹1,000-3,000 per day including fuel and rental
-  * For local transport: ₹200-800 per day for city travel
-  * Consider distance: Longer distances = higher costs
-  * Consider budget level: Luxury travelers pay more for comfort
-  * EXCLUDE UNAVAILABLE COSTS: If transportation mode is not available or not applicable, exclude it from breakdown
-  * MULTIPLE ROAD TRANSPORTATION OPTIONS: Provide 3-4 different road transportation options in availableOptions array
-  * ROAD TRANSPORTATION VARIETY: Include trains, buses, taxis, self-drive options where applicable (NO FLIGHTS)
-  * COST COMPARISON: Show different price ranges for different comfort levels and speeds
-  * SPECIFIC ROUTE REQUIREMENTS: For each transportation option, provide EXACT duration and cost to the specific destination (${preferredLocation || 'destination state/district'})
-  * ROUTE-SPECIFIC DETAILS: Each option must show "Duration: X hours" and "Cost: ₹X" for the specific route to destination
-  * EXACT FORMAT REQUIREMENTS: 
-    - duration field must be in format "X hours" or "X hours Y minutes" (e.g., "2 hours", "8 hours 30 minutes")
-    - cost field must be a number (e.g., 4500, 1200, 800)
-    - NEVER use ₹0 for cost - always provide realistic costs
-    - Include route-specific information in description field
-  * CRITICAL COST REQUIREMENTS:
-    - Trains: Minimum ₹400, Maximum ₹3,000 (NEVER use 0)
-    - Buses: Minimum ₹200, Maximum ₹1,500 (NEVER use 0)
-    - Taxis: Minimum ₹500, Maximum ₹2,000 (NEVER use 0)
-    - Self-Drive: Minimum ₹1,000, Maximum ₹3,000 (NEVER use 0)
-    - If cost is 0, use minimum cost for that transportation mode
-- BUDGET-SPECIFIC REQUIREMENTS:
-  * For budget travelers: Focus on free attractions, street food, public transport (₹200-800/day)
-  * For mid-range travelers: Mix of paid/free attractions, local restaurants, private transport (₹800-2,000/day)
-  * For luxury travelers: Premium attractions, fine dining, private transport (₹2,000-5,000/day)
-- LOCATION FILTERING REQUIREMENTS:
-  * ${preferredLocation ? `STRICT: Only suggest destinations in ${preferredLocation}` : 'Suggest destinations from various Indian states and regions'}`;
-
-  // Get live road transportation costs only (no flights)
-  let liveTransportationCosts = null;
-  try {
-    const transportResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/transportation-costs?origin=${encodeURIComponent('Mumbai')}&destination=${encodeURIComponent(preferredLocation || 'Delhi')}&mode=road`);
-    if (transportResponse.ok) {
-      liveTransportationCosts = await transportResponse.json();
-      console.log('Live road transportation costs fetched:', liveTransportationCosts);
-    }
-  } catch (error) {
-    console.error('Error fetching live transportation costs:', error);
-  }
-
-  // Add live transportation cost data to prompt if available
-  let liveCostData = '';
-  if (liveTransportationCosts?.data) {
-    liveCostData = `
-
-LIVE ROAD TRANSPORTATION COST DATA (Updated: ${liveTransportationCosts.timestamp}):
-${liveTransportationCosts.data.trains ? `🚂 TRAINS: Sleeper ₹${liveTransportationCosts.data.trains.sleeper}, AC3 ₹${liveTransportationCosts.data.trains.ac3}, AC2 ₹${liveTransportationCosts.data.trains.ac2}` : ''}
-${liveTransportationCosts.data.buses ? `🚌 BUSES: Ordinary ₹${liveTransportationCosts.data.buses.ordinary}, Semi-Luxury ₹${liveTransportationCosts.data.buses.semiLuxury}, Luxury ₹${liveTransportationCosts.data.buses.luxury}` : ''}
-${liveTransportationCosts.data.taxis ? `🚕 TAXIS: ₹${liveTransportationCosts.data.taxis.perKm}/km, ₹${liveTransportationCosts.data.taxis.perDay}/day` : ''}
-${liveTransportationCosts.data.selfDrive ? `🚗 SELF-DRIVE: ₹${liveTransportationCosts.data.selfDrive.fuelPerKm}/km fuel, ₹${liveTransportationCosts.data.selfDrive.rentalPerDay}/day rental` : ''}
-
-IMPORTANT: Use these LIVE ROAD TRANSPORTATION COSTS in your calculations. These are current market rates.
-FORMAT REQUIREMENTS:
-- duration: "X hours" or "X hours Y minutes" (e.g., "2 hours", "8 hours 30 minutes")
-- cost: number only (e.g., 4500, 1200, 800) - NEVER use 0
-- description: include route details (e.g., "Train journey from Mumbai to Goa")
-CRITICAL: NEVER use 0 for any transportation cost. Use minimum costs:
-- Trains: Minimum ₹400 (NEVER 0)  
-- Buses: Minimum ₹200 (NEVER 0)
-- Taxis: Minimum ₹500 (NEVER 0)
-- Self-Drive: Minimum ₹1,000 (NEVER 0)`;
-  }
-
-  const finalPrompt = prompt + liveCostData;
+  const finalPrompt = prompt;
 
   try {
     let text = "";
@@ -777,7 +733,7 @@ CRITICAL: NEVER use 0 for any transportation cost. Use minimum costs:
       const chat = await groq.chat.completions.create({
         model,
         messages: [
-          { role: "system", content: "You are a helpful travel planner that outputs ONLY valid JSON. Never use markdown formatting, code blocks, or any text outside the JSON structure. Always validate your JSON before responding." },
+          { role: "system", content: "You are a travel planner. Output ONLY valid JSON. No markdown, no explanations. Keep responses concise." },
           { role: "user", content: prompt },
         ],
         temperature: 0.7,
@@ -799,13 +755,18 @@ CRITICAL: NEVER use 0 for any transportation cost. Use minimum costs:
     console.log("Response length:", text.length);
     console.log("Response ends with:", text.slice(-100));
     
-    // Check for truncated response
+    // Check for truncated response - more comprehensive detection
     const isTruncated = text.includes("bud...") || text.includes("budg...") || 
                        text.endsWith("...") || text.endsWith("bud") || 
-                       text.endsWith("budg") || !text.trim().endsWith("}");
+                       text.endsWith("budg") || !text.trim().endsWith("}") ||
+                       text.includes("Visit the") && !text.includes("]") ||
+                       text.includes("localTips") && !text.includes("]") ||
+                       text.includes("culturalNotes") && !text.includes("]") ||
+                       text.includes("safetyNotes") && !text.includes("]");
     
     if (isTruncated) {
       console.warn("Detected potentially truncated AI response");
+      console.warn("Response ends with:", text.slice(-200));
     }
 
     const parsed = extractJson(text);
@@ -836,13 +797,26 @@ CRITICAL: NEVER use 0 for any transportation cost. Use minimum costs:
           return NextResponse.json({ 
             suggestions: fallbackSuggestions,
             warning: "Response was truncated, but some suggestions were successfully extracted",
-            extractedCount: fallbackSuggestions.length
+            extractedCount: fallbackSuggestions.length,
+            isTruncated: true
+          });
+        }
+        
+        // Try to extract partial suggestions from truncated JSON
+        const partialSuggestions = extractPartialSuggestions(text);
+        if (partialSuggestions.length > 0) {
+          console.log(`Returning ${partialSuggestions.length} partial suggestions from truncated response`);
+          return NextResponse.json({ 
+            suggestions: partialSuggestions,
+            warning: "Response was truncated, returning partial suggestions",
+            extractedCount: partialSuggestions.length,
+            isTruncated: true
           });
         }
         
         // If no suggestions could be extracted, try with minimal schema
         console.log("Attempting retry with minimal schema and fewer places");
-        return await retryWithMinimalSchema(request, 2); // Try with only 2 places
+        return await retryWithMinimalSchema({ budgetINR, days, preferredLocation, includeAccommodation, travelStyle, interests, preferredSeason, groupSize }, 3); // Try with 3 places as fallback
       }
       
       return NextResponse.json({ 
