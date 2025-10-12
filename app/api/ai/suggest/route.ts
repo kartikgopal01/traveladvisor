@@ -393,7 +393,6 @@ async function retryWithMinimalSchema(request: Request, maxPlaces: number) {
   const { 
     budgetINR, 
     days = 3, 
-    origin,
     preferredLocation,
     includeAccommodation = true,
     travelStyle = "balanced",
@@ -406,7 +405,7 @@ async function retryWithMinimalSchema(request: Request, maxPlaces: number) {
 
   const interestsList = Array.isArray(interests) ? interests.join(", ") : interests.join(", ");
 
-  const prompt = `You are an expert Indian travel planner. Suggest EXACTLY ${maxPlaces} destinations ONLY within ${preferredLocation || 'India'} that fit within a total budget of ₹${budgetINR.toLocaleString()} INR for a ${days}-day trip${origin ? ` starting from ${origin}` : ""}.
+  const prompt = `You are an expert Indian travel planner. Suggest EXACTLY ${maxPlaces} destinations ONLY within ${preferredLocation || 'India'} that fit within a total budget of ₹${budgetINR.toLocaleString()} INR for a ${days}-day trip.
 
 Return JSON with this MINIMAL FRONTEND-COMPATIBLE schema:
 {
@@ -529,7 +528,6 @@ export async function POST(request: Request) {
   const { 
     budgetINR, 
     days = 3, 
-    origin,
     preferredLocation,
     includeAccommodation = true,
     travelStyle = "balanced",
@@ -542,21 +540,13 @@ export async function POST(request: Request) {
 
   const interestsList = Array.isArray(interests) ? interests.join(", ") : interests.join(", ");
 
-  // Calculate budget allocation including travel costs from starting location
+  // Calculate budget allocation
   const budgetPerDay = budgetINR / days;
   const budgetPerPerson = budgetPerDay / groupSize;
   
-  // Estimate travel costs from starting location (if provided)
-  let estimatedTravelCost = 0;
-  if (origin) {
-    // Rough estimate: Reserve 15-25% of budget for travel from starting location
-    // This will be refined by AI based on actual destinations and distance
-    estimatedTravelCost = Math.floor(budgetINR * 0.2); // Reserve 20% for travel
-  }
-  
   // Allocate budget for accommodation if requested
   let accommodationBudget = 0;
-  let activityBudget = budgetINR - estimatedTravelCost;
+  let activityBudget = budgetINR;
   
   if (includeAccommodation) {
     // Allocate 40% of remaining budget for accommodation, 60% for activities
@@ -598,7 +588,7 @@ export async function POST(request: Request) {
     console.log(`Reduced number of places from original to ${maxPlaces} to prevent truncation`);
   }
 
-  const prompt = `You are an expert Indian travel planner. Suggest EXACTLY ${numberOfPlaces} diverse destinations ONLY within ${preferredLocation || 'India'} that fit within a total budget of ₹${budgetINR.toLocaleString()} INR for a ${days}-day trip${origin ? ` starting from ${origin}` : ""}.
+  const prompt = `You are an expert Indian travel planner. Suggest EXACTLY ${numberOfPlaces} diverse destinations ONLY within ${preferredLocation || 'India'} that fit within a total budget of ₹${budgetINR.toLocaleString()} INR for a ${days}-day trip.
 
 IMPORTANT: Generate ${numberOfPlaces} unique destinations - do not repeat similar places. Include variety in:
 - Different states/regions within the specified area
@@ -613,11 +603,9 @@ Budget Analysis:
 - Total Budget: ₹${budgetINR.toLocaleString()}
 - Days: ${days}
 - Group Size: ${groupSize} travelers
-- Starting Location: ${origin || 'Not specified'}
-${origin ? `- Estimated Travel Cost from ${origin}: ₹${estimatedTravelCost.toLocaleString()} (20% of total budget)` : ''}
 - Include Accommodation: ${includeAccommodation ? 'Yes' : 'No'}
-${includeAccommodation ? `- Accommodation Budget: ₹${accommodationBudget.toLocaleString()} (40% of remaining budget)` : ''}
-${includeAccommodation ? `- Activity Budget: ₹${activityBudget.toLocaleString()} (60% of remaining budget)` : ''}
+${includeAccommodation ? `- Accommodation Budget: ₹${accommodationBudget.toLocaleString()} (40% of total budget)` : ''}
+${includeAccommodation ? `- Activity Budget: ₹${activityBudget.toLocaleString()} (60% of total budget)` : ''}
 - Activity Budget per person per day: ₹${activityBudgetPerPerson.toFixed(0)}
 - Accommodation Level: ${accommodationLevel}
 - Number of Places: ${numberOfPlaces} (scaled based on activity budget)
@@ -695,9 +683,8 @@ Rules:
 - ${preferredLocation ? `LOCATION RESTRICTION: ALL destinations MUST be within ${preferredLocation} only.` : 'Include diverse destinations across different regions of India.'}
 - Provide realistic costs in Indian Rupees (INR).
 - Consider the specified travel style and interests.
-- TRANSPORTATION COST REQUIREMENTS:
-  * ALWAYS provide realistic transportation costs - never use ₹0
-  * For flights: ₹3,000-15,000 depending on distance and budget level
+- ROAD TRANSPORTATION COST REQUIREMENTS (NO FLIGHTS):
+  * ALWAYS provide realistic road transportation costs - never use ₹0
   * For trains: ₹500-3,000 depending on class and distance  
   * For buses: ₹200-1,500 depending on distance and type
   * For taxis/cabs: ₹500-2,000 per day depending on usage
@@ -705,21 +692,18 @@ Rules:
   * For local transport: ₹200-800 per day for city travel
   * Consider distance: Longer distances = higher costs
   * Consider budget level: Luxury travelers pay more for comfort
-  * STARTING LOCATION TRAVEL: If origin is provided, include realistic travel costs from ${origin} to destination
   * EXCLUDE UNAVAILABLE COSTS: If transportation mode is not available or not applicable, exclude it from breakdown
-  * BUDGET ALLOCATION: Ensure total estimatedCost includes travel from starting location if specified
-  * MULTIPLE TRANSPORTATION OPTIONS: Provide 3-4 different transportation options in availableOptions array
-  * TRANSPORTATION VARIETY: Include flights, trains, buses, taxis, self-drive options where applicable
+  * MULTIPLE ROAD TRANSPORTATION OPTIONS: Provide 3-4 different road transportation options in availableOptions array
+  * ROAD TRANSPORTATION VARIETY: Include trains, buses, taxis, self-drive options where applicable (NO FLIGHTS)
   * COST COMPARISON: Show different price ranges for different comfort levels and speeds
-  * SPECIFIC ROUTE REQUIREMENTS: For each transportation option, provide EXACT duration and cost from ${origin || 'starting location'} to the specific destination (${preferredLocation || 'destination state/district'})
-  * ROUTE-SPECIFIC DETAILS: Each option must show "Duration: X hours" and "Cost: ₹X" for the specific route from origin to destination
+  * SPECIFIC ROUTE REQUIREMENTS: For each transportation option, provide EXACT duration and cost to the specific destination (${preferredLocation || 'destination state/district'})
+  * ROUTE-SPECIFIC DETAILS: Each option must show "Duration: X hours" and "Cost: ₹X" for the specific route to destination
   * EXACT FORMAT REQUIREMENTS: 
     - duration field must be in format "X hours" or "X hours Y minutes" (e.g., "2 hours", "8 hours 30 minutes")
     - cost field must be a number (e.g., 4500, 1200, 800)
     - NEVER use ₹0 for cost - always provide realistic costs
     - Include route-specific information in description field
   * CRITICAL COST REQUIREMENTS:
-    - Flights: Minimum ₹3,000, Maximum ₹15,000 (NEVER use 0)
     - Trains: Minimum ₹400, Maximum ₹3,000 (NEVER use 0)
     - Buses: Minimum ₹200, Maximum ₹1,500 (NEVER use 0)
     - Taxis: Minimum ₹500, Maximum ₹2,000 (NEVER use 0)
@@ -732,13 +716,13 @@ Rules:
 - LOCATION FILTERING REQUIREMENTS:
   * ${preferredLocation ? `STRICT: Only suggest destinations in ${preferredLocation}` : 'Suggest destinations from various Indian states and regions'}`;
 
-  // Get live transportation costs
+  // Get live road transportation costs only (no flights)
   let liveTransportationCosts = null;
   try {
-    const transportResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/transportation-costs?origin=${encodeURIComponent(origin || 'Mumbai')}&destination=${encodeURIComponent(preferredLocation || 'Delhi')}&mode=all`);
+    const transportResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/transportation-costs?origin=${encodeURIComponent('Mumbai')}&destination=${encodeURIComponent(preferredLocation || 'Delhi')}&mode=road`);
     if (transportResponse.ok) {
       liveTransportationCosts = await transportResponse.json();
-      console.log('Live transportation costs fetched:', liveTransportationCosts);
+      console.log('Live road transportation costs fetched:', liveTransportationCosts);
     }
   } catch (error) {
     console.error('Error fetching live transportation costs:', error);
@@ -749,21 +733,18 @@ Rules:
   if (liveTransportationCosts?.data) {
     liveCostData = `
 
-LIVE TRANSPORTATION COST DATA (Updated: ${liveTransportationCosts.timestamp}):
-${liveTransportationCosts.data.flights ? `✈️ FLIGHTS: Economy ₹${liveTransportationCosts.data.flights.economy}, Business ₹${liveTransportationCosts.data.flights.business}` : ''}
+LIVE ROAD TRANSPORTATION COST DATA (Updated: ${liveTransportationCosts.timestamp}):
 ${liveTransportationCosts.data.trains ? `🚂 TRAINS: Sleeper ₹${liveTransportationCosts.data.trains.sleeper}, AC3 ₹${liveTransportationCosts.data.trains.ac3}, AC2 ₹${liveTransportationCosts.data.trains.ac2}` : ''}
 ${liveTransportationCosts.data.buses ? `🚌 BUSES: Ordinary ₹${liveTransportationCosts.data.buses.ordinary}, Semi-Luxury ₹${liveTransportationCosts.data.buses.semiLuxury}, Luxury ₹${liveTransportationCosts.data.buses.luxury}` : ''}
 ${liveTransportationCosts.data.taxis ? `🚕 TAXIS: ₹${liveTransportationCosts.data.taxis.perKm}/km, ₹${liveTransportationCosts.data.taxis.perDay}/day` : ''}
 ${liveTransportationCosts.data.selfDrive ? `🚗 SELF-DRIVE: ₹${liveTransportationCosts.data.selfDrive.fuelPerKm}/km fuel, ₹${liveTransportationCosts.data.selfDrive.rentalPerDay}/day rental` : ''}
 
-IMPORTANT: Use these LIVE COSTS in your transportation calculations. These are current market rates.
-ROUTE-SPECIFIC REQUIREMENT: For each transportation option, provide EXACT duration and cost from ${origin || 'starting location'} to each specific destination. Format: "Duration: X hours" and "Cost: ₹X" for the specific route.
+IMPORTANT: Use these LIVE ROAD TRANSPORTATION COSTS in your calculations. These are current market rates.
 FORMAT REQUIREMENTS:
 - duration: "X hours" or "X hours Y minutes" (e.g., "2 hours", "8 hours 30 minutes")
 - cost: number only (e.g., 4500, 1200, 800) - NEVER use 0
-- description: include route details (e.g., "Direct flight from Mumbai to Goa")
+- description: include route details (e.g., "Train journey from Mumbai to Goa")
 CRITICAL: NEVER use 0 for any transportation cost. Use minimum costs:
-- Flights: Minimum ₹3,000 (NEVER 0)
 - Trains: Minimum ₹400 (NEVER 0)  
 - Buses: Minimum ₹200 (NEVER 0)
 - Taxis: Minimum ₹500 (NEVER 0)
@@ -861,7 +842,6 @@ CRITICAL: NEVER use 0 for any transportation cost. Use minimum costs:
     const input: any = { 
       budgetINR, 
       days,
-      origin,
       preferredLocation,
       includeAccommodation,
       travelStyle,
@@ -871,7 +851,6 @@ CRITICAL: NEVER use 0 for any transportation cost. Use minimum costs:
       budgetAnalysis: {
         budgetPerDay,
         budgetPerPerson,
-        estimatedTravelCost,
         accommodationBudget,
         activityBudget,
         accommodationBudgetPerDay,

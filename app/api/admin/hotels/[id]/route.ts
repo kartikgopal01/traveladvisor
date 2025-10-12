@@ -1,19 +1,16 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { ensureAdmin } from "@/lib/admin";
 import { getAdminDb } from "@/lib/firebaseAdmin";
-
-const ADMIN_IDS = (process.env.ADMIN_USER_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
-
-function ensureAdmin(userId?: string | null) {
-  return !!userId && (ADMIN_IDS.length === 0 || ADMIN_IDS.includes(userId));
-}
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { userId } = await auth();
-  if (!ensureAdmin(userId)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { isAdmin, userEmail, userId } = await ensureAdmin();
+  
+  if (!isAdmin) {
+    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+  }
 
   const { id } = await params;
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
@@ -29,10 +26,29 @@ export async function PATCH(
     city: city.trim(),
     cityLower: city.trim().toLowerCase(),
     updatedAt: Date.now(),
-    updatedBy: userId,
+    updatedBy: userEmail || userId,
   });
 
   return NextResponse.json({ ok: true });
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { isAdmin, userEmail, userId } = await ensureAdmin();
+  
+  if (!isAdmin) {
+    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+  const db = getAdminDb();
+  await db.collection("partner_hotels").doc(id).delete();
+  
+  return NextResponse.json({ success: true });
 }
 
 

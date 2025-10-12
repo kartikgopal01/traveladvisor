@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { ensureAdmin } from "@/lib/admin";
 import { getAdminDb } from "@/lib/firebaseAdmin";
 
-const ADMIN_IDS = (process.env.ADMIN_USER_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
-
-function ensureAdmin(userId?: string | null) {
-  return !!userId && (ADMIN_IDS.length === 0 || ADMIN_IDS.includes(userId));
-}
-
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!ensureAdmin(userId)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { isAdmin, userEmail, userId } = await ensureAdmin();
+  
+  if (!isAdmin) {
+    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+  }
   
   const { id } = await params;
   const body = await request.json();
@@ -18,7 +15,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const docRef = db.collection("events").doc(id);
   
   // Update only the fields provided
-  const updateData: any = { updatedAt: Date.now() };
+  const updateData: any = { 
+    updatedAt: Date.now(),
+    updatedBy: userEmail || userId
+  };
   
   if (body.title !== undefined) updateData.title = body.title;
   if (body.description !== undefined) updateData.description = body.description;
@@ -46,8 +46,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
-  if (!ensureAdmin(userId)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { isAdmin, userEmail, userId } = await ensureAdmin();
+  
+  if (!isAdmin) {
+    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+  }
   
   const { id } = await params;
   const db = getAdminDb();

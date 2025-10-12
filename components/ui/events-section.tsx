@@ -102,10 +102,53 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            Upcoming Events
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              {showModeToggle ? 
+                (currentMode === 'recent' ? "Recent Events" : "Nearby Events") : 
+                "Upcoming Events"
+              }
+            </CardTitle>
+            
+            <div className="flex items-center gap-2">
+              {showModeToggle && (
+                <div className="flex items-center gap-1 mr-4">
+                  <Button
+                    variant={currentMode === 'recent' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCurrentMode('recent')}
+                  >
+                    Recent
+                  </Button>
+                  <Button
+                    variant={currentMode === 'nearby' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCurrentMode('nearby')}
+                  >
+                    Nearby
+                  </Button>
+                </div>
+              )}
+              
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-muted-foreground" />
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Filter by category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
@@ -121,10 +164,53 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            Upcoming Events
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              {showModeToggle ? 
+                (currentMode === 'recent' ? "Recent Events" : "Nearby Events") : 
+                "Upcoming Events"
+              }
+            </CardTitle>
+            
+            <div className="flex items-center gap-2">
+              {showModeToggle && (
+                <div className="flex items-center gap-1 mr-4">
+                  <Button
+                    variant={currentMode === 'recent' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCurrentMode('recent')}
+                  >
+                    Recent
+                  </Button>
+                  <Button
+                    variant={currentMode === 'nearby' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCurrentMode('nearby')}
+                  >
+                    Nearby
+                  </Button>
+                </div>
+              )}
+              
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-muted-foreground" />
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Filter by category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
@@ -142,10 +228,53 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
-            Upcoming Events
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5" />
+              {showModeToggle ? 
+                (currentMode === 'recent' ? "Recent Events" : "Nearby Events") : 
+                "Upcoming Events"
+              }
+            </CardTitle>
+            
+            <div className="flex items-center gap-2">
+              {showModeToggle && (
+                <div className="flex items-center gap-1 mr-4">
+                  <Button
+                    variant={currentMode === 'recent' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCurrentMode('recent')}
+                  >
+                    Recent
+                  </Button>
+                  <Button
+                    variant={currentMode === 'nearby' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setCurrentMode('nearby')}
+                  >
+                    Nearby
+                  </Button>
+                </div>
+              )}
+              
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-muted-foreground" />
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Filter by category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
@@ -250,7 +379,7 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {filteredEvents.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}

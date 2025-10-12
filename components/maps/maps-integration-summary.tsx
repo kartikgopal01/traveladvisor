@@ -172,13 +172,18 @@ export function MapsIntegrationSummary({
               "Mysore Palace, Karnataka",
               "Hawa Mahal, Jaipur"
             ].map((destination, index) => (
-              <MapButton
+              <Button
                 key={index}
-                url={generateMapsSearchUrl(destination)}
-                title={destination.split(',')[0]}
                 variant="ghost"
                 size="sm"
-              />
+                onClick={() => window.open(generateMapsSearchUrl(destination), '_blank', 'noopener,noreferrer')}
+                className="flex items-center gap-2 transition-all duration-200 hover:scale-105 btn-hover-enhanced"
+                title={`Open ${destination.split(',')[0]} in Google Maps`}
+              >
+                <MapPin className="w-4 h-4" />
+                {destination.split(',')[0]}
+                <ExternalLink className="w-3 h-3 opacity-70" />
+              </Button>
             ))}
           </div>
         </div>

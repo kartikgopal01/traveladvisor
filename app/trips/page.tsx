@@ -16,6 +16,7 @@ export default function TripsPage() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'suggestions' | 'plans'>('suggestions');
   const [popupWidth, setPopupWidth] = useState<'sm' | 'md' | 'lg' | 'xl'>('md');
+  const [expandedTripCard, setExpandedTripCard] = useState<string | null>(null);
   
   // Get popup width and height classes
   const getPopupClasses = () => {
@@ -213,7 +214,7 @@ export default function TripsPage() {
 
       <div className="mt-6 grid grid-cols-1 gap-4">
         {sortedTrips.map((t: any) => (
-          <Card key={t.id}>
+          <Card key={t.id} data-trip-id={t.id}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>
@@ -260,8 +261,8 @@ export default function TripsPage() {
               {activeTab === 'plans' && t.result?.attractions?.length > 0 && (
                 <div>
                   <div className="text-sm font-medium mb-2">Top Attractions</div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {t.result.attractions.slice(0, 6).map((p: any, i: number) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {(expandedTripCard === t.id ? t.result.attractions : t.result.attractions.slice(0, 2)).map((p: any, i: number) => (
                       <div key={i} className="border rounded p-3 text-sm flex items-center justify-between gap-3">
                         <div>
                           <div className="font-medium">{p.name}</div>
@@ -272,90 +273,292 @@ export default function TripsPage() {
                         )}
                       </div>
                     ))}
+                    {expandedTripCard !== t.id && t.result.attractions.length > 2 && (
+                      <div className="text-sm text-muted-foreground text-center py-2 bg-muted rounded col-span-full">
+                        +{t.result.attractions.length - 2} more attractions (click "View More" to see all)
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
 
-              {/* View All Routes Button for Trip Plans */}
-              {activeTab === 'plans' && t.result?.destinations?.length > 0 && (
-                <div className="pt-4 border-t space-y-3">
-                  <Button
-                    onClick={() => {
-                      // Create a multi-stop route URL
-                      const destinations = t.result.destinations;
-                      if (destinations.length === 1) {
-                        // Single destination - open directly
-                        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destinations[0])}, India`, '_blank');
-                      } else if (destinations.length > 1) {
-                        // Multiple destinations - create route
-                        const encodedDestinations = destinations.map((dest: string) => encodeURIComponent(dest));
-                        const origin = encodedDestinations[0];
-                        const destination = encodedDestinations[encodedDestinations.length - 1];
-                        const waypoints = encodedDestinations.slice(1, -1);
-                        
-                        let routeUrl;
-                        if (waypoints.length > 0) {
-                          const waypointsParam = waypoints.join('|');
-                          routeUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${waypointsParam}`;
-                        } else {
-                          routeUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
-                        }
-                        
-                        window.open(routeUrl, '_blank', 'noopener,noreferrer');
-                      }
-                    }}
-                    variant="default"
-                    size="sm"
-                    className="w-full flex items-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                    </svg>
-                    View All Routes ({t.result.destinations.length} destinations)
-                  </Button>
+              {/* Action Buttons */}
+              {activeTab === 'plans' && (
+                <div className="space-y-3">
+                  {/* View More Button */}
+                  <div className="flex gap-2 pt-2">
+                    <Button
+                      onClick={() => setExpandedTripCard(expandedTripCard === t.id ? null : t.id)}
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                    >
+                      {expandedTripCard === t.id ? 'View Less' : 'View More'}
+                    </Button>
+                  </div>
                   
-                  {/* QR Code and Share Buttons */}
-                  <div className="flex gap-2">
+                  {/* Functional Action Buttons */}
+                  {t.result?.destinations?.length > 0 && (
+                    <div className="pt-4 border-t space-y-3">
+                      <Button
+                        onClick={() => {
+                          // Create a multi-stop route URL
+                          const destinations = t.result.destinations;
+                          if (destinations.length === 1) {
+                            // Single destination - open directly
+                            window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destinations[0])}, India`, '_blank');
+                          } else if (destinations.length > 1) {
+                            // Multiple destinations - create route
+                            const encodedDestinations = destinations.map((dest: string) => encodeURIComponent(dest));
+                            const origin = encodedDestinations[0];
+                            const destination = encodedDestinations[encodedDestinations.length - 1];
+                            const waypoints = encodedDestinations.slice(1, -1);
+                            
+                            let routeUrl;
+                            if (waypoints.length > 0) {
+                              const waypointsParam = waypoints.join('|');
+                              routeUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${waypointsParam}`;
+                            } else {
+                              routeUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
+                            }
+                            
+                            window.open(routeUrl, '_blank', 'noopener,noreferrer');
+                          }
+                        }}
+                        variant="default"
+                        size="sm"
+                        className="w-full flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                        </svg>
+                        View All Routes ({t.result.destinations.length} destinations)
+                      </Button>
+                      
+                      {/* QR Code and Share Buttons */}
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => {
+                            const destinations = t.result.destinations;
+                            let routeUrl;
+                            if (destinations.length === 1) {
+                              routeUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destinations[0])}, India`;
+                            } else if (destinations.length > 1) {
+                              const encodedDestinations = destinations.map((dest: string) => encodeURIComponent(dest));
+                              const origin = encodedDestinations[0];
+                              const destination = encodedDestinations[encodedDestinations.length - 1];
+                              const waypoints = encodedDestinations.slice(1, -1);
+                              
+                              if (waypoints.length > 0) {
+                                const waypointsParam = waypoints.join('|');
+                                routeUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${waypointsParam}`;
+                              } else {
+                                routeUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
+                              }
+                            }
+                            
+                            if (routeUrl) {
+                              const qrUrl = generateQRCode(routeUrl);
+                              window.open(qrUrl, '_blank');
+                            }
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 flex items-center gap-2"
+                        >
+                          <QrCode className="w-4 h-4" />
+                          QR Code
+                        </Button>
+                        <Button
+                          onClick={() => shareTrip(t, 'plan')}
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 flex items-center gap-2"
+                        >
+                          <Share2 className="w-4 h-4" />
+                          Share
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Expanded Content - Detailed sections */}
+              {activeTab === 'plans' && expandedTripCard === t.id && (
+                <div className="space-y-4 transition-all duration-300 ease-in-out">
+                  {/* Daily Itinerary */}
+                  {t.result?.roadmap && t.result.roadmap.length > 0 && (
+                    <div>
+                      <div className="text-sm font-medium mb-3">
+                        📅 Daily Itinerary ({t.result.roadmap.length} days)
+                      </div>
+                      <div className="space-y-3">
+                        {t.result.roadmap.map((day: any, dayIdx: number) => (
+                          <div key={dayIdx} className="border rounded-lg p-3 bg-muted/30">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
+                                {day.day}
+                              </div>
+                              <h5 className="font-semibold text-sm">Day {day.day}</h5>
+                              <span className="text-xs text-muted-foreground">
+                                {day.locationName || day.destination || day.city || day.place || 'Location'}
+                              </span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mb-2">{day.summary}</p>
+                            
+                            {/* Activities */}
+                            {day.activities && day.activities.length > 0 && (
+                              <div className="space-y-1">
+                                <h6 className="font-medium text-xs text-foreground">
+                                  Activities ({day.activities.length}):
+                                </h6>
+                                {day.activities.map((activity: any, actIdx: number) => (
+                                  <div key={actIdx} className="flex items-start gap-2 p-2 bg-background rounded border text-xs">
+                                    <div className="flex-1">
+                                      <div className="font-medium text-xs">{activity.title}</div>
+                                      {activity.description && (
+                                        <div className="text-xs text-muted-foreground mt-1">
+                                          {activity.description}
+                                        </div>
+                                      )}
+                                      {activity.time && activity.duration && activity.cost && (
+                                        <div className="text-xs text-muted-foreground mt-1">
+                                          {activity.time} • {activity.duration} • ₹{activity.cost}
+                                        </div>
+                                      )}
+                                      {activity.tips && (
+                                        <div className="text-xs text-blue-600 mt-1">💡 {activity.tips}</div>
+                                      )}
+                                    </div>
+                                    {activity.mapsUrl && (
+                                      <MapButton
+                                        url={activity.mapsUrl}
+                                        title={activity.title}
+                                        size="sm"
+                                        variant="outline"
+                                      />
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Meals */}
+                            {day.meals && day.meals.length > 0 && (
+                              <div className="mt-2">
+                                <h6 className="font-medium text-xs text-foreground mb-1">
+                                  Meals ({day.meals.length}):
+                                </h6>
+                                <div className="grid grid-cols-1 gap-1">
+                                  {day.meals.map((meal: any, mealIdx: number) => (
+                                    <div key={mealIdx} className="text-xs border rounded p-2 bg-background">
+                                      <div className="font-medium">{meal.type}</div>
+                                      <div className="text-muted-foreground">{meal.suggestion}</div>
+                                      <div className="text-muted-foreground">₹{meal.cost}</div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Transportation */}
+                            {day.transportation && (
+                              <div className="mt-2">
+                                <h6 className="font-medium text-xs text-foreground mb-1">Transportation:</h6>
+                                <div className="text-xs border rounded p-2 bg-background">
+                                  <div className="font-medium">{day.transportation.mode}</div>
+                                  <div className="text-muted-foreground">{day.transportation.details}</div>
+                                  <div className="text-muted-foreground">
+                                    ₹{day.transportation.cost} • {day.transportation.duration}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Accommodation for the day */}
+                            {day.accommodation && (
+                              <div className="mt-2">
+                                <h6 className="font-medium text-xs text-foreground mb-1">Accommodation:</h6>
+                                <div className="text-xs border rounded p-2 bg-background">
+                                  <div className="font-medium">{day.accommodation.name}</div>
+                                  <div className="text-muted-foreground">₹{day.accommodation.price?.toLocaleString()}/night</div>
+                                  {day.accommodation.location && (
+                                    <div className="text-muted-foreground">{day.accommodation.location}</div>
+                                  )}
+                                  {day.accommodation.type && (
+                                    <div className="text-muted-foreground">{day.accommodation.type}</div>
+                                  )}
+                                  {day.accommodation.amenities && (
+                                    <div className="text-muted-foreground mt-1">
+                                      Amenities: {day.accommodation.amenities.join(", ")}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Additional tips and notes */}
+                            {day.tips && (
+                              <div className="mt-2">
+                                <h6 className="font-medium text-xs text-foreground mb-1">Day Tips:</h6>
+                                <div className="text-xs text-blue-600 bg-blue-50 rounded p-2">
+                                  💡 {day.tips}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Itinerary Summary */}
+                      <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+                        <div className="text-xs text-muted-foreground">
+                          <div className="flex items-center justify-between">
+                            <span>📊 Trip Summary:</span>
+                            <span>
+                              {t.result.roadmap.reduce((total: number, day: any) => total + (day.activities?.length || 0), 0)} activities • {' '}
+                              {t.result.roadmap.reduce((total: number, day: any) => total + (day.meals?.length || 0), 0)} meals • {' '}
+                              {t.result.roadmap.length} days
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* View Less Button at Bottom */}
+                  <div className="flex justify-center pt-4 border-t">
                     <Button
                       onClick={() => {
-                        const destinations = t.result.destinations;
-                        let routeUrl;
-                        if (destinations.length === 1) {
-                          routeUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destinations[0])}, India`;
-                        } else if (destinations.length > 1) {
-                          const encodedDestinations = destinations.map((dest: string) => encodeURIComponent(dest));
-                          const origin = encodedDestinations[0];
-                          const destination = encodedDestinations[encodedDestinations.length - 1];
-                          const waypoints = encodedDestinations.slice(1, -1);
-                          
-                          if (waypoints.length > 0) {
-                            const waypointsParam = waypoints.join('|');
-                            routeUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&waypoints=${waypointsParam}`;
-                          } else {
-                            routeUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
-                          }
-                        }
+                        // Get the current card element
+                        const cardElement = document.querySelector(`[data-trip-id="${t.id}"]`);
                         
-                        if (routeUrl) {
-                          const qrUrl = generateQRCode(routeUrl);
-                          window.open(qrUrl, '_blank');
-                        }
+                        // Collapse the content first
+                        setExpandedTripCard(null);
+                        
+                        // After content collapses, scroll to the card
+                        setTimeout(() => {
+                          if (cardElement) {
+                            // Calculate the card's position
+                            const cardRect = cardElement.getBoundingClientRect();
+                            const cardTop = cardRect.top + window.scrollY;
+                            
+                            // Scroll to the card with some offset from top
+                            const scrollPosition = cardTop - 100; // 100px offset from top
+                            
+                            window.scrollTo({
+                              top: Math.max(0, scrollPosition), // Ensure we don't scroll above the page
+                              behavior: 'smooth'
+                            });
+                          }
+                        }, 150); // Slightly longer delay to ensure content has collapsed
                       }}
                       variant="outline"
                       size="sm"
-                      className="flex-1 flex items-center gap-2"
+                      className="px-6"
                     >
-                      <QrCode className="w-4 h-4" />
-                      QR Code
-                    </Button>
-                    <Button
-                      onClick={() => shareTrip(t, 'plan')}
-                      variant="outline"
-                      size="sm"
-                      className="flex-1 flex items-center gap-2"
-                    >
-                      <Share2 className="w-4 h-4" />
-                      Share
+                      View Less
                     </Button>
                   </div>
                 </div>

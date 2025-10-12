@@ -32,7 +32,7 @@ interface TransportationCosts {
     fuelPerKm: number;
     rentalPerDay: number;
     source: string;
-    lastUpdated: string;
+  lastUpdated: string;
   };
 }
 
@@ -195,7 +195,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const origin = searchParams.get('origin');
     const destination = searchParams.get('destination');
-    const mode = searchParams.get('mode'); // 'all', 'flights', 'trains', 'buses', 'taxis', 'selfDrive'
+    const mode = searchParams.get('mode'); // 'all', 'road', 'flights', 'trains', 'buses', 'taxis', 'selfDrive'
     
     if (!origin || !destination) {
       return NextResponse.json({ 
@@ -215,7 +215,12 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    if (!mode || mode === 'all' || mode === 'trains') {
+    // Handle 'road' mode - exclude flights, include all road transportation
+    if (mode === 'road') {
+      // Skip flights for road mode
+    }
+    
+    if (!mode || mode === 'all' || mode === 'road' || mode === 'trains') {
       const trainPrices = await scrapeTrainPrices(origin, destination);
       if (trainPrices) {
         results.trains = trainPrices;
@@ -224,7 +229,7 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    if (!mode || mode === 'all' || mode === 'buses') {
+    if (!mode || mode === 'all' || mode === 'road' || mode === 'buses') {
       const busPrices = await scrapeBusPrices(origin, destination);
       if (busPrices) {
         results.buses = busPrices;
@@ -233,7 +238,7 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    if (!mode || mode === 'all' || mode === 'taxis') {
+    if (!mode || mode === 'all' || mode === 'road' || mode === 'taxis') {
       const taxiRates = await getCurrentTaxiRates();
       if (taxiRates) {
         results.taxis = taxiRates;
@@ -242,7 +247,7 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    if (!mode || mode === 'all' || mode === 'selfDrive') {
+    if (!mode || mode === 'all' || mode === 'road' || mode === 'selfDrive') {
       const fuelPrices = await getCurrentFuelPrices();
       if (fuelPrices) {
         results.selfDrive = fuelPrices;
@@ -258,7 +263,7 @@ export async function GET(request: NextRequest) {
       data: results,
       timestamp: new Date().toISOString()
     });
-    
+
   } catch (error) {
     console.error('Error fetching transportation costs:', error);
     return NextResponse.json({ 

@@ -1,25 +1,35 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { ensureAdmin } from "@/lib/admin";
 import { getAdminDb } from "@/lib/firebaseAdmin";
 
-const ADMIN_IDS = (process.env.ADMIN_USER_IDS || "").split(",").map((s) => s.trim()).filter(Boolean);
-
-function ensureAdmin(userId?: string | null) {
-  return !!userId && (ADMIN_IDS.length === 0 || ADMIN_IDS.includes(userId));
-}
-
 export async function GET() {
-  const { userId } = await auth();
-  if (!ensureAdmin(userId)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const db = getAdminDb();
-  const snap = await db.collection("partner_hotels").orderBy("createdAt", "desc").get();
-  const hotels = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-  return NextResponse.json({ hotels });
+  const { isAdmin, userEmail, userId } = await ensureAdmin();
+  
+  if (!isAdmin) {
+    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+  }
+
+  try {
+    const db = getAdminDb();
+    const snap = await db.collection("partner_hotels").orderBy("createdAt", "desc").get();
+    const hotels = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    return NextResponse.json({ 
+      hotels, 
+      adminInfo: { userEmail, userId, accessType: userEmail ? 'email' : 'userid' }
+    });
+  } catch (error) {
+    console.error("Error fetching hotels:", error);
+    return NextResponse.json({ error: "Failed to fetch hotels" }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
-  const { userId } = await auth();
-  if (!ensureAdmin(userId)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { isAdmin, userEmail, userId } = await ensureAdmin();
+  
+  if (!isAdmin) {
+    return NextResponse.json({ error: "Admin access required" }, { status: 403 });
+  }
+
   const body = await request.json();
   const {
     name,

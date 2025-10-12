@@ -293,7 +293,6 @@ export default function Home() {
   // Form states for suggest
   const [budgetINR, setBudgetINR] = useState(50000);
   const [suggestDays, setSuggestDays] = useState(3);
-  const [origin, setOrigin] = useState("");
   const [preferredLocation, setPreferredLocation] = useState("");
   const [includeAccommodation, setIncludeAccommodation] = useState(true);
   const [suggestTravelStyle, setSuggestTravelStyle] = useState("balanced");
@@ -372,7 +371,6 @@ export default function Home() {
         body: JSON.stringify({
           budgetINR,
           days: suggestDays,
-          origin: origin || undefined,
           preferredLocation: preferredLocation || undefined,
           includeAccommodation,
           travelStyle: suggestTravelStyle,
@@ -1419,8 +1417,8 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Travel Style and Origin */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Travel Style and Season */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="suggestTravelStyle">Travel Style</Label>
                     <Select value={suggestTravelStyle} onValueChange={setSuggestTravelStyle}>
@@ -1450,25 +1448,17 @@ export default function Home() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="origin">Starting Location (Optional)</Label>
-                    <Input
-                      id="origin"
-                      placeholder="e.g., Mumbai, Delhi"
-                      value={origin}
-                      onChange={(e) => setOrigin(e.target.value)}
-                    />
-                  </div>
                 </div>
 
                 {/* Preferred Location */}
                 <div className="space-y-2">
-                  <Label htmlFor="preferredLocation">Preferred Location/State/District (Optional)</Label>
+                  <Label htmlFor="preferredLocation">Preferred Location/State/District</Label>
                   <Input
                     id="preferredLocation"
                     placeholder="e.g., Kerala, Goa, Rajasthan, Shimla, Manali"
                     value={preferredLocation}
                     onChange={(e) => setPreferredLocation(e.target.value)}
+                    required
                   />
                   <p className="text-xs text-muted-foreground">
                     Specify a particular state, district, or city you'd like to visit
@@ -1625,7 +1615,9 @@ export default function Home() {
                 {/* Roadmap */}
                 {planResult.roadmap && (
                   <div className="space-y-4">
-                    <h4 className="text-lg font-semibold">Daily Itinerary</h4>
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-lg font-semibold">📅 Daily Itinerary ({planResult.roadmap.length} days)</h4>
+                    </div>
                     <div className="space-y-4">
                       {planResult.roadmap.map((day: any) => (
                         <Card key={day.day}>
@@ -1640,7 +1632,7 @@ export default function Home() {
                               <div>
                                 <h5 className="font-semibold mb-2 flex items-center gap-2">
                                   <Camera className="w-4 h-4" />
-                                  Activities
+                                  Activities ({day.activities.length})
                                 </h5>
                                 <div className="space-y-2">
                                   {day.activities.map((activity: any, idx: number) => (
@@ -1676,7 +1668,7 @@ export default function Home() {
                               <div>
                                 <h5 className="font-semibold mb-2 flex items-center gap-2">
                                   <Utensils className="w-4 h-4" />
-                                  Meals
+                                  Meals ({day.meals.length})
                                 </h5>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                                   {day.meals.map((meal: any, idx: number) => (
@@ -1706,9 +1698,103 @@ export default function Home() {
                                 </div>
                               </div>
                             )}
+
+                            {/* Additional details */}
+                            <div className="mt-4 pt-4 border-t border-muted">
+                                {/* Accommodation for the day */}
+                                {day.accommodation && (
+                                  <div className="mt-2">
+                                    <h5 className="font-semibold mb-2 flex items-center gap-2">
+                                      🏨 Accommodation
+                                    </h5>
+                                    <div className="text-sm border rounded p-3 bg-muted/30">
+                                      <div className="font-medium">{day.accommodation.name}</div>
+                                      <div className="text-muted-foreground">₹{day.accommodation.price?.toLocaleString()}/night</div>
+                                      {day.accommodation.location && (
+                                        <div className="text-muted-foreground">{day.accommodation.location}</div>
+                                      )}
+                                      {day.accommodation.type && (
+                                        <div className="text-muted-foreground">{day.accommodation.type}</div>
+                                      )}
+                                      {day.accommodation.amenities && (
+                                        <div className="text-muted-foreground mt-1">
+                                          Amenities: {day.accommodation.amenities.join(", ")}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Additional tips and notes */}
+                                {day.tips && (
+                                  <div className="mt-2">
+                                    <h5 className="font-semibold mb-2 flex items-center gap-2">
+                                      💡 Day Tips
+                                    </h5>
+                                    <div className="text-sm text-blue-600 bg-blue-50 rounded p-3">
+                                      {day.tips}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Additional day information */}
+                                {day.date && (
+                                  <div className="mt-2">
+                                    <h5 className="font-semibold mb-2 flex items-center gap-2">
+                                      📅 Date Details
+                                    </h5>
+                                    <div className="text-sm text-muted-foreground">
+                                      {new Date(day.date).toLocaleDateString('en-US', {
+                                        weekday: 'long',
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Weather information if available */}
+                                {day.weather && (
+                                  <div className="mt-2">
+                                    <h5 className="font-semibold mb-2 flex items-center gap-2">
+                                      🌤️ Weather
+                                    </h5>
+                                    <div className="text-sm text-muted-foreground">
+                                      {day.weather}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Packing suggestions for the day */}
+                                {day.packingSuggestions && (
+                                  <div className="mt-2">
+                                    <h5 className="font-semibold mb-2 flex items-center gap-2">
+                                      🎒 Packing Suggestions
+                                    </h5>
+                                    <div className="text-sm text-muted-foreground">
+                                      {day.packingSuggestions}
+                                    </div>
+                                  </div>
+                                )}
+                            </div>
                           </CardContent>
                         </Card>
                       ))}
+                      
+                      {/* Trip Summary */}
+                      <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                        <div className="text-sm text-muted-foreground">
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium">📊 Trip Summary:</span>
+                            <span>
+                              {planResult.roadmap.reduce((total: number, day: any) => total + (day.activities?.length || 0), 0)} activities • {' '}
+                              {planResult.roadmap.reduce((total: number, day: any) => total + (day.meals?.length || 0), 0)} meals • {' '}
+                              {planResult.roadmap.length} days
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1746,6 +1832,49 @@ export default function Home() {
                       })}
                       title="Navigation & Directions"
                     />
+                  </div>
+                )}
+
+                {/* Attractions */}
+                {planResult.attractions && planResult.attractions.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold">Must-Visit Attractions</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {planResult.attractions.map((place: any, idx: number) => (
+                        <Card key={idx}>
+                          <CardContent className="pt-6">
+                            <h5 className="font-semibold">{place.name}</h5>
+                            <p className="text-sm text-muted-foreground">{place.location}</p>
+                            <p className="text-sm mt-2">{place.description}</p>
+                            <div className="flex items-center justify-between mt-3">
+                              <div className="text-sm">
+                                <div>₹{place.entryFee}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {place.bestTime} • {place.duration}
+                                </div>
+                              </div>
+                              <MapButton
+                                url={place.mapsUrl}
+                                title={place.name}
+                                size="sm"
+                                variant="outline"
+                              />
+                            </div>
+                            {place.tips && (
+                              <div className="text-xs mt-2 text-blue-600">💡 {place.tips}</div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Partner Hotels near destinations */}
+                {planResult.destinations && planResult.destinations.length > 0 && accommodationType !== "na" && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold">Partner Hotels Near Your Trip</h4>
+                    <PartnerHotelsPanel destinations={planResult.destinations} />
                   </div>
                 )}
 
@@ -1792,63 +1921,7 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Attractions */}
-                {planResult.attractions && planResult.attractions.length > 0 && (
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold">Must-Visit Attractions</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {planResult.attractions.map((place: any, idx: number) => (
-                        <Card key={idx}>
-                          <CardContent className="pt-6">
-                            <h5 className="font-semibold">{place.name}</h5>
-                            <p className="text-sm text-muted-foreground">{place.location}</p>
-                            <p className="text-sm mt-2">{place.description}</p>
-                            <div className="flex items-center justify-between mt-3">
-                              <div className="text-sm">
-                                <div>₹{place.entryFee}</div>
-                                <div className="text-xs text-muted-foreground">
-                                  {place.bestTime} • {place.duration}
-                                </div>
-                              </div>
-                              <MapButton
-                                url={place.mapsUrl}
-                                title={place.name}
-                                size="sm"
-                                variant="outline"
-                              />
-                            </div>
-                            {place.tips && (
-                              <div className="text-xs mt-2 text-blue-600">💡 {place.tips}</div>
-                            )}
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Map Preview for Key Attractions */}
-                {planResult.attractions && planResult.attractions.length > 0 && (
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold">Location Map - Key Attractions</h4>
-                    <MapGrid
-                      locations={planResult.attractions.slice(0, 6).map((place: any) => ({
-                        name: place.name,
-                        location: place.location,
-                        mapsUrl: place.mapsUrl,
-                      }))}
-                    />
-                    <DistanceCostPanel
-                      destinations={planResult.attractions.slice(0, 6).map((place: any) => ({
-                        name: place.name,
-                        location: place.location,
-                        mapsQuery: `${place.name}, ${place.location}, India`,
-                      }))}
-                      costPerKmINR={15}
-                      baseFareINR={0}
-                    />
-                  </div>
-                )}
+                
 
                 {/* Restaurants */}
                 {planResult.restaurants && planResult.restaurants.length > 0 && (
@@ -1882,13 +1955,6 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Partner Hotels near destinations */}
-                {planResult.destinations && planResult.destinations.length > 0 && accommodationType !== "na" && (
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold">Partner Hotels Near Your Trip</h4>
-                    <PartnerHotelsPanel destinations={planResult.destinations} />
-                  </div>
-                )}
 
                 {/* Transportation Summary */}
                 {planResult.transportation && (

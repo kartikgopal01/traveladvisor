@@ -55,7 +55,7 @@ export function EventCard({ event }: EventCardProps) {
   return (
     <Card className="h-full overflow-hidden hover:shadow-lg transition-shadow duration-200 card-hover-enhanced">
       {event.imageUrl && (
-        <div className="h-48 relative overflow-hidden">
+        <div className="h-32 relative overflow-hidden">
           <img 
             src={event.imageUrl} 
             alt={event.title}
@@ -83,8 +83,8 @@ export function EventCard({ event }: EventCardProps) {
         </div>
       )}
       
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg leading-tight line-clamp-2">{event.title}</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base leading-tight line-clamp-2">{event.title}</CardTitle>
         {!event.imageUrl && (
           <div className="flex items-center gap-2">
             {event.category && (
@@ -102,18 +102,18 @@ export function EventCard({ event }: EventCardProps) {
         )}
       </CardHeader>
 
-      <CardContent className="space-y-3">
-        <p className="text-sm text-muted-foreground line-clamp-2">{event.description}</p>
+      <CardContent className="space-y-2">
+        <p className="text-xs text-muted-foreground line-clamp-2">{event.description}</p>
 
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-sm">
-            <Calendar className="w-4 h-4 text-muted-foreground" />
+        <div className="space-y-1">
+          <div className="flex items-center gap-1 text-xs">
+            <Calendar className="w-3 h-3 text-muted-foreground" />
             <span>{formatDate(event.eventDate)}</span>
           </div>
 
           {event.startTime && (
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="w-4 h-4 text-muted-foreground" />
+            <div className="flex items-center gap-1 text-xs">
+              <Clock className="w-3 h-3 text-muted-foreground" />
               <span>
                 {formatTime(event.startTime)}
                 {event.endTime && ` - ${formatTime(event.endTime)}`}
@@ -121,8 +121,8 @@ export function EventCard({ event }: EventCardProps) {
             </div>
           )}
 
-          <div className="flex items-center gap-2 text-sm">
-            <MapPin className="w-4 h-4 text-muted-foreground" />
+          <div className="flex items-center gap-1 text-xs">
+            <MapPin className="w-3 h-3 text-muted-foreground" />
             <span className="truncate">
               {event.location}
               {event.city && `, ${event.city}`}
@@ -131,14 +131,14 @@ export function EventCard({ event }: EventCardProps) {
           </div>
 
           {event.organizer && (
-            <div className="text-sm text-muted-foreground">
-              <span className="font-medium">Organized by:</span> {event.organizer}
+            <div className="text-xs text-muted-foreground">
+              <span className="font-medium">By:</span> {event.organizer}
             </div>
           )}
 
           {event.price !== undefined && (
-            <div className="flex items-center gap-2 text-sm font-medium">
-              <IndianRupee className="w-4 h-4" />
+            <div className="flex items-center gap-1 text-xs font-medium">
+              <IndianRupee className="w-3 h-3" />
               <span className={event.price === 0 ? "text-green-600" : ""}>
                 {event.price === 0 ? "Free" : `₹${event.price}`}
               </span>
@@ -146,10 +146,10 @@ export function EventCard({ event }: EventCardProps) {
           )}
 
           {event.maxCapacity && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Users className="w-4 h-4" />
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Users className="w-3 h-3" />
               <span>
-                {event.currentCapacity || 0} / {event.maxCapacity} attendees
+                {event.currentCapacity || 0} / {event.maxCapacity}
               </span>
             </div>
           )}
@@ -157,42 +157,42 @@ export function EventCard({ event }: EventCardProps) {
 
         {event.tags && event.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {event.tags.slice(0, 4).map((tag, idx) => (
-              <Badge key={idx} variant="outline" className="text-xs">
+            {event.tags.slice(0, 2).map((tag, idx) => (
+              <Badge key={idx} variant="outline" className="text-xs px-1 py-0">
                 {tag}
               </Badge>
             ))}
-            {event.tags.length > 4 && (
-              <Badge variant="outline" className="text-xs">
-                +{event.tags.length - 4} more
+            {event.tags.length > 2 && (
+              <Badge variant="outline" className="text-xs px-1 py-0">
+                +{event.tags.length - 2}
               </Badge>
             )}
           </div>
         )}
 
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-1 pt-1">
           {event.mapsUrl && (
-            <Button variant="outline" size="sm" asChild className="flex-1">
+            <Button variant="outline" size="sm" asChild className="flex-1 text-xs">
               <a href={event.mapsUrl} target="_blank" rel="noopener noreferrer">
-                <MapPin className="w-4 h-4 mr-1" />
-                Location
+                <MapPin className="w-3 h-3 mr-1" />
+                Map
               </a>
             </Button>
           )}
           {event.website && (
-            <Button variant="outline" size="sm" asChild className="flex-1">
+            <Button variant="outline" size="sm" asChild className="flex-1 text-xs">
               <a href={event.website} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="w-4 h-4 mr-1" />
-                Website
+                <ExternalLink className="w-3 h-3 mr-1" />
+                Site
               </a>
             </Button>
           )}
         </div>
 
         {(event.contactEmail || event.contactPhone) && (
-          <div className="text-xs text-muted-foreground pt-2 border-t">
+          <div className="text-xs text-muted-foreground pt-1 border-t">
             <div className="font-medium">Contact:</div>
-            {event.contactEmail && <div>{event.contactEmail}</div>}
+            {event.contactEmail && <div className="truncate">{event.contactEmail}</div>}
             {event.contactPhone && <div>{event.contactPhone}</div>}
           </div>
         )}

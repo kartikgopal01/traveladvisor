@@ -20,6 +20,7 @@ export default function AdminEventsPage() {
   const router = useRouter();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
+  const [adminInfo, setAdminInfo] = useState<{userEmail?: string, userId?: string, accessType?: string} | null>(null);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -43,6 +44,7 @@ export default function AdminEventsPage() {
   });
 
   const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [deletingEventId, setDeletingEventId] = useState<string | null>(null);
 
   // Check admin status
   useEffect(() => {
@@ -57,7 +59,9 @@ export default function AdminEventsPage() {
       try {
         const response = await fetch("/api/admin/events");
         if (response.ok) {
+          const data = await response.json();
           setIsAdmin(true);
+          setAdminInfo(data.adminInfo || null);
         } else {
           router.push("/");
         }
@@ -118,18 +122,25 @@ export default function AdminEventsPage() {
       isActive: form.isActive === "true",
     };
 
-    const res = await fetch("/api/admin/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch("/api/admin/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    if (res.ok) {
-      await mutate("/api/admin/events");
-      resetForm();
-    } else {
-      const msg = await res.text();
-      alert("Failed: " + msg);
+      if (res.ok) {
+        // Immediately refresh the data to show the new event
+        await mutate("/api/admin/events");
+        resetForm();
+        alert("Event added successfully!");
+      } else {
+        const msg = await res.text();
+        alert("Failed: " + msg);
+      }
+    } catch (error) {
+      console.error("Add event error:", error);
+      alert("Failed: " + (error as Error).message);
     }
   }
 
@@ -144,34 +155,63 @@ export default function AdminEventsPage() {
       isActive: form.isActive === "true",
     };
 
-    const res = await fetch(`/api/admin/events/${editingEvent.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const res = await fetch(`/api/admin/events/${editingEvent.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-    if (res.ok) {
-      await mutate("/api/admin/events");
-      setEditingEvent(null);
-      resetForm();
-    } else {
-      const msg = await res.text();
-      alert("Update failed: " + msg);
+      if (res.ok) {
+        // Immediately refresh the data to show the updated event
+        await mutate("/api/admin/events");
+        setEditingEvent(null);
+        resetForm();
+        alert("Event updated successfully!");
+      } else {
+        const msg = await res.text();
+        alert("Update failed: " + msg);
+      }
+    } catch (error) {
+      console.error("Update event error:", error);
+      alert("Update failed: " + (error as Error).message);
     }
   }
 
   async function deleteEvent(eventId: string) {
     if (!confirm("Are you sure you want to delete this event?")) return;
 
-    const res = await fetch(`/api/admin/events/${eventId}`, {
-      method: "DELETE",
-    });
+    setDeletingEventId(eventId);
+    
+    try {
+      const res = await fetch(`/api/admin/events/${eventId}`, {
+        method: "DELETE",
+      });
 
-    if (res.ok) {
-      await mutate("/api/admin/events");
-    } else {
-      const msg = await res.text();
-      alert("Delete failed: " + msg);
+      if (res.ok) {
+        // Optimistically update the UI by removing the event from the cache
+        mutate("/api/admin/events", (data: any) => {
+          if (!data) return data;
+          return {
+            ...data,
+            events: data.events.filter((event: any) => event.id !== eventId)
+          };
+        }, false); // false = don't revalidate immediately, we already have the updated data
+        
+        // Then revalidate to ensure consistency
+        await mutate("/api/admin/events");
+        
+        // Show success message
+        alert("Event deleted successfully!");
+      } else {
+        const msg = await res.text();
+        alert("Delete failed: " + msg);
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      alert("Delete failed: " + (error as Error).message);
+    } finally {
+      setDeletingEventId(null);
     }
   }
 
@@ -450,8 +490,17 @@ export default function AdminEventsPage() {
                         <Button size="sm" variant="outline" onClick={() => startEdit(event)}>
                           <Edit className="w-3 h-3" />
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => deleteEvent(event.id)}>
-                          <Trash2 className="w-3 h-3" />
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          onClick={() => deleteEvent(event.id)}
+                          disabled={deletingEventId === event.id}
+                        >
+                          {deletingEventId === event.id ? (
+                            <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-current"></div>
+                          ) : (
+                            <Trash2 className="w-3 h-3" />
+                          )}
                         </Button>
                       </div>
                     </div>
