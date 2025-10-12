@@ -27,6 +27,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Happy Journey",
   description: "Happy Journey",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -51,7 +52,7 @@ export default function RootLayout({
           suppressHydrationWarning={true}
         >
           <ScrollableHeader />
-          <div className="pt-20 sm:pt-24">
+          <div className="pt-16 sm:pt-20 md:pt-24">
             {children}
           </div>
           <ChatDock />

@@ -37,8 +37,6 @@ export function ScrollableHeader() {
   const { userId } = useAuth();
   const { theme } = useTheme();
   
-  console.log('ScrollableHeader rendering - ALWAYS VISIBLE');
-  
   const [isAdmin, setIsAdmin] = useState(false);
   const [documentTitle, setDocumentTitle] = useState<string | null>(null);
   const [documentId, setDocumentId] = useState<string | null>(null);
@@ -49,38 +47,6 @@ export function ScrollableHeader() {
   const { status: geoStatus, location, error: geoError, request } = useGeolocation();
   const [navCity, setNavCity] = useState<string | null>(null);
 
-  // Export navCity to window so home can read it as a last resort
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // @ts-ignore
-      window.__NAV_CITY__ = navCity;
-      try {
-        window.dispatchEvent(new CustomEvent('nav-city', { detail: navCity }));
-      } catch {}
-    }
-  }, [navCity]);
-
-  // Simplified document title handling without Firebase
-  useEffect(() => {
-    const segments = pathname.split("/").filter(Boolean);
-    if (segments[0] === "docs" && segments[1] && segments[1] !== "[id]") {
-      const docId = segments[1];
-      setDocumentId(docId);
-      // For now, use a generic title - you can enhance this later with Firebase
-      setDocumentTitle("Document");
-      setCanEdit(userId ? true : false);
-    } else {
-      setDocumentTitle(null);
-      setDocumentId(null);
-      setCanEdit(false);
-    }
-  }, [pathname, userId]);
-
-  // Auto request location on mount
-  useEffect(() => {
-    request();
-  }, []);
-
   // Check if user is admin
   useEffect(() => {
     async function checkAdminStatus() {
@@ -90,7 +56,6 @@ export function ScrollableHeader() {
       }
       
       try {
-        // Test admin access by trying to fetch admin data
         const response = await fetch("/api/admin/events");
         setIsAdmin(response.ok);
       } catch {
@@ -101,16 +66,19 @@ export function ScrollableHeader() {
     checkAdminStatus();
   }, [userId]);
 
-  // Reverse geocode when location updates; fallback to client IP geolocation
+  // Reverse geocode when location updates
   useEffect(() => {
     async function run() {
       try {
         if (location) {
           const res = await fetch(`/api/geo/reverse?lat=${location.lat}&lng=${location.lng}`);
           const data = await res.json();
-          if (res.ok) { setNavCity(data.city || data.state || null); return; }
+          if (res.ok) { 
+            setNavCity(data.city || data.state || null); 
+            return; 
+          }
         }
-        // If no GPS, approximate via client IP
+        // Fallback to client IP geolocation
         if (!location) {
           const rr = await fetch("https://ipapi.co/json/");
           if (rr.ok) {
@@ -134,7 +102,6 @@ export function ScrollableHeader() {
 
     setIsUpdating(true);
     try {
-      // Simplified save - you can enhance this with Firebase later
       setDocumentTitle(editTitle.trim());
       setIsEditing(false);
     } catch (error) {
@@ -161,12 +128,10 @@ export function ScrollableHeader() {
       if (segment === "dashboard") {
         breadcrumbs.push({ label: "Dashboard", path, icon: null, editable: false });
       } else if (segment === "docs") {
-        // Skip adding "Documents" as a separate breadcrumb
         continue;
       } else if (segment === "new") {
         breadcrumbs.push({ label: "New Document", path, icon: null, editable: false });
       } else if (segment !== "[id]" && segment.length > 0) {
-        // This is likely a document ID - use the fetched title or fallback
         const title = documentTitle || "Document";
         breadcrumbs.push({ 
           label: title, 
@@ -190,28 +155,28 @@ export function ScrollableHeader() {
       }`}
     >
       {/* Main header content */}
-      <div className={`w-full px-4 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between ${
+      <div className={`w-full px-2 sm:px-4 md:px-6 lg:px-8 h-16 sm:h-20 md:h-24 flex items-center justify-between ${
         theme === 'dark' ? 'glass-header-content-dark-medium' : 'glass-header-content-medium'
       }`}>
         <div className="flex items-center overflow-hidden">
-          <a href="/" className="flex items-center justify-center h-full w-full sm:h-16 sm:w-full ml-4 sm:ml-25 overflow-hidden" title="Happy Journey - Go to Home">
-            <div className="h-full w-full sm:h-full sm:w-full flex items-center justify-center">
+          <a href="/" className="flex items-center justify-center h-full max-w-[120px] sm:max-w-none sm:h-16 sm:w-full ml-2 sm:ml-4 md:ml-25 overflow-hidden" title="Happy Journey - Go to Home">
+            <div className="h-full w-full max-w-[100px] sm:max-w-none sm:h-full sm:w-full flex items-center justify-center">
               <ThemeLogo />
             </div>
           </a>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-1 sm:gap-2 md:gap-4">
           {/* Admin buttons */}
           {userId && isAdmin && (
             <div className="hidden md:flex items-center gap-2">
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="touch-target">
                 <Link href="/admin/events">
                   <RiCalendarLine className="h-4 w-4" />
                   <span className="hidden lg:inline ml-1">Admin Events</span>
                 </Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="touch-target">
                 <Link href="/admin/hotels">
                   <RiSettingsLine className="h-4 w-4" />
                   <span className="hidden lg:inline ml-1">Admin Hotels</span>
@@ -221,16 +186,16 @@ export function ScrollableHeader() {
           )}
 
           {/* Auth buttons */}
-          <Button variant="ghost" size="sm" asChild className="border border-border icon-hover-enhanced">
+          <Button variant="ghost" size="sm" asChild className="border border-border icon-hover-enhanced touch-target">
             <Link href="/">
-              <RiHomeLine className="h-5 w-5" />
+              <RiHomeLine className="h-4 w-4 sm:h-5 sm:w-5" />
             </Link>
           </Button>
           
           {/* Trips Button - After Home */}
-          <Button variant="ghost" size="sm" asChild className="border border-border icon-hover-enhanced">
+          <Button variant="ghost" size="sm" asChild className="border border-border icon-hover-enhanced touch-target">
             <Link href="/trips">
-              <RiRoadMapLine className="h-5 w-5" />
+              <RiRoadMapLine className="h-4 w-4 sm:h-5 sm:w-5" />
             </Link>
           </Button>
           
@@ -239,13 +204,13 @@ export function ScrollableHeader() {
           <SignedOut>
             <div className="flex items-center gap-1 sm:gap-2">
               <SignInButton mode="modal">
-                <button className="px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors btn-hover-enhanced">
+                <button className="px-2 sm:px-3 md:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors btn-hover-enhanced touch-target">
                   <span className="hidden sm:inline">Sign In</span>
                   <span className="sm:hidden">Sign In</span>
                 </button>
               </SignInButton>
               <SignUpButton mode="modal">
-                <button className="px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-background bg-foreground border border-foreground rounded-md hover:bg-foreground/90 transition-colors btn-hover-enhanced">
+                <button className="px-2 sm:px-3 md:px-4 py-1 sm:py-2 text-xs sm:text-sm font-medium text-background bg-foreground border border-foreground rounded-md hover:bg-foreground/90 transition-colors btn-hover-enhanced touch-target">
                   <span className="hidden sm:inline">Sign Up</span>
                   <span className="sm:hidden">Sign Up</span>
                 </button>
@@ -262,13 +227,13 @@ export function ScrollableHeader() {
             size="sm"
             onClick={() => request()}
             disabled={geoStatus === "prompt"}
-            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm icon-hover-enhanced"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm icon-hover-enhanced touch-target"
             title={geoStatus === "prompt" ? "Detecting location..." : "Refresh location"}
           >
             {geoStatus === "prompt" ? (
-              <RiLoader4Line className="h-4 w-4 animate-spin" />
+              <RiLoader4Line className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
             ) : (
-              <RiMapPinFill className="h-4 w-4" />
+              <RiMapPinFill className="h-3 w-3 sm:h-4 sm:w-4" />
             )}
             <span className="hidden sm:inline">
               {geoStatus === "prompt" ? "Detecting..." : 
@@ -278,7 +243,7 @@ export function ScrollableHeader() {
           </Button>
         </div>
       </div>
+
     </header>
   );
 }
-

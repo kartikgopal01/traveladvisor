@@ -288,15 +288,35 @@ export default function Home() {
   const getPopupClasses = () => {
     switch (popupWidth) {
       case 'sm':
-        return { width: 'w-[70vw] max-w-2xl', height: 'h-[60vh] max-h-[70vh]' };
+        return { 
+          width: 'w-[90vw] sm:w-[70vw] md:w-[60vw] lg:w-[50vw] max-w-2xl', 
+          height: 'h-[70vh] max-h-[80vh]',
+          position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+        };
       case 'md':
-        return { width: 'w-[80vw] max-w-4xl', height: 'h-[70vh] max-h-[80vh]' };
+        return { 
+          width: 'w-[95vw] sm:w-[80vw] md:w-[70vw] lg:w-[60vw] max-w-4xl', 
+          height: 'h-[80vh] max-h-[85vh]',
+          position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+        };
       case 'lg':
-        return { width: 'w-[90vw] max-w-6xl', height: 'h-[80vh] max-h-[90vh]' };
+        return { 
+          width: 'w-[98vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] max-w-6xl', 
+          height: 'h-[85vh] max-h-[90vh]',
+          position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+        };
       case 'xl':
-        return { width: 'w-[95vw] max-w-7xl', height: 'h-[90vh] max-h-[95vh]' };
+        return { 
+          width: 'w-[99vw] sm:w-[95vw] md:w-[90vw] lg:w-[80vw] max-w-7xl', 
+          height: 'h-[90vh] max-h-[95vh]',
+          position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+        };
       default:
-        return { width: 'w-[90vw] max-w-6xl', height: 'h-[80vh] max-h-[90vh]' };
+        return { 
+          width: 'w-[98vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] max-w-6xl', 
+          height: 'h-[85vh] max-h-[90vh]',
+          position: 'popup-mobile sm:popup-tablet md:popup-desktop'
+        };
     }
   };
 
@@ -481,14 +501,14 @@ export default function Home() {
               </motion.div>
             </div>
 
-            <div className="container-responsive pt-12 sm:pt-20 pb-12 sm:pb-16 relative z-10">
+            <div className="container-mobile pt-8 sm:pt-12 md:pt-16 lg:pt-20 pb-8 sm:pb-12 md:pb-16 relative z-10">
               <div className="text-center">
-                <Badge variant="secondary" className="mb-3 sm:mb-4 text-xs sm:text-sm">
+                <Badge variant="secondary" className="mb-2 sm:mb-3 md:mb-4 text-xs sm:text-sm touch-target">
                   <RiFlashlightLine className="w-3 h-3 mr-1" />
                   AI trip planning
                 </Badge>
 
-                <h1 className="text-responsive-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 sm:mb-6 text-foreground">
+                <h1 className="text-mobile-xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-normal sm:font-bold tracking-tight mb-3 sm:mb-4 md:mb-6 text-foreground">
                   Plan your next{" "}
                   <FlipWords
                     words={["Adventure", "Journey", "Experience", "Memory"]}
@@ -497,17 +517,17 @@ export default function Home() {
                   with
                   <span className="text-foreground block">AI Superpowers</span>
                 </h1>
-                <p className="text-responsive-base sm:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-8 px-4">
+                <p className="text-mobile-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-4 sm:mb-6 md:mb-8 px-4">
                   Create detailed itineraries with AI, compare destinations by budget, and visualize routes on interactive maps. All in one fast, modern app.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 justify-center px-4">
                   <SignInButton mode="modal">
-                    <Button size="lg" className="flex items-center group bg-foreground text-background hover:bg-foreground/90 border-foreground w-full sm:w-auto btn-hover-enhanced">
+                    <Button size="lg" className="flex items-center group bg-foreground text-background hover:bg-foreground/90 border-foreground w-full sm:w-auto btn-hover-enhanced btn-mobile touch-target">
                       Get Started Free
                       <RiArrowRightLine className="h-4 w-4 ml-1" />
                     </Button>
                   </SignInButton>
-                  <Button variant="outline" size="lg" asChild className="border-foreground text-foreground hover:bg-foreground hover:text-background w-full sm:w-auto btn-hover-enhanced">
+                  <Button variant="outline" size="lg" asChild className="border-foreground text-foreground hover:bg-foreground hover:text-background w-full sm:w-auto btn-hover-enhanced btn-mobile touch-target">
                     <Link href="#features">Learn More</Link>
                   </Button>
                 </div>
@@ -517,9 +537,9 @@ export default function Home() {
 
           {/* Local Discover Section */}
           <section className="section-padding">
-            <div className="container-responsive">
+            <div className="container-mobile">
               <div className="flex flex-col items-center gap-2 text-center">
-                <div className="text-responsive-sm text-muted-foreground">
+                <div className="text-mobile-sm text-muted-foreground">
                   {localCity ? (
                     <>You are near <span className="font-medium text-foreground">{localCity}</span></>
                   ) : (
@@ -530,14 +550,14 @@ export default function Home() {
               </div>
 
             {/* Change location */}
-            <div className="mt-3 flex flex-col sm:flex-row items-center justify-center gap-2">
+            <div className="mt-3 flex flex-col sm:flex-row items-center justify-center gap-2 form-mobile">
               <Input
                 placeholder="Change city (e.g., Jaipur)"
                 value={customCity}
                 onChange={(e) => setCustomCity(e.target.value)}
-                className="w-full sm:w-56"
+                className="w-full sm:w-56 touch-target"
               />
-              <Button size="sm" variant="outline" onClick={() => fetchPlacesByCity(customCity)} className="w-full sm:w-auto btn-hover-enhanced">Show places</Button>
+              <Button size="sm" variant="outline" onClick={() => fetchPlacesByCity(customCity)} className="w-full sm:w-auto btn-hover-enhanced btn-mobile touch-target">Show places</Button>
             </div>
 
               {localPlaces.length > 0 && (
@@ -547,7 +567,7 @@ export default function Home() {
                     <Button
                       size="sm"
                       variant="outline"
-                      className="w-8 h-8 p-0 bg-white/80 hover:bg-white"
+                      className="w-8 h-8 p-0 bg-white/80 hover:bg-white touch-target mobile-hover"
                       onClick={() => {
                         setIsAnimationPaused(!isAnimationPaused);
                         const container = document.querySelector('.animate-scroll-all-cards') as HTMLElement;
@@ -720,7 +740,9 @@ export default function Home() {
           {/* Events Section */}
           <section className="py-10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <EventsSection city={localCity || undefined} showModeToggle={true} limit={6} />
+              <div className="events-section-mobile">
+                <EventsSection city={localCity || undefined} showModeToggle={true} limit={6} />
+              </div>
             </div>
           </section>
 
@@ -1067,43 +1089,47 @@ export default function Home() {
 
           {/* Events Section for Signed In Users */}
           <section className="py-6">
-            <EventsSection city={localCity || undefined} showModeToggle={true} limit={4} />
+            <div className="events-section-mobile">
+              <EventsSection city={localCity || undefined} showModeToggle={true} limit={4} />
+            </div>
           </section>
 
           <Tabs defaultValue="plan" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="plan" className="flex items-center gap-2 bg-purple-100 text-purple-700 data-[state=active]:bg-purple-700 data-[state=active]:text-white hover:bg-purple-200 rounded-full">
+          <TabsList className="grid w-full grid-cols-2 mb-6 sm:mb-8 gap-1">
+            <TabsTrigger value="plan" className="flex items-center gap-2 bg-purple-100 text-purple-700 data-[state=active]:bg-purple-700 data-[state=active]:text-white hover:bg-purple-200 rounded-full btn-mobile touch-target">
               <MapPin className="w-4 h-4" />
-              Plan by Places
+              <span className="hidden sm:inline">Plan by Places</span>
+              <span className="sm:hidden">Places</span>
             </TabsTrigger>
-            <TabsTrigger value="suggest" className="flex items-center gap-2 bg-purple-100 text-purple-700 data-[state=active]:bg-purple-700 data-[state=active]:text-white hover:bg-purple-200 rounded-full">
+            <TabsTrigger value="suggest" className="flex items-center gap-2 bg-purple-100 text-purple-700 data-[state=active]:bg-purple-700 data-[state=active]:text-white hover:bg-purple-200 rounded-full btn-mobile touch-target">
               <IndianRupee className="w-4 h-4" />
-              Suggest by Budget
+              <span className="hidden sm:inline">Suggest by Budget</span>
+              <span className="sm:hidden">Budget</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="plan" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+          <TabsContent value="plan" className="space-y-4 sm:space-y-6">
+            <Card className="card-mobile">
+              <CardHeader className="p-mobile">
+                <CardTitle className="flex items-center gap-2 text-mobile-lg">
                   <MapPin className="w-5 h-5" />
                   Create Custom Trip Plan
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-mobile-sm">
                   Plan your perfect Indian adventure by specifying destinations and preferences
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6 p-mobile">
                 {/* Places Section */}
                 <div className="space-y-3">
-                  <Label className="text-base font-semibold">Destinations in India</Label>
+                  <Label className="text-mobile-base font-semibold">Destinations in India</Label>
                   {places.map((place, index) => (
-                    <div key={index} className="flex gap-2">
+                    <div key={index} className="flex flex-col sm:flex-row gap-2">
                       <Input
                         placeholder={`Destination ${index + 1} (e.g., Mumbai, Kerala, Delhi)`}
                         value={place}
                         onChange={(e) => updatePlace(index, e.target.value)}
-                        className="flex-1"
+                        className="flex-1 touch-target"
                       />
                       {places.length > 1 && (
                         <Button
@@ -1111,6 +1137,7 @@ export default function Home() {
                           variant="outline"
                           size="sm"
                           onClick={() => removePlace(index)}
+                          className="btn-mobile touch-target"
                         >
                           Remove
                         </Button>
@@ -1122,16 +1149,16 @@ export default function Home() {
                     variant="outline"
                     size="sm"
                     onClick={addPlace}
-                    className="w-full"
+                    className="w-full btn-mobile touch-target"
                   >
                     Add Another Destination
                   </Button>
                 </div>
 
                 {/* Basic Details */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="days">Number of Days (Optional)</Label>
+                    <Label htmlFor="days" className="text-mobile-sm">Number of Days (Optional)</Label>
                     <Input
                       id="days"
                       type="number"
@@ -1140,10 +1167,11 @@ export default function Home() {
                       value={days}
                       onChange={(e) => setDays(Number(e.target.value))}
                       placeholder="Leave empty for auto-calculation"
+                      className="touch-target"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="travelers">Number of Travelers (Optional)</Label>
+                    <Label htmlFor="travelers" className="text-mobile-sm">Number of Travelers (Optional)</Label>
                     <Input
                       id="travelers"
                       type="number"
@@ -1152,10 +1180,11 @@ export default function Home() {
                       value={travelers}
                       onChange={(e) => setTravelers(Number(e.target.value))}
                       placeholder="Leave empty for auto-calculation"
+                      className="touch-target"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="budget">Total Budget (₹) (Optional)</Label>
+                    <Label htmlFor="budget" className="text-mobile-sm">Total Budget (₹) (Optional)</Label>
                     <Input
                       id="budget"
                       type="number"
@@ -1163,16 +1192,17 @@ export default function Home() {
                       value={budget}
                       onChange={(e) => setBudget(Number(e.target.value))}
                       placeholder="Leave empty for auto-calculation"
+                      className="touch-target"
                     />
                   </div>
                 </div>
 
                 {/* Travel Preferences */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="travelStyle">Travel Style</Label>
+                    <Label htmlFor="travelStyle" className="text-mobile-sm">Travel Style</Label>
                     <Select value={travelStyle} onValueChange={setTravelStyle}>
-                      <SelectTrigger>
+                      <SelectTrigger className="touch-target">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1277,18 +1307,19 @@ export default function Home() {
 
                 {/* Interests */}
                 <div className="space-y-3">
-                  <Label className="text-base font-semibold">Interests & Activities</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Label className="text-mobile-base font-semibold">Interests & Activities</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     {interestOptions.map((interest) => (
-                      <div key={interest} className="flex items-center space-x-2">
+                      <div key={interest} className="flex items-center space-x-2 touch-target">
                         <Checkbox
                           id={`interest-${interest}`}
                           checked={interests.includes(interest)}
                           onCheckedChange={() => toggleInterest(interest)}
+                          className="touch-target"
                         />
                         <Label
                           htmlFor={`interest-${interest}`}
-                          className="text-sm font-normal cursor-pointer"
+                          className="text-mobile-xs font-normal cursor-pointer touch-target"
                         >
                           {interest}
                         </Label>
@@ -1299,18 +1330,19 @@ export default function Home() {
 
                 {/* Dietary Restrictions */}
                 <div className="space-y-3">
-                  <Label className="text-base font-semibold">Dietary Restrictions</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Label className="text-mobile-base font-semibold">Dietary Restrictions</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     {dietaryOptions.map((option) => (
-                      <div key={option} className="flex items-center space-x-2">
+                      <div key={option} className="flex items-center space-x-2 touch-target">
                         <Checkbox
                           id={`dietary-${option}`}
                           checked={dietaryRestrictions.includes(option)}
                           onCheckedChange={() => toggleDietary(option)}
+                          className="touch-target"
                         />
                         <Label
                           htmlFor={`dietary-${option}`}
-                          className="text-sm font-normal cursor-pointer"
+                          className="text-mobile-xs font-normal cursor-pointer touch-target"
                         >
                           {option}
                         </Label>
@@ -1321,18 +1353,19 @@ export default function Home() {
 
                 {/* Accessibility */}
                 <div className="space-y-3">
-                  <Label className="text-base font-semibold">Accessibility Requirements</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <Label className="text-mobile-base font-semibold">Accessibility Requirements</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {accessibilityOptions.map((option) => (
-                      <div key={option} className="flex items-center space-x-2">
+                      <div key={option} className="flex items-center space-x-2 touch-target">
                         <Checkbox
                           id={`accessibility-${option}`}
                           checked={accessibility.includes(option)}
                           onCheckedChange={() => toggleAccessibility(option)}
+                          className="touch-target"
                         />
                         <Label
                           htmlFor={`accessibility-${option}`}
-                          className="text-sm font-normal cursor-pointer"
+                          className="text-mobile-xs font-normal cursor-pointer touch-target"
                         >
                           {option}
                         </Label>
@@ -1342,42 +1375,45 @@ export default function Home() {
                 </div>
 
                 {/* Dates */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="startDate">Start Date (Optional)</Label>
+                    <Label htmlFor="startDate" className="text-mobile-sm">Start Date (Optional)</Label>
                     <Input
                       id="startDate"
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
+                      className="touch-target"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="endDate">End Date (Optional)</Label>
+                    <Label htmlFor="endDate" className="text-mobile-sm">End Date (Optional)</Label>
                     <Input
                       id="endDate"
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
+                      className="touch-target"
                     />
                   </div>
                 </div>
 
                 {/* Special Requests */}
                 <div className="space-y-2">
-                  <Label htmlFor="specialRequests">Special Requests (Optional)</Label>
+                  <Label htmlFor="specialRequests" className="text-mobile-sm">Special Requests (Optional)</Label>
                   <Input
                     id="specialRequests"
                     placeholder="Any special requirements or preferences..."
                     value={specialRequests}
                     onChange={(e) => setSpecialRequests(e.target.value)}
+                    className="touch-target"
                   />
                 </div>
 
                 <Button
                   onClick={createPlan}
                   disabled={loading}
-                  className="w-full"
+                  className="w-full btn-mobile touch-target"
                   size="lg"
                 >
                   {loading ? "Planning Your Trip..." : "Generate Trip Plan"}
@@ -1386,32 +1422,33 @@ export default function Home() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="suggest" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+          <TabsContent value="suggest" className="space-y-4 sm:space-y-6">
+            <Card className="card-mobile">
+              <CardHeader className="p-mobile">
+                <CardTitle className="flex items-center gap-2 text-mobile-lg">
                   <IndianRupee className="w-5 h-5" />
                   Get Destination Suggestions
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-mobile-sm">
                   Let AI suggest the best Indian destinations based on your budget and preferences
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6 p-mobile">
                 {/* Budget and Basic Details */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="budgetINR">Total Budget (₹)</Label>
+                    <Label htmlFor="budgetINR" className="text-mobile-sm">Total Budget (₹)</Label>
                     <Input
                       id="budgetINR"
                       type="number"
                       min={5000}
                       value={budgetINR}
                       onChange={(e) => setBudgetINR(Number(e.target.value))}
+                      className="touch-target"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="suggestDays">Number of Days</Label>
+                    <Label htmlFor="suggestDays" className="text-mobile-sm">Number of Days</Label>
                     <Input
                       id="suggestDays"
                       type="number"
@@ -1419,10 +1456,11 @@ export default function Home() {
                       max={30}
                       value={suggestDays}
                       onChange={(e) => setSuggestDays(Number(e.target.value))}
+                      className="touch-target"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="groupSize">Group Size</Label>
+                    <Label htmlFor="groupSize" className="text-mobile-sm">Group Size</Label>
                     <Input
                       id="groupSize"
                       type="number"
@@ -1430,16 +1468,17 @@ export default function Home() {
                       max={20}
                       value={groupSize}
                       onChange={(e) => setGroupSize(Number(e.target.value))}
+                      className="touch-target"
                     />
                   </div>
                 </div>
 
                 {/* Travel Style and Season */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="suggestTravelStyle">Travel Style</Label>
+                    <Label htmlFor="suggestTravelStyle" className="text-mobile-sm">Travel Style</Label>
                     <Select value={suggestTravelStyle} onValueChange={setSuggestTravelStyle}>
-                      <SelectTrigger>
+                      <SelectTrigger className="touch-target">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1519,30 +1558,31 @@ export default function Home() {
 
                 {/* Interests for suggestions */}
                 <div className="space-y-3">
-                  <Label className="text-base font-semibold">Interests & Activities</Label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Label className="text-mobile-base font-semibold">Interests & Activities</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                     {interestOptions.map((interest) => (
-                      <div key={interest} className="flex items-center space-x-2">
+                      <div key={interest} className="flex items-center space-x-2 touch-target">
                         <Checkbox
                           id={`suggest-interest-${interest}`}
                           checked={suggestInterests.includes(interest)}
                           onCheckedChange={() => toggleSuggestInterest(interest)}
+                          className="touch-target"
                         />
                         <Label
                           htmlFor={`suggest-interest-${interest}`}
-                          className="text-sm font-normal cursor-pointer"
+                          className="text-mobile-xs font-normal cursor-pointer touch-target"
                         >
                           {interest}
                         </Label>
                       </div>
                     ))}
-              </div>
-            </div>
+                  </div>
+                </div>
 
                 <Button
                   onClick={suggestTrips}
                   disabled={loading}
-                  className="w-full"
+                  className="w-full btn-mobile touch-target"
                   size="lg"
                 >
                   {loading ? "Finding Perfect Destinations..." : "Get Suggestions"}
@@ -2374,7 +2414,7 @@ export default function Home() {
 
                       {/* Full Details Popup */}
                       {expandedSuggestion === idx && (
-                        <div className={`suggestion-popup absolute top-0 left-0 z-20 bg-blue-50 border border-blue-200 rounded-lg shadow-2xl p-4 ${getPopupClasses().width} ${getPopupClasses().height} overflow-y-auto`}>
+                        <div className={`suggestion-popup ${getPopupClasses().position} z-20 bg-blue-50 border border-blue-200 rounded-lg shadow-2xl p-4 ${getPopupClasses().width} ${getPopupClasses().height} overflow-y-auto`}>
                           <div className="space-y-3">
                             {/* Header */}
                             <div className="flex items-center justify-between border-b border-blue-200 pb-3">

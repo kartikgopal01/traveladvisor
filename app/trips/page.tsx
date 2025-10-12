@@ -22,24 +22,29 @@ export default function TripsPage() {
   const getPopupClasses = () => {
     switch (popupWidth) {
       case 'sm': return {
-        width: 'w-1/3 min-w-80',
-        height: 'max-h-[80vh]'
+        width: 'w-[90vw] sm:w-[70vw] md:w-[60vw] lg:w-[50vw] max-w-2xl',
+        height: 'h-[70vh] max-h-[80vh]',
+        position: 'popup-mobile sm:popup-tablet md:popup-desktop'
       };
       case 'md': return {
-        width: 'w-1/2 min-w-96',
-        height: 'max-h-[70vh]'
+        width: 'w-[95vw] sm:w-[80vw] md:w-[70vw] lg:w-[60vw] max-w-4xl',
+        height: 'h-[80vh] max-h-[85vh]',
+        position: 'popup-mobile sm:popup-tablet md:popup-desktop'
       };
       case 'lg': return {
-        width: 'w-2/3 min-w-[32rem]',
-        height: 'max-h-[60vh]'
+        width: 'w-[98vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] max-w-6xl',
+        height: 'h-[85vh] max-h-[90vh]',
+        position: 'popup-mobile sm:popup-tablet md:popup-desktop'
       };
       case 'xl': return {
-        width: 'w-3/4 min-w-[40rem]',
-        height: 'max-h-[50vh]'
+        width: 'w-[99vw] sm:w-[95vw] md:w-[90vw] lg:w-[80vw] max-w-7xl',
+        height: 'h-[90vh] max-h-[95vh]',
+        position: 'popup-mobile sm:popup-tablet md:popup-desktop'
       };
       default: return {
-        width: 'w-1/2 min-w-96',
-        height: 'max-h-[70vh]'
+        width: 'w-[95vw] sm:w-[80vw] md:w-[70vw] lg:w-[60vw] max-w-4xl',
+        height: 'h-[80vh] max-h-[85vh]',
+        position: 'popup-mobile sm:popup-tablet md:popup-desktop'
       };
     }
   };
@@ -157,31 +162,33 @@ export default function TripsPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10" onClick={handleClickOutside}>
-      <div className="flex items-center justify-between mb-6">
-      <h1 className="text-3xl font-semibold">Your Trips</h1>
-        <div className="flex items-center gap-4">
+    <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-10" onClick={handleClickOutside}>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-4">
+      <h1 className="text-2xl sm:text-3xl font-semibold">Your Trips</h1>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
           {/* Tab Buttons */}
-          <div className="flex gap-2">
+          <div className="flex gap-1 sm:gap-2 w-full sm:w-auto">
             <button
               onClick={() => setActiveTab('suggestions')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all touch-target flex-1 sm:flex-none ${
                 activeTab === 'suggestions'
                   ? 'bg-purple-700 text-white'
                   : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
               }`}
             >
-              Destination Suggestions
+              <span className="hidden sm:inline">Destination Suggestions</span>
+              <span className="sm:hidden">Suggestions</span>
             </button>
             <button
               onClick={() => setActiveTab('plans')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all touch-target flex-1 sm:flex-none ${
                 activeTab === 'plans'
                   ? 'bg-purple-700 text-white'
                   : 'bg-purple-100 text-purple-700 hover:bg-purple-200'
               }`}
             >
-              Trip Plans
+              <span className="hidden sm:inline">Trip Plans</span>
+              <span className="sm:hidden">Plans</span>
             </button>
           </div>
           
@@ -191,11 +198,12 @@ export default function TripsPage() {
               onClick={toggleSortOrder}
               variant="outline"
               size="sm"
-              className="flex items-center gap-2"
+              className="flex items-center gap-1 sm:gap-2 touch-target btn-mobile"
             >
-              <Calendar className="w-4 h-4" />
-              {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
-              <ArrowUpDown className="w-4 h-4" />
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">{sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}</span>
+              <span className="sm:hidden">{sortOrder === 'newest' ? 'New' : 'Old'}</span>
+              <ArrowUpDown className="w-3 h-3 sm:w-4 sm:h-4" />
             </Button>
           )}
         </div>
@@ -212,11 +220,11 @@ export default function TripsPage() {
         </Card>
       )}
 
-      <div className="mt-6 grid grid-cols-1 gap-4">
+      <div className="mt-4 sm:mt-6 grid grid-cols-1 gap-3 sm:gap-4">
         {sortedTrips.map((t: any) => (
-          <Card key={t.id} data-trip-id={t.id}>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+          <Card key={t.id} data-trip-id={t.id} className="card-mobile">
+            <CardHeader className="p-mobile">
+              <CardTitle className="flex items-center justify-between text-mobile-lg">
                 <span>
                   {activeTab === 'plans' 
                     ? (t.result?.destinations?.join(", ") || "Trip Plan")
@@ -240,20 +248,20 @@ export default function TripsPage() {
                 }
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4 p-mobile">
               {activeTab === 'plans' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   <div className="space-y-2">
-                    <div className="text-sm text-muted-foreground">Total Budget</div>
-                    <div className="text-xl font-semibold">₹{t.result?.totalBudget?.toLocaleString?.() || "-"}</div>
+                    <div className="text-mobile-sm text-muted-foreground">Total Budget</div>
+                    <div className="text-mobile-xl font-semibold">₹{t.result?.totalBudget?.toLocaleString?.() || "-"}</div>
                   </div>
                   <div className="space-y-2">
-                    <div className="text-sm text-muted-foreground">Days</div>
-                    <div className="text-xl font-semibold">{t.result?.days}</div>
+                    <div className="text-mobile-sm text-muted-foreground">Days</div>
+                    <div className="text-mobile-xl font-semibold">{t.result?.days}</div>
                   </div>
                   <div className="space-y-2">
-                    <div className="text-sm text-muted-foreground">Destinations</div>
-                    <div className="text-sm">{t.result?.destinations?.join(", ")}</div>
+                    <div className="text-mobile-sm text-muted-foreground">Destinations</div>
+                    <div className="text-mobile-sm">{t.result?.destinations?.join(", ")}</div>
                   </div>
                 </div>
               )}
@@ -261,8 +269,8 @@ export default function TripsPage() {
               {/* Preference Analysis for Trip Plans */}
               {activeTab === 'plans' && t.result?.preferenceAnalysis && (
                 <div className="space-y-3">
-                  <div className="text-sm font-medium">🎯 Your Preferences Analysis</div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="text-mobile-sm font-medium">🎯 Your Preferences Analysis</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {/* Interests Coverage */}
                     <div className="border border-blue-200 bg-blue-50 rounded-lg p-4 shadow-lg hover:shadow-xl transition-all duration-300">
                       <div className="flex items-center gap-3 mb-4">
@@ -702,7 +710,7 @@ export default function TripsPage() {
               )}
 
               {activeTab === 'suggestions' && (
-                <div className="grid md:grid-cols-3 gap-3 relative">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 relative">
                   {t.result?.suggestions?.map((s: any, i: number) => {
                     const cardId = `${t.id}-suggestion-${i}`;
                     const isExpanded = expandedCard === cardId;
@@ -715,17 +723,17 @@ export default function TripsPage() {
                            }`}
                            onClick={() => handleCardClick(cardId)}
                          >
-                        <CardContent className="pt-6 space-y-3 flex flex-col h-full">
-                          <div className="flex-1 space-y-3">
+                        <CardContent className="pt-4 sm:pt-6 space-y-2 sm:space-y-3 flex flex-col h-full p-mobile">
+                          <div className="flex-1 space-y-2 sm:space-y-3">
                             <div className="space-y-1">
-                              <div className="font-medium text-lg">{s.destination}</div>
-                              <div className="text-sm text-muted-foreground">{s.state} • {s.region}</div>
+                              <div className="font-medium text-mobile-lg">{s.destination}</div>
+                              <div className="text-mobile-sm text-muted-foreground">{s.state} • {s.region}</div>
                               <div className="flex items-center justify-between">
-                                <div className="text-lg font-semibold text-foreground">
+                                <div className="text-mobile-lg font-semibold text-foreground">
                                   Est. ₹{s.estimatedCost?.toLocaleString?.()}
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <div className="text-sm font-medium text-foreground bg-muted px-2 py-1 rounded-full">
+                                  <div className="text-mobile-xs font-medium text-foreground bg-muted px-2 py-1 rounded-full">
                                     {t.input?.days || s.days || s.samplePlan?.days || 'N/A'} days
                                   </div>
                                   {/* Preference Score */}
@@ -739,25 +747,25 @@ export default function TripsPage() {
                             </div>
 
                             {/* Interest Match Badges */}
-                            {s.interestMatch && s.interestMatch.length > 0 && (
-                              <div className="flex flex-wrap gap-2">
-                                {s.interestMatch.slice(0, 3).map((interest: string, i: number) => (
-                                  <span key={i} className="text-xs bg-blue-100 text-blue-800 px-3 py-2 rounded-lg border border-blue-200 shadow-sm">
-                                    🎯 {interest}
-                                  </span>
-                                ))}
-                                {s.interestMatch.length > 3 && (
-                                  <span className="text-xs text-muted-foreground">
-                                    +{s.interestMatch.length - 3} more
-                                  </span>
-                                )}
-                              </div>
-                            )}
+                              {s.interestMatch && s.interestMatch.length > 0 && (
+                                <div className="flex flex-wrap gap-1 sm:gap-2">
+                                  {s.interestMatch.slice(0, 3).map((interest: string, i: number) => (
+                                    <span key={i} className="text-mobile-xs bg-blue-100 text-blue-800 px-2 sm:px-3 py-1 sm:py-2 rounded-lg border border-blue-200 shadow-sm">
+                                      🎯 {interest}
+                                    </span>
+                                  ))}
+                                  {s.interestMatch.length > 3 && (
+                                    <span className="text-mobile-xs text-muted-foreground">
+                                      +{s.interestMatch.length - 3} more
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                           </div>
                           
                           {/* Click hint - moved to bottom */}
                           {!isExpanded && (
-                            <div className="text-xs text-muted-foreground text-center pt-3 mt-auto border-t">
+                            <div className="text-mobile-xs text-muted-foreground text-center pt-2 sm:pt-3 mt-auto border-t">
                               Click to see places to visit
                             </div>
                           )}
@@ -766,10 +774,10 @@ export default function TripsPage() {
 
                        {/* Pop-up Overlay */}
                        {isExpanded && (
-                         <div className={`absolute top-0 left-0 z-20 bg-blue-50 border border-blue-200 rounded-lg shadow-2xl p-4 ${getPopupClasses().width} ${getPopupClasses().height} overflow-y-auto`}>
-                           <div className="space-y-3">
-                            <div className="flex items-center justify-between border-b border-blue-200 pb-2">
-                              <h3 className="font-semibold text-lg text-blue-800">{s.destination}</h3>
+                         <div className={`${getPopupClasses().position} z-20 bg-blue-50 border border-blue-200 rounded-lg shadow-2xl p-3 sm:p-4 ${getPopupClasses().width} ${getPopupClasses().height}`}>
+                           <div className="space-y-2 sm:space-y-3">
+                             <div className="flex items-center justify-between border-b border-blue-200 pb-2">
+                               <h3 className="font-semibold text-mobile-lg text-blue-800">{s.destination}</h3>
                               <div className="flex items-center gap-2">
                                 {/* Preference Score */}
                                 {s.preferenceScore && (
@@ -784,7 +792,7 @@ export default function TripsPage() {
                                       e.stopPropagation();
                                       setPopupWidth('sm');
                                     }}
-                                    className={`px-2 py-1 rounded text-xs font-medium transition-all ${
+                                    className={`px-1 sm:px-2 py-1 rounded text-xs font-medium transition-all touch-target ${
                                       popupWidth === 'sm'
                                         ? 'bg-background text-foreground shadow-sm'
                                         : 'text-muted-foreground hover:text-foreground'
@@ -798,7 +806,7 @@ export default function TripsPage() {
                                       e.stopPropagation();
                                       setPopupWidth('md');
                                     }}
-                                    className={`px-2 py-1 rounded text-xs font-medium transition-all ${
+                                    className={`px-1 sm:px-2 py-1 rounded text-xs font-medium transition-all touch-target ${
                                       popupWidth === 'md'
                                         ? 'bg-background text-foreground shadow-sm'
                                         : 'text-muted-foreground hover:text-foreground'
@@ -812,7 +820,7 @@ export default function TripsPage() {
                                       e.stopPropagation();
                                       setPopupWidth('lg');
                                     }}
-                                    className={`px-2 py-1 rounded text-xs font-medium transition-all ${
+                                    className={`px-1 sm:px-2 py-1 rounded text-xs font-medium transition-all touch-target ${
                                       popupWidth === 'lg'
                                         ? 'bg-background text-foreground shadow-sm'
                                         : 'text-muted-foreground hover:text-foreground'
@@ -826,7 +834,7 @@ export default function TripsPage() {
                                       e.stopPropagation();
                                       setPopupWidth('xl');
                                     }}
-                                    className={`px-2 py-1 rounded text-xs font-medium transition-all ${
+                                    className={`px-1 sm:px-2 py-1 rounded text-xs font-medium transition-all touch-target ${
                                       popupWidth === 'xl'
                                         ? 'bg-background text-foreground shadow-sm'
                                         : 'text-muted-foreground hover:text-foreground'
@@ -841,7 +849,7 @@ export default function TripsPage() {
                                     e.stopPropagation();
                                     setExpandedCard(null);
                                   }}
-                                  className="text-muted-foreground hover:text-foreground text-xl"
+                                  className="text-muted-foreground hover:text-foreground text-xl touch-target mobile-hover"
                                 >
                                   ×
                                 </button>

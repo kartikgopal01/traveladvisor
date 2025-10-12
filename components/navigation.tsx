@@ -195,30 +195,30 @@ export default function Navigation() {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <nav className={`fixed top-16 sm:top-18 left-0 right-0 z-40 flex items-center justify-between text-sm text-muted-foreground px-2 sm:px-4 py-2 glass-navigation backdrop-blur-glass transition-transform duration-300 ${
+    <nav className={`fixed top-12 sm:top-16 md:top-18 left-0 right-0 z-40 flex items-center justify-between text-xs sm:text-sm text-muted-foreground px-1 sm:px-2 md:px-4 py-1 sm:py-2 glass-navigation backdrop-blur-glass transition-transform duration-300 ${
       isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
     }`}>
       <div className="flex items-center space-x-1 min-w-0 flex-1">
-        <Button variant="ghost" size="sm" asChild>
+        <Button variant="ghost" size="sm" asChild className="touch-target">
           <Link href="/">
-            <RiHomeLine className="h-4 w-4" />
+            <RiHomeLine className="h-3 w-3 sm:h-4 sm:w-4" />
           </Link>
         </Button>
 
         {breadcrumbs.map((breadcrumb, index) => (
         <div key={breadcrumb.path} className="flex items-center min-w-0">
-          <RiArrowRightSLine className="h-4 w-4 mr-1 sm:mr-2 flex-shrink-0" />
+          <RiArrowRightSLine className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 flex-shrink-0" />
           {index === breadcrumbs.length - 1 ? (
             <span className="font-medium text-foreground flex items-center gap-1 sm:gap-2 group min-w-0">
               {breadcrumb.icon && (
-                <breadcrumb.icon className="h-4 w-4 inline flex-shrink-0" />
+                <breadcrumb.icon className="h-3 w-3 sm:h-4 sm:w-4 inline flex-shrink-0" />
               )}
               {breadcrumb.editable && breadcrumb.isDocument && isEditing ? (
                 <div className="flex items-center gap-1 min-w-0">
                   <Input
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="h-6 text-sm w-32 sm:w-48"
+                    className="h-6 text-xs sm:text-sm w-24 sm:w-32 md:w-48 touch-target"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         handleSaveTitle();
@@ -233,7 +233,7 @@ export default function Navigation() {
                     variant="ghost"
                     onClick={handleSaveTitle}
                     disabled={isUpdating}
-                    className="h-6 w-6 p-0 flex-shrink-0"
+                    className="h-6 w-6 p-0 flex-shrink-0 touch-target"
                     title="Save changes"
                   >
                     {isUpdating ? (
@@ -247,7 +247,7 @@ export default function Navigation() {
                     variant="ghost"
                     onClick={handleCancelEdit}
                     disabled={isUpdating}
-                    className="h-6 w-6 p-0 flex-shrink-0"
+                    className="h-6 w-6 p-0 flex-shrink-0 touch-target"
                     title="Cancel editing"
                   >
                     <RiCloseLine className="h-3 w-3" />
