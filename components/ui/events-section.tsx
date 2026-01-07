@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -378,13 +378,59 @@ export function EventsSection({ city, limit = 6, showRecent = false, showModeTog
               No events found in the selected category
             </p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {filteredEvents.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-        )}
+        ) : (() => {
+          // Check if we're in Recent Events mode
+          const isRecentMode = showModeToggle ? currentMode === 'recent' : showRecent;
+          // Show carousel if in Recent Events mode and there are more than 3 cards
+          const shouldShowCarousel = isRecentMode && filteredEvents.length > 3;
+          
+          if (shouldShowCarousel) {
+            // Duplicate events for seamless loop
+            const duplicatedEvents = [...filteredEvents, ...filteredEvents];
+            // Calculate animation duration based on number of cards (slower for more cards)
+            const animationDuration = Math.max(filteredEvents.length * 20, 60);
+            
+            // Component for carousel with dynamic animation duration
+            const CarouselContainer = () => {
+              const carouselRef = useRef<HTMLDivElement>(null);
+              
+              useEffect(() => {
+                if (carouselRef.current) {
+                  carouselRef.current.style.setProperty('--animation-duration', `${animationDuration}s`);
+                }
+              }, [animationDuration]);
+              
+              return (
+                <div className="relative overflow-hidden w-full">
+                  <div 
+                    ref={carouselRef}
+                    className="flex gap-4 events-carousel-scroll"
+                  >
+                    {duplicatedEvents.map((event, index) => (
+                      <div 
+                        key={`${event.id}-${index}`} 
+                        className="flex-shrink-0 w-[280px] md:w-[300px]"
+                      >
+                        <EventCard event={event} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            };
+            
+            return <CarouselContainer />;
+          }
+          
+          // Default grid layout for other modes or when there are few cards
+          return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {filteredEvents.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+          );
+        })()}
         
         {events.length >= limit && (
           <div className="text-center mt-6">

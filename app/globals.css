@@ -2016,6 +2016,25 @@ html:not(.dark) .btn-secondary-hover {
   }
 }
 
+/* Events carousel horizontal scrolling animation */
+@keyframes eventsCarouselScroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-50% - 1rem));
+  }
+}
+
+.events-carousel-scroll {
+  animation: eventsCarouselScroll var(--animation-duration, 60s) linear infinite;
+  will-change: transform;
+}
+
+.events-carousel-scroll:hover {
+  animation-play-state: paused;
+}
+
 /* Rotating color ring animation for badge */
 
 
